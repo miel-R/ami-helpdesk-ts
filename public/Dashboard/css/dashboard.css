@@ -1,0 +1,18 @@
+:root { --ami-purple: #6f42c1; --ami-purple-hover: #59339d; }
+body { background-color: #f8fafc; min-height: 100vh; }
+.bg-ami { background: linear-gradient(135deg, #59339d 0%, #6f42c1 50%, #4c1d95 100%) !important; }
+.text-ami { color: var(--ami-purple) !important; }
+.btn-ami { background-color: var(--ami-purple); border-color: var(--ami-purple); color: #fff; }
+.btn-ami:hover { background-color: var(--ami-purple-hover); border-color: var(--ami-purple-hover); color: #fff; }
+.metric-card { border: 1px solid rgba(0,0,0,.06); transition: transform .15s ease, box-shadow .15s ease; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important; }
+.metric-title { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; font-weight: 700; color: #64748b; }
+.metric-value { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+@media (min-width: 1200px) { .col-xl-2dot4 { flex: 0 0 20%; max-width: 20%; } }
+.chart-box { position: relative; height: 260px; width: 100%; }
+.chart-box-sm { position: relative; height: 220px; width: 100%; }
+.table thead th { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: #64748b; font-weight: 600; background-color: #f8fafc; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: .85rem; }
+.nav-pills .nav-link { font-weight: 600; color: #475569; border-radius: 8px; padding: .5rem .9rem; font-size: .9rem; }
+.nav-pills .nav-link.active { background-color: var(--ami-purple); color: #fff; box-shadow: 0 4px 12px rgba(111,66,193,.25); }
+[data-bs-theme="dark"] body { background-color: #0f172a; }

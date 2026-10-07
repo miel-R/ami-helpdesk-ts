@@ -1,0 +1,38 @@
+{
+  "event": "ticket_created",
+  "department": "mis",
+  "ticket_type": "tech_support",
+  "target_list": "mis_job_list_tech",
+  "user": {
+    "user_id": 266684,
+    "login": "remiel.baking",
+    "full_name": "Remiel Baking",
+    "first_name": "Remiel",
+    "last_name": "Baking",
+    "name": "Remiel",
+    "email": "remiel.baking@inari-amertron.com.ph",
+    "department": "IT",
+    "role": "admin"
+  },
+  "ticket_data": {
+    "category": "Hardware",
+    "system": "Printer",
+    "location": "CK1 MIS",
+    "description": "SAMPLE: finance printer shows a paper jam error",
+    "justification": "SAMPLE: month-end printing is blocked",
+    "impact": "",
+    "from_process": "",
+    "to_process": "",
+    "risk": "",
+    "request_category": "",
+    "asset_tag": "",
+    "quantity": "",
+    "item": "",
+    "created_at": "2026-10-03 14:56:17",
+    "category_id": 1,
+    "system_id": 2,
+    "department": "Finance"
+  },
+  "attachment_count": 0,
+  "attachments": []
+}

@@ -1,0 +1,45 @@
+# Keep the build context small and stop secrets from being baked into image layers.
+# This matters on every platform: the context is uploaded to the Docker daemon,
+# so anything listed here never reaches the daemon or lands in a layer.
+
+# Secrets - supplied at runtime via compose/--env, never baked into the image
+.env
+.env.*
+!.env.example
+certs
+*.pem
+*.key
+*.crt
+
+# Dependencies - reinstalled inside the image from package-lock.json
+node_modules
+npm-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# Writable runtime state - mounted as volumes, must not be in the image
+data
+history
+logs
+tmp
+
+# VCS and tooling
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.md
+!README.md
+
+# Docker / compose definitions are not needed at runtime
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+
+# Local test and measurement harnesses
+test-*.js
+measure-*.js
+*.test.js
+*.spec.js

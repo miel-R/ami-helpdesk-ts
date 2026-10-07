@@ -1,0 +1,39 @@
+{
+  "event": "ticket_created",
+  "department": "mis",
+  "ticket_type": "it_asset",
+  "target_list": "mis_job_list",
+  "user": {
+    "user_id": 266684,
+    "login": "remiel.baking",
+    "full_name": "Remiel Baking",
+    "first_name": "Remiel",
+    "last_name": "Baking",
+    "name": "Remiel",
+    "email": "remiel.baking@inari-amertron.com.ph",
+    "department": "IT",
+    "role": "admin"
+  },
+  "ticket_data": {
+    "category": "",
+    "system": "",
+    "location": "",
+    "description": "SAMPLE: temporary AVR for the incoming inspection team",
+    "justification": "SAMPLE: borrowed while the unit under test is recalibrated",
+    "impact": "",
+    "from_process": "",
+    "to_process": "",
+    "risk": "",
+    "request_category": "Borrow",
+    "asset_tag": "",
+    "quantity": 2,
+    "item": "AVR",
+    "created_at": "2026-10-03 14:56:17",
+    "category_id": "",
+    "system_id": "",
+    "department": "QCQA",
+    "item_onhand": 15
+  },
+  "attachment_count": 0,
+  "attachments": []
+}

@@ -1,0 +1,352 @@
+[
+  {
+    "description": "Requesting 95 meters CAT5 Yellow LAN Cable",
+    "justification": "Replacement of the damaged LAN cable connecting the CK1 IFPD Test Cabinet to the Cyclops area.",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "  To replace the old finger print scanner.  \r\nMINIPC: MIS-SA-5080-0064\r\nLoc: OSA FOL TKS IN ",
+    "justification": "  Due to the TKS incident on OSA FOL, we need to replace the old finger scanner to test if the problem is due to old fingerprint scanner or application.   ",
+    "request_category": "Borrow",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Borrow Laptop until 02 JULY,2026.\r\nLarry Canlas - 996003 - 08 Jan 1999 - IPD EOL  ",
+    "justification": "To be use for WIP Inventory..",
+    "request_category": "Borrow",
+    "department": "IPD",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting Network Switch 16 port",
+    "justification": "To connect the network label printer to LAN\r\nLocation: Die Visual\r\n",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Will be used for the to Mini PC of Bengie Villamor.\r\nMini PC Info: MIS-SA-5080-0552 | CK821 ",
+    "justification": " For ref. (ITA26060039, AIPS26060366). ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Requesting WINDOW 11 OS\r\n ",
+    "justification": " To upgrade Windows 7 to Windows 11\r\n\r\nAsset tag: MIS-5080-5080-1436\r\nPC Name: CK1303 ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Request a new laptop for newly hire engineer to be use laptop is the laptop of Mark Jason De Luna and will be assigned to\r\nName: Jermaine Marc Dulay\r\nID#: 266675\r\nDate Hired: 22-jun-2026\r\nDepartment: IFPD\r\nLocation: CK1 War Room",
+    "justification": " No Laptop to be use for reporting and data gatherings the line assigned is from assembly to endline.",
+    "request_category": "New",
+    "department": "IFPD-OSA",
+    "asset_tag": ""
+  },
+  {
+    "description": "Request computer CPU, Monitor, Keyboard and Mouse for newly hired Programmer\r\nName: Remiel R. Baking\r\nID No.: 266684\r\nDate Hired: 24- June - 2026\r\nDepartment: MIS\r\nLocation: CK1 MIS",
+    "justification": "This request is for the provision of a computer CPU, monitor, keyboard, and mouse for a newly hired Programmer. These computer peripherals are essential to enable the employee to perform assigned programming, system development, application support, and other work-related tasks efficiently.",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "1 - 4TB External HDD (Portable) for EXEC NAS External Backup",
+    "justification": "Additional 4TB External HDD (Portable) for EXEC NAS External Backup\r\nEXEC NAS Total Storage Used: 6.5TB",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting for replacement of a Laptop Charger (Acer)\r\n\r\n",
+    "justification": "Replacement of Defective Charger. \r\nLaptop CK1017 - Acer   \r\nAsset Tag: MIS-5080-0330\r\nLaptop Owner: Mylene Guilas\r\nTicket Number: [AIPS26060332]  \r\nReference Number: REF872",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Please issue temporary mini laptop as per advise of sir Jerome and sir Marlon. Due to the laptop existing issue from Matthew Camat is defective. ",
+    "justification": "Use for daily communication and engineering maintenance report.",
+    "request_category": "Borrow",
+    "department": "IFPD-IFV",
+    "asset_tag": ""
+  },
+  {
+    "description": " Request Laptop for Newly Hired Test Engineer\r\nID: 266679 \r\nNAME: JEFFREY JOSH MARTINEZ \r\nDATE HIRED: JUNE 22, 2026\r\nDEPARTMENT: CLOUDLIGHT\r\nLocation: CK2 Warroom ",
+    "justification": " Replacement of Resigned Test Engineer – MIS-5080-0446 (CK1198 ASUS Vivobook)\r\nReplacement: Cyron Laxa (Test Engineer – CL)\r\nNew Hire: Jeffrey Josh Martinez (ID: 266679)\r\nDate Hired: June 22, 2026\r\nA laptop is required for the newly hired Test Engineer to effectively perform daily engineering activities. This will enable him to quickly transition between tasks and work locations without losing valuable time setting up a workstation.\r\nThe laptop will also be used for preparing and updating engineering documentation, generating buy-off reports, analyzing test data, and submitting required reports and documents to customers in a timely manner. Providing the necessary equipment will help ensure efficient execution of responsibilities and support continuous customer requirements and production operations. ",
+    "request_category": "New",
+    "department": "CL",
+    "asset_tag": ""
+  },
+  {
+    "description": " Requesting Win10 for new PC to be deployed on lightning.\r\n\r\nOwner:\r\nRestie Fernandez \r\nComputer:\r\nMIS-SA-5080-1227\r\nCK1221 \r\nMonitor:\r\nMIS-SA-5080-0177   ",
+    "justification": " Requesting win10 os license key for MIS-SA-5080-1227 - CK1221 pc to be deployed in lightning. ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Request to replace laptop charger of Violee Anne Bustos\r\n\r\nLaptop Ast Tag: MIS-5080-0286\r\nID:165041\r\nDept. : QCQA\r\nLocation: CK2 War Room / Eng Room\r\nDate Hired: Aug. 03, 2016\r\n\r\n\r\n\r\n ",
+    "justification": "Charger is defective and need the latop for documents process.",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Request to borrow mini PC,Monitor, mouse and keyboard \r\nName. Bengie Villamor\r\nDate hired. April 08,1999\r\nID no. 996018\r\nLocation. Sanan End of line dept.\r\nIFV dept. Engineering\r\nduration:2 months\r\n\r\n",
+    "justification": " Request for the temporary issuance of the mini PC since my PC was damaged in the recent fire incident. This will allow me to continue performing my daily work while waiting for a replacement unit. With communication email from my department head. ",
+    "request_category": "Borrow",
+    "department": "IFPD-IFV",
+    "asset_tag": ""
+  },
+  {
+    "description": " request new label printer for the cloudlight materials and direct delivery materials labeling. ",
+    "justification": " printer use as the labeling of cloudlight materials upon receipt and all direct delivery materials. \r\n\r\nRYAN RAZO\r\nAI--106008\r\n03/15/2010\r\nWAREHOUSE CK2 2.1 ",
+    "request_category": "New",
+    "department": "Store",
+    "asset_tag": ""
+  },
+  {
+    "description": " request new printer to be use in warehouse replacement for the unit affected by fire. \r\n\r\nname : ryan razo\r\nid # 106008\r\ndate hired 03/15/2010\r\nlocation warehouse ck2 2.1 ",
+    "justification": " for warehouse document printing use in a daily basis  ",
+    "request_category": "New",
+    "department": "Store",
+    "asset_tag": ""
+  },
+  {
+    "description": "1 - Microsoft Office 2016 License",
+    "justification": "To upgrade the MS Office Application of Grenz Aubrey Apostol from MS Office 2010 to MS Office 2016\r\nTech Support Ticket: AIPS26060301\r\nAsset tag: MIS-SA-5080-0948\r\nName: GRENZ AUBREY APOSTOL\r\nID #: 255541\r\nDept.: 5070- PC PLANNING\r\nDate Hired: 11-Aug-2025",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Request for replacement of my defective Laptop charger:\r\nLaptop Details:\r\nCK1152: HP Pavilion x360\r\nAccountability: Marlon Tapac  [ID # 176134]\r\nIT Asset : MIS-5080-0412 ",
+    "justification": "Defective Laptop Charger:\r\n1. Tried to insert and re-insert the charger. [Result: Not Charging]\r\n2. Tried to insert to different power outlet [Result: Not Charging]\r\n3.Tried to use Sir Jing laptop charger since we have same Laptop Model [Result: Working and Charging]\r\n   -Currently using Sir Jing laptop charger to charge the laptop.",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting Computer Mini for Replacement\r\nAsset Tag: MIS-SA-5080-0192\r\nOwner: MIS - TKS - INSIDE IFPD FOL (IN)\r\nLocation: CK1 IFPD FOL INSIDE\r\n",
+    "justification": "The Mini PC requires replacement due to a BIOS error. Pressing F1 is required to proceed with booting.",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Request for replacement of HP LaserJet 4250\r\n>> MIS-CA-5080-0083 \r\n>> CK1 OPD EOL\r\n \r\nThe Printer need to replace due to:\r\n>> Jamming\r\n>> Unavailable parts\r\n>> Need to upgrade ",
+    "justification": "Ticket no: AIPS26060256\r\nAsser Tag: MIS-CA-5080-0083 \r\nLocation: CK1 OPD EOL\r\nName: MARINEL CABUYABAN\r\nDate Hired: JULY 15 2014\r\nID: 141073",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "   Requesting Operating System (OS)\r\nPC Name: CK1297\r\nAsset Tag: MIS-SA-5080-1019\r\nMonitor Asset Tag: MIS-SA-5080-1302\r\n\r\nOwner: \tBanjie Pablo\r\nID#: \t095004\r\nProd:       CL   ",
+    "justification": "   To upgrade existing windows 7 to windows 10   ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "  Requesting Operating System (OS)\r\nPC Name: CK527\r\nAsset Tag: MIS-5080-0111\r\nMonitor Asset Tag: MIS-SA-5080-0362\r\n\r\nOwner: Romelyn Banag\r\nID#: 065012\r\nProd: CL  ",
+    "justification": "  To upgrade existing windows 7 to windows 10  ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Request to borrow 3 laptops that will be accounted to Chelsea Dumago (ID: 255505) / Date Hired July 07, 2025. ",
+    "justification": " Requesting 3 laptops for OJT, to be accounted to Chelsea Dumago (ID: 255505), from June 17 – July 17, 2026, for work tasks to ensure smooth workflow and timely project completion.",
+    "request_category": "Borrow",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting Label Printer for replacement\r\nAsset Tag: MIS-SA-5080-0155\r\nTicket No.: AIPS26060102\r\n Name: Mario J. Antonio Jr.\r\n ID No.: 186345\r\n Date Hired: 18,2018\r\n Dept.: Lightning\r\n Location: CK2.1 MC Store\r\n",
+    "justification": "Defective Print Head need to replace.\r\n",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting Printer for Replacement\r\nAsset Tag: MIS-CA-5080-0028\r\nTicket No.: AIPS26060130\r\nName: Jhen Dela Cruz\r\nID#: 065010\r\nDept: PPMC \r\nLocation: Die Visual\r\nDate Hired: June05,2006 ",
+    "justification": "Printer error cannot print RC need to replace.",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Kindly transfer the computer, monitor, keyboard, and mouse to my name, as the previous user has already resigned (Cheska Tumabao)\r\nAIP-MRF-26-00018 [245450] TUMABAO, CHESKA\r\n\r\nCPU name: CK662\r\nCPU: MIS-SA-5080-0364\r\nMONITOR: MIS-SA-5080-0365\r\nMOUSE\r\nKEYBOARD",
+    "justification": "These items will be used by the replacement Product Technician.",
+    "request_category": "Replacement",
+    "department": "IFPD-IFV",
+    "asset_tag": ""
+  },
+  {
+    "description": " Requesting Yellow Lan Cable 40 meters \r\n\r\n ",
+    "justification": " To connect FGI SCAN Computer in Broadcom Server \r\n \r\nLocation: IFPD TEST\r\n\r\nPC Asset Tag : MIS-SA-5080-0262\r\nPC Name: CK928 ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting to replace Defective CPU Due to Faulty Motherboard\r\nCPU: CK544\r\n          MIS-SA-5080-0446\r\n\r\nMonitor: MIS-SA-5080-0447",
+    "justification": " Owner: Melanie Miguel\r\nID: 055019\r\nDepartment: CK1 IFPD EOL\r\nDate Hired: 12 SEP 2005\r\n\r\nREF#869\r\n ",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting for HDMI 10 meters/35 Feet\r\n\r\n",
+    "justification": "To connect a laptop to Board room displays for client presentations or meeting presentations.\r\n\r\nGumamela Board Room\r\n\r\nTV Asset tag: ADM-5020-0115",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Request for two (2) desktop PCs and one (1) printer for the MOLD Area currently located at SANAN/APC Department. One PC will be assigned as a GL PC for reporting activities, while the other PC will be used by operators for MES transactions. The requested equipment is needed to support daily production and reporting operations.",
+    "justification": "Due to the fire incident that occurred on May 10, 2026, the MOLD Area was relocated to the SANAN/APC Department. Currently, there are no available PCs and printer for operator transactions and reporting activities.",
+    "request_category": "Replacement",
+    "department": "IFPD-IFV",
+    "asset_tag": ""
+  },
+  {
+    "description": "   Request Laptop  for  Excell  Lea Teruel-265518\r\nDate hired: 25-May-26 \r\nQA Engineer  \r\nLocation: CK1 War room",
+    "justification": "  NEWLY HIRED OPD QCQA ENGINEER.\r\n\r\nThe laptop will be essential for the new engineer to carry out their responsibilities, especially in supporting our customer with Broadcom.  ",
+    "request_category": "New",
+    "department": "QCQA",
+    "asset_tag": ""
+  },
+  {
+    "description": "Borrow PC for Nenita Jimenez due to PC affected by fire incident \r\nBorrowing period: 2 months\r\n\r\nUser details\r\nName: Nenita Jimenez\r\nPosition: QA Tech (Calibration)\r\nID: 035006\r\nDate Hired: 18 Aug 2003\r\n\r\n  ",
+    "justification": "Nenita Jimenez\r\nUse for PM/Cal approval\r\nUse for generating quotation for calibration.\r\nUse for IPD reliability\r\nUse to generate environment reports",
+    "request_category": "Borrow",
+    "department": "HiRel",
+    "asset_tag": ""
+  },
+  {
+    "description": "Replacement for defective USB 3.0 TO SATA//IDE HDD DOCKING STATION \r\n\r\nNote: No Docking Station chooses under (Item Request) thus we have reselect other item to proceed on the request.",
+    "justification": "For the replacement of defective USB 3.0 TO SATA//IDE HDD DOCKING STATION use on back up of test programs, data logs, lot sum and other related test data back ups. \r\n\r\nNote: No Docking Station chooses under (Item Request) thus we have reselect other item to proceed on the request.",
+    "request_category": "Replacement",
+    "department": "IPD",
+    "asset_tag": ""
+  },
+  {
+    "description": "for the requested computer for issue by MIS to be use in store\r\n\r\nfor the computer request under ruby ann maniti & john kevin paras",
+    "justification": "for warehouse use",
+    "request_category": "New",
+    "department": "Store",
+    "asset_tag": ""
+  },
+  {
+    "description": "   Request Laptop and mouse  for  Chaze David-266566\r\nDate hired:04-Jun-26 \r\n IFPD QA Executive Engineer \r\n ",
+    "justification": "  NEWLY HIRED IFPD QA Executive Engineer\r\n\r\nMouse- Using a mouse makes more efficient at writing QA reports and browsing files during customer meetings.\r\nThe laptop will be essential for the new engineer to carry out their responsibilities, especially in supporting our customer with Broadcom.\r\n ",
+    "request_category": "New",
+    "department": "QCQA",
+    "asset_tag": ""
+  },
+  {
+    "description": " Requesting 2 HDD Portable for Broadcom Server \n Location: MIS Tech Office\n Storage: 4TB\n\n\n \n ",
+    "justification": " Use for Broadcom Server Backup\r\nName: John Carlo Gopez\r\nID: 256506\r\nDept.: MIS\r\nDate Hired: July 07, 2025 ",
+    "request_category": "Borrow",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Requesting of OS and Office for RUBY ANN MANITI PC.\r\nPC details: MIS-5080-0572 ",
+    "justification": " Due to fire incident. ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Requesting OS and Office for JOHN KEVIN PARAS PC.\r\nPC Details:MIS-5080-0570 ",
+    "justification": " Due to fire incident. ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " 1 - 16 Port Network Switch for the Broadcom Network ",
+    "justification": "To be use the managed network switch in isolating the broadcom network. \r\nSwitch Cabinte Asset tag: MIS-5080-0013\r\nLocation: CK1 IFPD Test",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "1 - Microsoft Office 2013 for the Laptop of Kriselle Mapile",
+    "justification": "Install Microsoft Office 2013 on the laptop assigned to Kriselle Mapile. Office 365 is currently installed; however, it does not have an active license.\r\nTech Support Ticket: AIPS26060032\r\nAsset tag: MIS-5080-0320\r\nName: Kriselle Mapile\r\nID #: 2351112\r\nDept.: 1380- Cloudlight\r\nDate Hired: 24-Oct-2023",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "- extend borrow issued laptop for below Warehouse personnel the old laptop of sir restie \r\n- borrow laptop to be return once the replacement of computer use from fire incident is been issued to the user.\r\n\r\n\r\nissued borrowed laptop details last May 27, 2026\r\nPC NAME : CK1037\r\nASSET TAG # MIS -5080-0337\r\n\r\nNAME: RYAN MAR DEPLIAN\r\nID # : AI--246333\r\nDATE HIRED: JUNE 04, 2024\r\nDEPT. WAREHOUSE ",
+    "justification": "to be use for warehouse transactions ",
+    "request_category": "Borrow",
+    "department": "Store",
+    "asset_tag": ""
+  },
+  {
+    "description": "  Requesting for Labeler Sticker \r\n\r\nAsset Tag: MIS-SA-5080-0487 ",
+    "justification": " The labeler sticker is needed for clear identification and proper organization.  ",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting Laptop for replacement CK1156\r\nDefective laptop\r\nDiagnosis REF.: 868\r\nAsset tag : MIS-5080-0407\r\n",
+    "justification": "Name: Jamal Amer\r\nID No.: 236279\r\nDept.: 5020- ADMINISTRATIVE DEPARTMENT\r\nDate Hired: 05-Oct-2023",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Borrow Document Scanner for IQA document upload",
+    "justification": "IQA document scanner was affected by the fire incident",
+    "request_category": "Borrow",
+    "department": "QCQA",
+    "asset_tag": ""
+  },
+  {
+    "description": "Borrow Document scanner \r\n\r\nID#: 045016\r\nName: Elaine Pelayo\r\nDate hired:  16-Mar-2004",
+    "justification": "Due to fire incident IQA scanner is affected.\r\nNeed this for scanning of document such as COC, ESD forms and other needed documents to upload at IQAR system.",
+    "request_category": "Borrow",
+    "department": "QCQA",
+    "asset_tag": ""
+  },
+  {
+    "description": "Requesting 2 LAN Extender for the machine in IFPD Test",
+    "justification": "Locate: IFPD Test\r\nMachine Name: \r\n - Stupa tester #1\r\n - Nezha tester #1",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": " Requesting 2 LAN Extender for the machine in IFPD Test \r\nAsset Tag:\r\n- Stupa tester #1 - IFM-CA-1020-0036\r\n - Nezha tester #1 - IFM-CA-1020-0043",
+    "justification": " Locate: IFPD Test\r\nMachine Name: \r\n - Stupa tester #1\r\n - Nezha tester #1 ",
+    "request_category": "New",
+    "department": "MIS",
+    "asset_tag": ""
+  },
+  {
+    "description": "Corrupted windows operating system-Windows failed to start \r\nAsset Tag: SMT-CA-1110-0007\r\nDescription: Iceman Firmware\r\n",
+    "justification": "Windows failed to start",
+    "request_category": "New",
+    "department": "IFPD-SMT",
+    "asset_tag": ""
+  },
+  {
+    "description": "Replace old monitor 18\" (MIS-SA-5080-0748) to wider screen 24\" (MIS-SA-5080-0744).\r\nJennilyn Eser\r\nID#:065020\r\nDate hired:Aug3, 2006",
+    "justification": "Old monitor for replacement.",
+    "request_category": "Replacement",
+    "department": "MIS",
+    "asset_tag": ""
+  }
+]

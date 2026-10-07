@@ -1,0 +1,160 @@
+# Ami Helpdesk - container orchestration
+#
+# Runs identically on Docker Desktop (Windows/macOS) and native Linux.
+#   docker compose up -d --build
+#   docker compose logs -f ami-chatbot
+#
+# Prerequisites: copy .env.example to .env and fill in the values. Compose reads
+# .env automatically from this directory on both Windows and Linux.
+
+services:
+  ami-chatbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ami-helpdesk-ts:latest
+    # This replaces the JavaScript build, so it keeps the original container name.
+    # Anything that addresses the bot by container name (MIS reverse proxy, ops
+    # scripts) therefore does not need changing.
+    container_name: ami-helpdesk-chatbot
+    restart: unless-stopped
+    ports:
+      # The same host port the JavaScript build published, so this is a drop-in
+      # replacement: callers on :3000 do not need to be updated.
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      # Production webhook for real tickets; the test one is only used by the
+      # $test-webhook command so probes never touch the live ticket tables.
+      - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
+      - N8N_TEST_WEBHOOK_URL=${N8N_TEST_WEBHOOK_URL}
+      - ADMIN_KEY=${ADMIN_KEY}
+      # Bootstrap admins. The role is resolved from the users row, never from
+      # the request body, so this is the only env-based admin path.
+      - ADMIN_USERS=${ADMIN_USERS:-}
+      # Shared secret with the MIS PHP pages, used to sign the role MIS already
+      # knows. Blank disables it and falls back to users.role + ADMIN_USERS.
+      - IDENTITY_SECRET=${IDENTITY_SECRET:-}
+      # Read-only MIS user directory. Lets the chatbot read scrf_user.user_role
+      # directly, so MIS is the source of truth with no MIS PHP change.
+      - MIS_DB_HOST=${MIS_DB_HOST:-}
+      - MIS_DB_PORT=${MIS_DB_PORT:-3306}
+      - MIS_DB_NAME=${MIS_DB_NAME:-}
+      - MIS_DB_USER=${MIS_DB_USER:-}
+      - MIS_DB_PASSWORD=${MIS_DB_PASSWORD:-}
+      # Limits - defaulted from .env so the file is the single source of truth.
+      - MAX_HISTORY=${MAX_HISTORY:-20}
+      - RATE_LIMIT_PER_DAY=${RATE_LIMIT_PER_DAY:-10}
+      - REQUESTS_PER_DAY=${REQUESTS_PER_DAY:-100}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-30}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-10485760}
+      # Idle handling. Two thresholds: the warning, then the close. Passed through
+      # explicitly because the container reads its environment from here rather than
+      # from .env, so setting SESSION_*_MINUTES in .env alone changed nothing - the
+      # service kept reporting the built-in defaults.
+      - SESSION_NUDGE_MINUTES=${SESSION_NUDGE_MINUTES:-2}
+      - SESSION_TIMEOUT_MINUTES=${SESSION_TIMEOUT_MINUTES:-5}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - TLS_CERT_FILE=${TLS_CERT_FILE}
+      - TLS_KEY_FILE=${TLS_KEY_FILE}
+      # Ticket attachments are staged under $ATTACHMENTS_DIR/_incoming before
+      # n8n moves them into file_master/<type>/<control number>/.
+      #
+      # Unset, it defaults to /app/data/attachments, which is already on the
+      # ami_data volume - so attachments persist and work with no extra setup.
+      #
+      # For production, point it at the NAS-backed file_master and mount the
+      # share at the SAME absolute path here and in the n8n container: the app
+      # sends absolute staged_path values that n8n reads unchanged. Mount the NAS
+      # on the host FIRST via /etc/fstab - Docker does not manage host mounts.
+      # See README "Attachment Storage".
+      #
+      # - ATTACHMENTS_DIR=/app/attachments
+      #   volumes:
+      #     - /mnt/nas/file_master:/app/attachments
+      - DATABASE_URL=${DATABASE_URL}
+      - PGPOOL_MAX=${PGPOOL_MAX:-5}
+      - PG_STATEMENT_TIMEOUT_MS=${PG_STATEMENT_TIMEOUT_MS:-10000}
+      - MESSAGE_RETENTION_DAYS=${MESSAGE_RETENTION_DAYS:-180}
+      # Timezone for anything the container renders locally (logs, date output).
+      # Ticket timestamps are converted explicitly from config.timezone rather
+      # than relying on this, but setting it keeps every clock in the container
+      # agreeing instead of leaving them on UTC.
+      - TZ=${TIMEZONE:-Asia/Manila}
+    volumes:
+      # Conversations, attachments and uploads must survive restarts and image
+      # rebuilds, so they live in a named volume rather than the image.
+      - ami_data:/app/data
+      # Serve static widget assets straight from the host for quick iteration.
+      # Remove this mount to serve the copies baked into the image instead.
+      - ./public:/app/public:ro
+      # TLS material is read-only and is never copied into the image by
+      # .dockerignore. The certs/ directory must exist on the host.
+      - ./certs:/app/certs:ro
+    networks:
+      - ami-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Node-based probe so it works on any base image. Kept in sync with the
+    # HEALTHCHECK in the Dockerfile.
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('https').get({host:'127.0.0.1',port:process.env.PORT||3000,path:'/api/health',rejectUnauthorized:false},r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+# Dedicated Postgres for the chatbot only. n8n keeps its own storage and is
+# never touched by this database. DATABASE_URL in .env controls whether the
+# chatbot uses this instance; leave DATABASE_URL empty to run on the JSON
+# fallback (zero dependencies).
+  postgres:
+    image: postgres:16-alpine
+    container_name: ami-helpdesk-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=ami_helpdesk
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=ami_helpdesk
+    ports:
+      # Internal only; remove "5432:5432" if you never need external access.
+      - "5432:5432"
+    volumes:
+      - ami_pgdata:/var/lib/postgresql/data
+    networks:
+      - ami-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ami_helpdesk -d ami_helpdesk"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  ami-network:
+    driver: bridge
+    name: ami-network
+
+volumes:
+  # The `name` keys are pinned to the volumes the JavaScript build created.
+  #
+  # Compose namespaces a bare volume name with the project name, so without these
+  # the TS stack would silently create BRAND NEW empty volumes
+  # (ami-helpdesk-ts_ami_data / _ami_pgdata) and the server would come up looking
+  # like it had lost every conversation. Pinning them re-attaches this stack to
+  # the existing data instead. Docker has no "rename volume" operation, so these
+  # keep the legacy ami-helpdesk-node_ prefix by design.
+  ami_data:
+    name: ami-helpdesk-node_ami_data
+  ami_pgdata:
+    name: ami-helpdesk-node_ami_pgdata

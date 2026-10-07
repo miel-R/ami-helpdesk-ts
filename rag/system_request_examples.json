@@ -1,0 +1,452 @@
+[
+  {
+    "description": "Request MR\r\nItem Code: C04001780\r\nDescription: ME00256_Electric Cleaner Accessory (CL P/N: ELE-M 001)\r\nQty: 33pcs",
+    "justification": "For material inventory tracking of Consigned Operating Supplies to ensure material availability and prevent shortages.",
+    "from_process": "No Onhand",
+    "to_process": "With Onhand",
+    "risk": "No Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "To close the status of the NEVA X RMA units (FG units returned by the customer) in MES to proceed with re-processing (RMA Verification and re-processing).\r\nSee attached file for the list of Cable SN, PROD, and BAG IDs.",
+    "justification": "Encountering \"Module SN already exist\" error during lot formation.\r\nEncountering \"Already have Bag ID\" error during Batch Merging",
+    "from_process": "Received RMA units are previously FGs shipped to end customer are existing on MES",
+    "to_process": "Close status to re-process on normal production.",
+    "risk": "No risk.",
+    "category": "16",
+    "system": "3"
+  },
+  {
+    "description": "Request to provide Oracle PR account for below planners\r\nGeorge  Pescasio\r\nMaricon Adriano",
+    "justification": "George  Pescasio and Maricon Adriano\r\nneed to assist the IFV and IFM line \r\nAbigail Lacanlalay and Maryann Galano Already resigned, last day will be on JUNE 30, 2026.\r\n\r\nStatus: Still waiting for the new Planner to handle the IFV and IFM\r\n\r\n",
+    "from_process": "No PR account ",
+    "to_process": "add\r\nAG_AIP_PO_PR REQUEST",
+    "risk": "no risk",
+    "category": "18",
+    "system": "1"
+  },
+  {
+    "description": "Add  access to Plating Solution Maintenance for\r\nMES account : leanne.delacerna\r\nEmail : opto-eolprocesstech.ck@inari-amertron.com.ph\r\n",
+    "justification": "To input data of titration analysis of Tin and Acid Concentration ",
+    "from_process": "no access ",
+    "to_process": "access Plating Solution Maintenance",
+    "risk": "no risk",
+    "category": "15",
+    "system": "3"
+  },
+  {
+    "description": "To MI/remove in the system the attached OPD FG onhand\r\nThis is under DMR# 104026240069",
+    "justification": "This is will be part of the exposure of OPD that presented by Sir Jing last Jun 09. Attached is the email communication.",
+    "from_process": "In the system",
+    "to_process": "Remove in the system the list of FG",
+    "risk": "MI amount is approximately: $42,074.29\r\nNeed to add Sir poove, Ms Myles and Sir Chew in approver",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "To create a new quotation for the new item code A27000005 under Dou Yee Enterprises (S) Pte Ltd",
+    "justification": "To upload the pricing of the new ESD Moisture Barrier Bag use by SR8, CDGR4+ and cGR4+ devices in Lumentum line.\r\nThis is the replacement of the A03200091 ESD Shielding Bag as Customer requirement for enhance moisture resistance.\r\n\r\n",
+    "from_process": "Dou Yee Enterprises (S) Pte Ltd\r\nN/A",
+    "to_process": "Dou Yee Enterprises (S) Pte Ltd\r\nITEM CODE\tQUANTITY\tUOM\tUNIT PRICE\r\nA27000005\t     2,100 \t         PCS\t $0.83000 ",
+    "risk": "BBC price will be updated on the next BBC review for Lumentum.",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "To enable the old account for OpenKM\r\nbanjielyn.pablo",
+    "justification": "To use for viewing and reviewing of documents under OpenKM",
+    "from_process": "Disable old account",
+    "to_process": "Enable account.",
+    "risk": "No Risk",
+    "category": "15",
+    "system": "14"
+  },
+  {
+    "description": "To request new itemcode for T.O. Package line IC DICE. [IC_SDS065J008B3]\r\n*see attached",
+    "justification": "To request new itemcode for the T.O. Package line IC Dice to be able to withdraw consigned IC Dice which is requirement for BOM set-up in Oracle and MES set-up for T.O. Devices.\r\n*see attached",
+    "from_process": "No itemcode",
+    "to_process": "To request new itemcode for T.O. Package line IC DICE.\r\n*see attached",
+    "risk": "No Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "To enroll new locators for Store in Oracle. SEGREGATION AREA, ANNEX WAREHOUSE, WAREHOUSE #4, WAREHOUSE #5, CHEMICAL WAREHOUSE, COLD STORAGE, CYLINDER GAS AREA, CK2.1, FREEZER 1- 7, VAULT 1- 3, Cabinet 1-4, OLD STORE, Container, Wafer Store",
+    "justification": "To align system locator to actual inventory location",
+    "from_process": "No Locators named:\r\nDescription\tPrefix\tLocator \tSub\r\nSEGREGATION AREA\tSGN\tOS.SGN.0\tOS\r\nANNEX WAREHOUSE\tANX\tOS.ANX.0\tOS\r\nWAREHOUSE #4\tWHS4\tOS.WHS4.0\tOS\r\nWAREHOUSE #5\tWHS5\tOS.WHS5.0\tOS\r\n\t\tSP.WHS5.0\tSP\r\nCHEMICAL WAREHOUSE\tCHEM\tOS.CHEM.0\tOS\r\nCOLD STORAGE\tCLDS\tRM.CLDS.0\tRM\r\n\t\tOS.CLDS.0\tOS\r\n\t\tRMMC.CLDS.0\tRMMC\r\n\t\tCM.CLDS.0\tCM\r\nCYLINDER GAS AREA\tCGA\tOS.CGA.0\tOS\r\nCK2.1\tCK2-1\tCMEX.CK2-1.0\tCMEX\r\nFREEZER 1- 7\tFRZ1-7\tRMEX.FRZ1.0\tRMEX\r\n\t\tRMEX.FRZ2.0\tRMEX\r\n\t\tRMEX.FRZ3.0\tRMEX\r\n\t\tRMEX.FRZ4.0\tRMEX\r\n\t\tRMEX.FRZ5.0\tRMEX\r\n\t\tRMEX.FRZ6.0\tRMEX\r\n\t\tRMEX.FRZ7.0\tRMEX\r\n\t\tRMEX.IFPD.FRZ1.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ2.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ3.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ4.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ5.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ6.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ7.0\tRMEX.IFPD\r\n\t\tRMSC.FRZ1.0\tRMSC\r\n\t\tRMSC.FRZ2.0\tRMSC\r\n\t\tRMSC.FRZ3.0\tRMSC\r\n\t\tRMSC.FRZ4.0\tRMSC\r\n\t\tRMSC.FRZ5.0\tRMSC\r\n\t\tRMSC.FRZ6.0\tRMSC\r\n\t\tRMSC.FRZ7.0\tRMSC\r\n\t\tRM.FRZ1.0\tRM\r\n\t\tRM.FRZ2.0\tRM\r\n\t\tRM.FRZ3.0\tRM\r\n\t\tRM.FRZ4.0\tRM\r\n\t\tRM.FRZ5.0\tRM\r\n\t\tRM.FRZ6.0\tRM\r\n\t\tRM.FRZ7.0\tRM\r\n\t\tCMEX.FRZ1.0\tCMEX\r\n\t\tCMEX.FRZ2.0\tCMEX\r\n\t\tCMEX.FRZ3.0\tCMEX\r\n\t\tCMEX.FRZ4.0\tCMEX\r\n\t\tCMEX.FRZ5.0\tCMEX\r\n\t\tCMEX.FRZ6.0\tCMEX\r\n\t\tCMEX.FRZ7.0\tCMEX\r\nVAULT 1- 3\tVLT1-3\tRMGW.VLT1.0\tRMGW\r\n\t\tRMGW.VLT2.0\tRMGW\r\n\t\tRMGW.VLT3.0\tRMGW\r\n\t\tRMPF.VLT1.0\tRMPF\r\n\t\tRMPF.VLT2.0\tRMPF\r\n\t\tRMPF.VLT3.0\tRMPF\r\nCabinet 1-4\tCBT\tRMHD.CBT1.0\tRMHD\r\n\t\tRMHD.CBT2.0\tRMHD\r\n\t\tRMHD.CBT3.0\tRMHD\r\n\t\tRMHD.CBT4.0\tRMHD\r\nOLD STORE\tOLDST\tRM.OLDST.0\tRM\r\n\t\tCM.OLDST.0\tCM\r\n\t\tOS.OLDST.0\tOS\r\nContainer\tCONT\tOS.CONT.0\tOS\r\nWafer Store\tWFR\tRM.WFR.0\tRM\r\n\t\tCM.WFR.0\tCM\r\n",
+    "to_process": "With locators named:\r\nDescription\tPrefix\tLocator \tSub\r\nSEGREGATION AREA\tSGN\tOS.SGN.0\tOS\r\nANNEX WAREHOUSE\tANX\tOS.ANX.0\tOS\r\nWAREHOUSE #4\tWHS4\tOS.WHS4.0\tOS\r\nWAREHOUSE #5\tWHS5\tOS.WHS5.0\tOS\r\n\t\tSP.WHS5.0\tSP\r\nCHEMICAL WAREHOUSE\tCHEM\tOS.CHEM.0\tOS\r\nCOLD STORAGE\tCLDS\tRM.CLDS.0\tRM\r\n\t\tOS.CLDS.0\tOS\r\n\t\tRMMC.CLDS.0\tRMMC\r\n\t\tCM.CLDS.0\tCM\r\nCYLINDER GAS AREA\tCGA\tOS.CGA.0\tOS\r\nCK2.1\tCK2-1\tCMEX.CK2-1.0\tCMEX\r\nFREEZER 1- 7\tFRZ1-7\tRMEX.FRZ1.0\tRMEX\r\n\t\tRMEX.FRZ2.0\tRMEX\r\n\t\tRMEX.FRZ3.0\tRMEX\r\n\t\tRMEX.FRZ4.0\tRMEX\r\n\t\tRMEX.FRZ5.0\tRMEX\r\n\t\tRMEX.FRZ6.0\tRMEX\r\n\t\tRMEX.FRZ7.0\tRMEX\r\n\t\tRMEX.IFPD.FRZ1.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ2.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ3.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ4.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ5.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ6.0\tRMEX.IFPD\r\n\t\tRMEX.IFPD.FRZ7.0\tRMEX.IFPD\r\n\t\tRMSC.FRZ1.0\tRMSC\r\n\t\tRMSC.FRZ2.0\tRMSC\r\n\t\tRMSC.FRZ3.0\tRMSC\r\n\t\tRMSC.FRZ4.0\tRMSC\r\n\t\tRMSC.FRZ5.0\tRMSC\r\n\t\tRMSC.FRZ6.0\tRMSC\r\n\t\tRMSC.FRZ7.0\tRMSC\r\n\t\tRM.FRZ1.0\tRM\r\n\t\tRM.FRZ2.0\tRM\r\n\t\tRM.FRZ3.0\tRM\r\n\t\tRM.FRZ4.0\tRM\r\n\t\tRM.FRZ5.0\tRM\r\n\t\tRM.FRZ6.0\tRM\r\n\t\tRM.FRZ7.0\tRM\r\n\t\tCMEX.FRZ1.0\tCMEX\r\n\t\tCMEX.FRZ2.0\tCMEX\r\n\t\tCMEX.FRZ3.0\tCMEX\r\n\t\tCMEX.FRZ4.0\tCMEX\r\n\t\tCMEX.FRZ5.0\tCMEX\r\n\t\tCMEX.FRZ6.0\tCMEX\r\n\t\tCMEX.FRZ7.0\tCMEX\r\nVAULT 1- 3\tVLT1-3\tRMGW.VLT1.0\tRMGW\r\n\t\tRMGW.VLT2.0\tRMGW\r\n\t\tRMGW.VLT3.0\tRMGW\r\n\t\tRMPF.VLT1.0\tRMPF\r\n\t\tRMPF.VLT2.0\tRMPF\r\n\t\tRMPF.VLT3.0\tRMPF\r\nCabinet 1-4\tCBT\tRMHD.CBT1.0\tRMHD\r\n\t\tRMHD.CBT2.0\tRMHD\r\n\t\tRMHD.CBT3.0\tRMHD\r\n\t\tRMHD.CBT4.0\tRMHD\r\nOLD STORE\tOLDST\tRM.OLDST.0\tRM\r\n\t\tCM.OLDST.0\tCM\r\n\t\tOS.OLDST.0\tOS\r\nContainer\tCONT\tOS.CONT.0\tOS\r\nWafer Store\tWFR\tRM.WFR.0\tRM\r\n\t\tCM.WFR.0\tCM\r\n",
+    "risk": "No risks",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Need to set status as \"CLOSE\" of the following items to proceed units for re-processing.\r\n\r\nMODULE_SN\tCABLE_SN\tPROD_ID\tBAG_ID\r\nAQ22180CE9\tK76127764ZD02227101144\t8664-81-1302 SQ2205160125\tBOMZ4E188WG6G031\r\nAQ22190B01\tK76127764ZD02227101349\t8664-81-1302 SQ2205150052\tBOMZ4E188WG6G031\r\nAQ22190B38\tK76127764ZD02227101140\t8664-81-1302 SQ2205130010\tBOMZ4E188WG6G031\r\nAQ2219041E\tK77127763ZD01869403317\t8664-81-1302 SQ2205110003\tBOMZ4E188WG6G031\r\nAQ22210CFC\tK77127763ZD01869402066\t8664-81-1302 SQ2205110001\tBOMZ4E188WG6G031\r\nAQ22190316\tK77127763ZD01869402067\t8664-81-1302 SQ2205110005\tBOMZ4E188WG6G031\r\nAQ22181562\tK76127764ZD02227101111\t8664-81-1302 SQ2205150031\tBOMZ4E188WG6G031\r\nAQ22180F63\tK76127764ZD02227100543\t8664-81-1302 SQ2205140002\tBOMZ4E188WG6G031\r\nAQ221901DF\tK7712775CZD01638601698\t8664-81-1302 SQ2205110004\tBOMZ4E188WG6G031\r\nAQ2219013A\tK7712775CZD01638602371\t8664-81-1302 SQ2205110002\tBOMZ4E188WG6G031\r\nAQ221904BB\tK7712775CZD01638601756\t8664-81-1302 SQ2205110007\tBOMZ4E188WG6G031\r\nAQ22190135\tK77127763ZD01869402065\t8664-81-1302 SQ2205110006\tBOMZ4E188WG6G031",
+    "justification": "Affected SNs are currently unable to flow down due to error encountered during FGI. \r\nUnits require relabeling to proceed FGI.",
+    "from_process": "Current status of affected modules are \"GOOD\" which unable to re-process.",
+    "to_process": "Set status to \"CLOSE\" for BAG ID and SN List provided.",
+    "risk": "No risk.",
+    "category": "16",
+    "system": "3"
+  },
+  {
+    "description": "* LIFT MIN MAX OS DPDV @ PMR\r\n*LIFT MIN MAX ISSUANCE @ OS/SP ISSUANCE\r\nGOOD FOR 3 MONTHS FROM JUNE 27, 2026 TO OCTOBER 31, 2026\r\n\r\nSEE ATTACHED FILE FOR OS ITEMCODE & DESCRIPTION",
+    "justification": "NEED TO PMR MORE THAN THE MAX FOR THE SHIPMENT OF OS TO KKM.\r\n3 MONTHS (UNTIL DPDV SAWING IS STABLE)",
+    "from_process": "OS DPDV WITH MIN MAX @ PMR\r\nOS/SP ISSUANCE WITH MINMAX",
+    "to_process": "LIFT DPDV MIN MAX @ PMR\r\nLIFT OS/SP ISSUANCE  MINMAX",
+    "risk": "NO RISK",
+    "category": "16",
+    "system": "2,3"
+  },
+  {
+    "description": "This to upload the new price for the item code A00800052R1 EPOXY ECCOBOND E3503-1 5CC EFD SYR (8 Gram) 0470-2958.",
+    "justification": "This is to load for the item code A00800052R1 under Material Technology Pte Ltd.",
+    "from_process": "USD 29.34",
+    "to_process": "USD 31.59",
+    "risk": "No Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Disable the account of the resigned employee\r\n\r\nName: Michaela Mendoza\r\nUsername: michaela.mendoza/ MICHAELA.MENDOZA\r\nEmployee ID: 241086\r\nDepartment: CL\r\nPosition: Operator\r\nLast Working Day: June 23, 2026\r\nMES Account: NON-IPD and CL",
+    "justification": "Employee has resigned",
+    "from_process": "Employee accounts remain active after resignation.",
+    "to_process": "Disable all system accounts of the resigned employees effective immediately after their last working day, June 23, 2026.",
+    "risk": "No risk. Ensures system security and proper access control.",
+    "category": "15",
+    "system": "3"
+  },
+  {
+    "description": "Request MR below item code\r\nC04001778 - TORQUE WRENCH HEAD 4*40*1.2*200*00 MATERIAL CODE: FCS-3-04-M-00431 - QTY: 90\r\nC04001779 - A CAGE OSFP 1X1 CAGE 571-2317416-1 MATERIAL CODE: FSC-3-04-M-00016 - QTY: 10",
+    "justification": "Consigned Material , under OS Supply(For Material Inventory Tracking in System base)",
+    "from_process": "No Onhand",
+    "to_process": "With Onhand",
+    "risk": "No Rsk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Account Alias Receipt A04001314\r\nFrom IPD MES , pls. return A04001314\tCounter Sunk Screw Allen Flat Full Threaded M3 X   qty: 30 pcs to the Mc store by the request of the issuer.\r\n",
+    "justification": "to return the item in the store and to correct the qty on hand in oracle\r\ndescription: A04001314  Counter Sunk Screw Allen Flat Full Threaded M3 X   qty: 30 pcs\r\nthe issuer in Store late knowing the item was included in fire incident.",
+    "from_process": "the item is from IPD MES\r\nOS and SP Issuance\r\nitemcode : A04001314\r\nlot : N/A\r\nqty : 30",
+    "to_process": "RETURN TO MC STORE\r\nitemcode : A04001314\r\nlot : N/A\r\nqty : 30\r\nsubinvvetory : SP\r\nlocator : SP. 0.0",
+    "risk": "no risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "NBMF_ACPL-W347-560E - New Device Option",
+    "justification": "System Setup",
+    "from_process": "n/a",
+    "to_process": "ACPL-W347-560E - New Device Option",
+    "risk": "Low Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "pls provide additional SP in my DRAFT MRS in PMR",
+    "justification": "so I can return materials to the store.",
+    "from_process": "NO SP in MRS type in DRAFT PMR",
+    "to_process": "TO HAVE SP in MRS type in DRAFT PMR",
+    "risk": "NO RISK",
+    "category": "18",
+    "system": "2"
+  },
+  {
+    "description": "Itemcode request.\r\n\r\n1. Description: Wukong  lower plastic cover P/N: 5189-2147\r\n2. Description: Wukong upper metal housing P/N: 5189-2148",
+    "justification": "New material for new device Wukong DC50 \r\n(AFBR-5FC85Z / AFBR-5FT85Z / AFBR-5FR85Z ",
+    "from_process": "no item code ",
+    "to_process": "Itemcode request.\r\n\r\n1. Description: Wukong  lower plastic cover P/N: 5189-2147\r\n2. Description: Wukong upper metal housing P/N: 5189-2148",
+    "risk": "no risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "To create admin access accounts for MES, PMR, EDAS, and OpenKM for the newly hired Programmer.\nName: Remiel Baking\nID #: 266684\nDate hired: 24-June-2026\n",
+    "justification": "Account is needed for development purposes",
+    "from_process": "No access account ",
+    "to_process": "With access account",
+    "risk": "No risk",
+    "category": "15",
+    "system": "2,3,7,14"
+  },
+  {
+    "description": "RE OPENING P.O. 52602097 UNDER Merchanto Enterprises Corp.",
+    "justification": "NEED TO REOPEN  P.O. 52602097 TO PROCESS PAYMENT OF Merchanto Enterprises Corp. IN ACCOUNTING ",
+    "from_process": "ITEM      DESCRIPTION                                                                                                                                                     QTY      OUM        PRICE              \r\nA04001475   Blank Label Sticker Mfr:MERCHANTO, DIM:W-76mmxL-72mm,STD PKG.500pcs/Roll ,Matl. TT2C FASSON  30000PCS    .57\r\n PCS   GAP SIZE:2.5MM, CORE SIZE:1\".   FINALLY CLOSED P.O.",
+    "to_process": "ITEM      DESCRIPTION                                                                                                                                                      QTY         OUM        PRICE              \r\nA04001475 Blank Label Sticker Mfr:MERCHANTO, DIM:W-76mmxL-72mm,STD PKG.500pcs/Roll ,Matl. TT2C FASSON  30000PCS    .57\r\n PCS   GAP SIZE:2.5MM, CORE SIZE:1\".   OPEN P.O.",
+    "risk": "NO RISK",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "To create a MIS Helpdesk for newly hired Programmer\r\nName: Remiel R. Baking\r\nID #: 266684\r\nDate Hired: 24-June-2026",
+    "justification": "To provide the newly hired Programmer with access to the MIS Helpdesk assisting with ticket requests as part of assigned job responsibilities.",
+    "from_process": "No Account",
+    "to_process": "With Account",
+    "risk": "No risk",
+    "category": "15",
+    "system": "24"
+  },
+  {
+    "description": "Additional request in line with AIP26040238\r\n\r\n-To update the character length validation on AOC devices during Label Printer and Attach Station.",
+    "justification": "To update the character length validation on AOC devices during Module Serial Number scanning at Label Printer and Attach Station:\r\n\r\nMICROSOFT DEVICE (CL_7123-P73-XX / CL_22379480-0XX) : 22 characters\r\nORACLE DEVICE( CL_8363-63-XXXX / CL_22379334-0XX): 23 characters",
+    "from_process": "N/A",
+    "to_process": "MES System to perform character length validation of scanned Module Serial Number on the following AOC device:\r\n\r\nMICROSOFT DEVICE (CL_7123-P73-XX / CL_22379480-0XX) : 22 characters\r\nORACLE DEVICE( CL_8363-63-XXXX / CL_22379334-0XX): 23 characters\r\n\r\nplease refer to the attached file.",
+    "risk": "No risk",
+    "category": "18",
+    "system": "3"
+  },
+  {
+    "description": "1. Request to MI shipped rework units of Disassy line\r\n2. To manual close on PSIS MES\r\n\r\n",
+    "justification": "To align system and actual FG onhand",
+    "from_process": "with FG on hand",
+    "to_process": "remove in FG on hand both in Oracle and MES",
+    "risk": "no risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Request to include Downgraded TR-PD to RMA Flow\r\nSee flow for reference",
+    "justification": "Cusomer returned several lots for remarking with only required PD retest but the following remarking flow was not included on RMA Flow",
+    "from_process": "Downgraded TR-PD flow is not included on RMA list selection",
+    "to_process": "Help to Include Downgraded TR-PD flow for RMA",
+    "risk": "NO Risk",
+    "category": "16",
+    "system": "3"
+  },
+  {
+    "description": "Under TO MES, to update the IQAR/Vendor Lot page to reflect the correct onhand of the Common IQAR.",
+    "justification": "Current setup only compute the transaction of the selected product line and not including the common material transaction which is stored in mes database and not in wip database.",
+    "from_process": "Compute the selected product line only.",
+    "to_process": "To include the common material transaction in the computation.",
+    "risk": "No Risk.",
+    "category": "18",
+    "system": "3"
+  },
+  {
+    "description": "Request access to CK PRPO Query",
+    "justification": "To check PO for concerns on Duplicate Lot numbers received in 2016 vs 2026.",
+    "from_process": "NO access to CK PRPO Query",
+    "to_process": "With access to CK PRPO Query",
+    "risk": "NO Risk",
+    "category": "15",
+    "system": "1"
+  },
+  {
+    "description": "Request for new itemcode for IPD line",
+    "justification": "Need to setup the new itemcode for leadframe, which is a requires BOM setup in Oracle and MES setup for IPD line.",
+    "from_process": "No Current Itemcode Setup",
+    "to_process": "Request new itemcode for SO5 stamped A194 LF PN: 5062-8772 Ni/Ag Strike/Ag Spot (I-chiun) (V-Groove)",
+    "risk": "Low Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "to create new itemcode for items under IPEX that will be Transfer Mould To Ipex Dongguan",
+    "justification": "to identify materials under IPEX Dongguan by adding revision on itemcode\r\n \r\napproved by brcm\r\nfor order processes only\r\n\r\nrefer attachment for new itemcode sheet, email communication from brcm and quote",
+    "from_process": " Itemcode        Description\r\nA048000181R1\tPull delatch black DOS/XUNO 5042-6723\r\nA04800069R1\tUpper Housing 5042-0086\r\nA02800024R1\tDUPLEX CONNECTOR 5041-6527\r\nA02800075R1\tDemeter Duplex Connector 5067-3966\r\nA04800333R1\tRegulus Flex Housing Bottom 1inch 5067-4908\r\nA04800332R1\tRegulus Flex Housing Top 1inch 5067-4907\r\nA05100052R1\t        DEMETER CVL PORT REV.H, 5023-0437\r\n",
+    "to_process": "New Itemcode        Description\r\nA048000181R2\tPull delatch black DOS/XUNO 5042-6723\r\nA04800069R2\tUpper Housing 5042-0086\r\nA02800024R2\tDUPLEX CONNECTOR 5041-6527\r\nA02800075R2\tDemeter Duplex Connector 5067-3966\r\nA04800333R2\tRegulus Flex Housing Bottom 1inch 5067-4908\r\nA04800332R2\tRegulus Flex Housing Top 1inch 5067-4907\r\nA05100052R2\tDEMETER CVL PORT REV.H, 5023-0437\r\n",
+    "risk": "no risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "This is to upload item code A05900089 HSUR-712 (LED) from EPISTAR CORPORATION to ENNOSTAR CORPORATION.\r\n",
+    "justification": "Ennostar and Epistar had merge into one company.  And all PO’s will be issued to Ennostar.",
+    "from_process": "USD 46.35\r\n",
+    "to_process": "USD 46.35\r\n\r\n",
+    "risk": "No Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "1. Reset password OPENKM Access for Chaze David\r\n2. Add in EDAS approval list. \r\n  - Chaze David -  Sr. Executive Engineer, and  \r\n  - Excell Lea Teruel - (QA Engineer)\r\n\r\n",
+    "justification": "New account",
+    "from_process": "1. Inactive account\r\n2. None",
+    "to_process": "1. Reset password OPENKM Access for Chaze David\r\n2. Add in EDAS approval list. \r\n  - Chaze David -  Sr. Executive Engineer, and  \r\n  - Excell Lea Teruel - (QA Engineer)\r\n",
+    "risk": "no risk",
+    "category": "15",
+    "system": "7,14"
+  },
+  {
+    "description": "This to upload the new price A00200400 Apollo TX Redesigned PPF leadframe 5003-9584.\r\n\r\n ",
+    "justification": "June LME Pricing update. Effectivity Date: June 29, 2026 only.",
+    "from_process": "USD 59.15\r\n",
+    "to_process": "USD 58.94\r\n",
+    "risk": "No Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Request for OpenKM Account\r\n266675 Jermaine Marc Dulay",
+    "justification": "New Engineer for IFPD line\r\nOSA and IFM",
+    "from_process": "No Account",
+    "to_process": "To have OpenKM account",
+    "risk": "No risk\r\n26-Jun-2026 still ongoing requesting for laptop to be use once deployed will request an email you can use my email to update.",
+    "category": "15",
+    "system": "14"
+  },
+  {
+    "description": "Request account for EDAS\r\n266675 - Jermaine Marc Dulay",
+    "justification": "New Engineer for IFPD \r\nOSA and IFM",
+    "from_process": "No account",
+    "to_process": "To have Edas account",
+    "risk": "No Risk\r\n26-Jun-2026 still ongoing requesting for laptop to be use once deployed will request an email you can use my email to update.",
+    "category": "15",
+    "system": "7"
+  },
+  {
+    "description": "Update department code  at GL Accountant",
+    "justification": "5030 (HRD) and 5170 (Training) for update in RNF and M&E to be part of 5020 (Admin) at GL Accountant in Oracle.",
+    "from_process": "5030 - Hrd\r\n5170 - Training",
+    "to_process": "5020 - Admin",
+    "risk": "No risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "For unblock IFV_ MES account and reset password of  Warjanna Arakama- 191002",
+    "justification": "due to wrong password-  cannot retrieve.",
+    "from_process": "block account\r\nacct: warjanna.arakama\r\npw: janna01",
+    "to_process": "unblock acct\r\nreset password",
+    "risk": "unable to access the MES transaction.",
+    "category": "15",
+    "system": "3"
+  },
+  {
+    "description": "Setup to add new SVP MUNKEONG.LAI (0.51 usd limit) before CHOONSANG.CHEW approval to all PR Hierarchy",
+    "justification": "New SVP additional approver. IAB Poh Leng go signal attached.",
+    "from_process": "GM                   Lau, KC                              999999998\r\nGroup CFO      Chong, Poh-Leng              139999\r\nSVP-CHEW\t Chew, Choon Sang            69999\r\nFC-PD\t         Doraisamy, Poovendran     0.5\r\n........",
+    "to_process": "GM                   Lau, KC                              999999998\r\nGroup CFO      Chong, Poh-Leng              139999\r\nSVP-CHEW\t Chew, Choon Sang            69999\r\nSVP-LAI\t         Lai, Mun Keong                  0.51\r\nFC-PD\t         Doraisamy, Poovendran     0.5\r\n........",
+    "risk": "Returned PR after setup",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Lift SPQ Control for itemcode A04700001R1 for PMR Draft and Issuance",
+    "justification": "Supplier MOQ is 400 grams, 26 bottles of 15grams (390g) and 1 bottle of 10g.\r\nDue to Fire incident, supplier is sending partial quantities more or less than 15grams to support HL line Q3.",
+    "from_process": "15grams SPQ",
+    "to_process": "less than and equal to 15 grams SPQ",
+    "risk": "No Risk",
+    "category": "18",
+    "system": "2"
+  },
+  {
+    "description": "Request for CONSIGN itemcode for the following items under Cloudlight Line (1380)\r\nSIM Duplex Gen2 _Semi Good_Flow A (CL P/N: 22396911)\r\nME00256_Electric Cleaner Accessory (CL P/N: ELE-M 001)\r\n\r\nAs per checking, there is no similar PN from above items which was generated across all AIP departments.",
+    "justification": "For material traceability and transaction.",
+    "from_process": "No consigned itemcode existing across departments on oracle",
+    "to_process": "for consigned itemcode generation\r\nSIM Duplex Gen2 _Semi Good_Flow A (CL P/N: 22396911)\r\nME00256_Electric Cleaner Accessory (CL P/N: ELE-M 001)",
+    "risk": "No Risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Request accnt for AMERTRON_CAPTIVE wifi access.",
+    "justification": "As alternative connection for CKAmertron when it is down or with error.",
+    "from_process": "no accnt on AMERTRON_CAPTIVE",
+    "to_process": "Request accnt on AMERTRON_CAPTIVE",
+    "risk": "no risk",
+    "category": "15",
+    "system": "19"
+  },
+  {
+    "description": "Request to add the Assets listed in the Fixed Asset Masterlists to the Fixed Asset Management System.",
+    "justification": "This will make it easier for us to update all the assets at once instead of adding or updating them one by one.",
+    "from_process": "Upload and update all assets from the masterlist to ensure the system is complete and up to date.",
+    "to_process": "To generate the masterlist listing of company asset in system.",
+    "risk": "1. Incomplete or inaccurate asset information in the master list may result in incorrect system records.\r\n2. Duplicate asset entries may be created if existing records are not properly verified before upload.\r\n",
+    "category": "16",
+    "system": "3"
+  },
+  {
+    "description": "Add Plating Controls for SnPb Devices in MES account of the ffg:\r\nYszabelle Marasigan-Process Engineer (yszabelle.marasigan)\r\nLeanne Dela Cerna-Process Technician (leanne.delacerna\r\nMarvin Nieves-GL(marvin.nieves)\r\nRhobin Lagman-GL(robin.lagman)",
+    "justification": "Additional account to access\r\n Plating Control for SnPb Devices",
+    "from_process": "No access",
+    "to_process": "To access the Plating Control for SnPb Devices",
+    "risk": "no risk",
+    "category": "15",
+    "system": "3"
+  },
+  {
+    "description": "Request new account in EDAS, OpenKM , MES_IPD,MIS helpdesk for Leanne Dela Cerna ( New Plating Process Technician)\r\n",
+    "justification": "Requesting a new user account to revise and route specifications, download  MES data for LYT analysis, for creating SCRF .",
+    "from_process": "non-existing",
+    "to_process": "opto-eolprocesstech.ck@inari-amertron.com.ph\r\nLeanne Dela Cerna\r\nID number :181158",
+    "risk": "no risk",
+    "category": "15",
+    "system": "3,7,14,24"
+  },
+  {
+    "description": "Transfer the approval of Leave/authority to edit in HRIS from Ma’am Josephine Campo to Sir Restie A. Fernandez under the Logistics Department.",
+    "justification": "Alignment of approval within the Logistics. Ma’am Josephine’s upcoming retirement effective June 30, 2026. ,  request to transfer HRIS Leave/Authority to Edit to Sir Restie A. Fernandez. ",
+    "from_process": "Approval to Ma'am Josephine Campos",
+    "to_process": "Approval to Sir  Restie A. Fernandez",
+    "risk": "no Risk",
+    "category": "15",
+    "system": "5"
+  },
+  {
+    "description": "Clear control # generated for itemcode A04200064 \r\n\r\nRR# 26003171\r\nIQAR#: R85049.1\r\nQty generated: 45 (1 control #) it should be 45000 (3 control #)",
+    "justification": "Need to correct the control # generated to issue during PMR.",
+    "from_process": "R85049.1.001",
+    "to_process": "Clear control",
+    "risk": "no risk",
+    "category": "16",
+    "system": "2"
+  },
+  {
+    "description": "Adjust min-max withdrawal on PMR Itemcode A00800012: Sumitomo Metal Mining Pn:0470-1808 Silver Epoxy T3030 (5.5556cc) 20g/syr (CM3)",
+    "justification": "MATERIAL USED FOR DIFFERENT MACHINE(ASM2,ASM4,DA44 & DA73) PCB and INSERT DEVICES \r\n",
+    "from_process": "A00800012\r\nQTY:11.11112",
+    "to_process": "A00800012\r\nQTY:44.44",
+    "risk": "No Risk",
+    "category": "18",
+    "system": "2"
+  },
+  {
+    "description": "To put additional sn on each traveller\r\n\r\nTRAVELLER \t        Additional SN\r\n38F25K0205D8\tNDE5G47991\r\n38E25L0263D8\tNDE5G5G812\r\n",
+    "justification": "To correct the actual SN on the travellers",
+    "from_process": "From 6 SN on each traveller",
+    "to_process": "To 7 SN on each traveller",
+    "risk": "no risk",
+    "category": "18",
+    "system": "3"
+  },
+  {
+    "description": "Update BOM to change material itemcode of Thermal Pad from A08000001R1 to A08000001R2.\r\nChange of supplier from Brady to Tianmai.",
+    "justification": "Update BOM to change material itemcode.\r\nAttached approved BMF and ECN-PCN (MOD-26-CN26)\r\nImplementation Date: 23-Jun-26",
+    "from_process": "A08000001R1",
+    "to_process": "A08000001R2",
+    "risk": "No risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "\r\nTo create new price  for update to item code under LSG Industrial & Office Products, Inc.\r\nA04001933 \r\nA04001934\r\nA04000385\r\n",
+    "justification": "This is to upload  the price of   \r\nMarker #853 Brand/Mftr.: Artline  Black\r\nMarker #70 Brand/Mftr.: Artline  Blue\r\nMarker #70 Brand/Mftr.: Artline  Red\r\nunder LSG Industrial & Office Products, Inc.",
+    "from_process": "ITEM CODE                                                                      QUANTITY\t  UOM     UNIT PRICE\r\nA04001933  Marker #70 Brand/Mftr.: Artline  Red                 1            pc           PHP 30.00 \r\nA04001934\tMarker #70 Brand/Mftr.: Artline  Blue              1            pc           PHP 28.00 \r\nA04000385\tMarker #853 Brand/Mftr.: Artline  Black          1            pc           PHP 40.00 \r\n\r\n\r\n\r\n\r\n\r\n",
+    "to_process": "ITEM CODE                                                                      QUANTITY\t  UOM     UNIT PRICE\r\nA04001933  Marker #70 Brand/Mftr.: Artline  Red                 1            pc            PHP 34.29 \r\nA04001934\tMarker #70 Brand/Mftr.: Artline  Blue              1            pc            PHP 34.29 \r\nA04000385\tMarker #853 Brand/Mftr.: Artline  Black          1            pc            PHP  46.07\r\n\r\n\r\n",
+    "risk": "NO RISK",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Request New Item code for Dicing Tape V-12S-RM 300mm X 100M.",
+    "justification": "Attached is the Quote for the V-12S- RM (New Material) for the 300mm width and email communication for your reference.",
+    "from_process": "A05000008 :DICING ADHESIVE TAPE (PVC) ELP V-12SR 230mmX100m LIGHT BLUE",
+    "to_process": "A05000008R2 : Nitto Dicing Tape V-12SRM 300mm X 100M   ",
+    "risk": "No risk",
+    "category": "16",
+    "system": "1"
+  },
+  {
+    "description": "Request to do system set-up for CDGR4 PLUS RMA devices:\r\nCLRU_9643-81-2034\r\nCLRU_9643-81-2038\r\nCLRU_9643-81-2040\r\nCLRU_9643-81-2041\r\nCLRU_22364014\r\nCLRU_22381166\r\nCLRU_9643-81-2037\r\nAlso, set-up on device master.",
+    "justification": "For system transaction and traceability of WOs generated",
+    "from_process": "No device available for CDGR4 PLUS RMA build",
+    "to_process": "To set-up accordingly\r\nCLRU_9643-81-2034\r\nCLRU_9643-81-2038\r\nCLRU_9643-81-2040\r\nCLRU_9643-81-2041\r\nCLRU_22364014\r\nCLRU_22381166\r\nCLRU_9643-81-2037",
+    "risk": "No Risk",
+    "category": "16",
+    "system": "1"
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "event": "ticket_created",
+  "department": "mis",
+  "ticket_type": "tech_support",
+  "target_list": "mis_job_list_tech",
+  "user": {
+    "user_id": 999999999,
+    "login": "test.user",
+    "full_name": "Test User",
+    "first_name": "Test",
+    "last_name": "User",
+    "name": "Test User",
+    "email": "test@example.com",
+    "department": "MIS",
+    "role": "user"
+  },
+  "ticket_data": {
+    "category": "Hardware",
+    "system": "Printer",
+    "location": "CK1 MIS",
+    "description": "SAMPLE: finance printer shows a paper jam error",
+    "justification": "SAMPLE: month-end printing is blocked",
+    "impact": "",
+    "from_process": "",
+    "to_process": "",
+    "risk": "",
+    "request_category": "",
+    "asset_tag": "",
+    "quantity": "",
+    "item": "",
+    "created_at": "2026-10-03 14:56:17",
+    "category_id": 1,
+    "system_id": 2,
+    "department": "Finance",
+    "_test": true
+  },
+  "attachment_count": 0,
+  "attachments": []
+}

@@ -1,0 +1,38 @@
+{
+  "event": "ticket_created",
+  "department": "mis",
+  "ticket_type": "system_request",
+  "target_list": "mis_job_list",
+  "user": {
+    "user_id": 266684,
+    "login": "remiel.baking",
+    "full_name": "Remiel Baking",
+    "first_name": "Remiel",
+    "last_name": "Baking",
+    "name": "Remiel",
+    "email": "remiel.baking@inari-amertron.com.ph",
+    "department": "IT",
+    "role": "admin"
+  },
+  "ticket_data": {
+    "category": "Data Update",
+    "system": "Oracle ERP",
+    "location": "",
+    "description": "SAMPLE: add my account to the Oracle ERP procurement module",
+    "justification": "SAMPLE: need to raise POs for the incoming inspectors",
+    "impact": "",
+    "from_process": "SAMPLE: POs are raised manually in Excel",
+    "to_process": "SAMPLE: POs are raised directly in Oracle ERP",
+    "risk": "SAMPLE: manual entry causes delays and stock shortages",
+    "request_category": "",
+    "asset_tag": "",
+    "quantity": "",
+    "item": "",
+    "created_at": "2026-10-03 14:56:17",
+    "category_id": 16,
+    "system_id": 1,
+    "department": "Finance"
+  },
+  "attachment_count": 0,
+  "attachments": []
+}

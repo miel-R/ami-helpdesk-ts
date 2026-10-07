@@ -1,0 +1,352 @@
+[
+  {
+    "description": "Computer shutdown.\r\nCPU is on but the monitor can't open\r\nCK-703\r\n192.1.9.81",
+    "justification": "",
+    "location": "SD EOL QC Area",
+    "category": "",
+    "support_category": "PC"
+  },
+  {
+    "description": "HDD Health status Check and HDD cloning.",
+    "justification": "Machine CPU is unable to utilized due to Primary Master HDD is in BAD Status. Need to be Check and to be clone, for us to utilized the marking CPU and continue the process in our EOL station ( Marking station).",
+    "location": "CK1 OPD EOL",
+    "category": "2",
+    "support_category": "15"
+  },
+  {
+    "description": "Generate the Weekly Security Report of the CKAmertron FIrewall for the Work Week of 25 of the year 2026",
+    "justification": "Weekly Security Report",
+    "location": "CK1 MIS TECH",
+    "category": "2",
+    "support_category": "12"
+  },
+  {
+    "description": "Trace the fiber link of CK1 Server Room going to the CK1 IPD Packing Area",
+    "justification": "Trace the fiber link of CK1 Server Room going to the CK1 IPD Packing Area",
+    "location": "CK1 MIS TECH",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Request to download remote application for turnstile  registration.\r\nhttps://sunlogin.oray.com/download?categ=personal\r\n\r\nPC Name: Julius Corpuz \r\nAsset Tag ; MIS- SA-5080-1058",
+    "justification": "For registration/ Installation of turnstile supplier wants to remote so they can assist us fixing the turnstile. ",
+    "location": "CK1 HR Office",
+    "category": "4",
+    "support_category": "15"
+  },
+  {
+    "description": "Request to download remote application for turnstile  registration.\r\nhttps://sunlogin.oray.com/download?categ=personal\r\n\r\nPC Name: Julius Corpuz \r\nAsset Tag ; MIS- SA-5080-1058",
+    "justification": "For registration/ Installation of turnstile supplier wants to remote so they can assist us fixing the turnstile. ",
+    "location": "CK1 HR Office",
+    "category": "4",
+    "support_category": "15"
+  },
+  {
+    "description": "for repair ipd eol printer \r\nasset tag # MIS-CA-5080-0092\r\nMODEL #HPLJ M602",
+    "justification": "unable to print",
+    "location": "CK2 IPD MOLD",
+    "category": "2",
+    "support_category": "2"
+  },
+  {
+    "description": "check baby label printer due to cutter error\r\nAsset tag # MIS-5080-0475/ZEBRA\r\n ",
+    "justification": "use to print baby label at labelling station",
+    "location": "CK1 OPD EOL",
+    "category": "1",
+    "support_category": "2"
+  },
+  {
+    "description": "Defective fuser\r\nAsset Tag: MIS-CA-5080-0092\r\nModel: HLPJ M602",
+    "justification": "Unable to print.",
+    "location": "CK2 IPD DTFS",
+    "category": "1",
+    "support_category": "2"
+  },
+  {
+    "description": "Spare Parts Inventory at CK2 Server Room",
+    "justification": " MIS Spare Parts Inventory for the Month of June 2026\r\n-To ensure accuracy, and completeness of IT Spare Parts\r\n-For Monthly schedule of Spare Parts Inventory ",
+    "location": "CK2 Server Room",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "Spare Parts Inventory at CK1 MIS Storage",
+    "justification": " MIS Spare Parts Inventory for the Month of June 2026\r\n-To ensure accuracy, and completeness of IT Spare Parts\r\n-For Monthly schedule of Spare Parts Inventory ",
+    "location": "CK1 MIS Storage",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "Spare Parts Inventory at CK1 Server Room",
+    "justification": " MIS Spare Parts Inventory for the Month of June 2026\r\n-To ensure accuracy, and completeness of IT Spare Parts\r\n-For Monthly schedule of Spare Parts Inventory ",
+    "location": "CK1 Server Room",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "Spare Parts Inventory - June 2026",
+    "justification": " MIS Spare Parts Inventory for the Month of June 2026\r\n-To ensure accuracy, and completeness of IT Spare Parts\r\n-For Monthly schedule of Spare Parts Inventory ",
+    "location": "CK1 MIS",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "Processing Clearance of Michaela Mendoza (241086), Operator from CLoudlight",
+    "justification": "Processing clearance for resigned employees to ensure all company property and responsibilities are properly accounted and cleared. ",
+    "location": "CK1 MIS",
+    "category": "3",
+    "support_category": "16"
+  },
+  {
+    "description": "Weekly report for Spare Parts Inventory",
+    "justification": "MIS Infra Report Week 26",
+    "location": "CK1 MIS",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "To reinstate the LAN (network) cable connection for the Turnstile System at the IFPD Front Line (OSA).",
+    "justification": "To restore the LAN (network) connection of the Turnstile System at the IFPD Front Line (OSA), allowing normal operation of employee access.",
+    "location": "CK1 IFPD FOL",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Kindly check barcode label printer at IQA area.\r\n\r\nError:  Media out/Load Media.\r\n\r\n",
+    "justification": "Traceability of store and production that the materials is already Pass IQA.  Also the label sticker is used during production MES transaction.",
+    "location": "CK2.1 MC Store",
+    "category": "2",
+    "support_category": "2"
+  },
+  {
+    "description": "Install agents on PCs located at Lena Sim.",
+    "justification": "This for our SIEM monitoring. ",
+    "location": "CK2 CL LENA SIM",
+    "category": "1",
+    "support_category": "1"
+  },
+  {
+    "description": "Install an agent to all windows PC located at CDGR4.",
+    "justification": "Reqiured for our SIEM monitoring.",
+    "location": "CK2 CL CDGR4",
+    "category": "1",
+    "support_category": "1"
+  },
+  {
+    "description": "Enroll all Windows PC on WAZUH monitoring",
+    "justification": "Required for SIEM monitoring.",
+    "location": "CK2 CL CDGR4",
+    "category": "1",
+    "support_category": "1"
+  },
+  {
+    "description": "Connect all MES PC in IPD TEST",
+    "justification": "To use MES and Connect to MES",
+    "location": "CK2 IPD TEST",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Connect all MES in IPD MOLD",
+    "justification": "To use MES and Connect to MES",
+    "location": "CK2 IPD MOLD",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Connect all MES Connection in IPD HV ",
+    "justification": "To use MES and Connect to MES",
+    "location": "CK2 IPD HV",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Check all MES CONNECTION problem in IPD FOL",
+    "justification": "To use MES and connect to MES",
+    "location": "CK2 IPD FOL",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Trace the LAN Cable in UPS Room for Entrance OUT TKS",
+    "justification": "To use TKS in Entrance OUT",
+    "location": "CK1 UPS Room",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Remove all Cable in UPS Room",
+    "justification": "To remove all excess LAN Cable in UPS Room",
+    "location": "CK1 UPS Room",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "Terminate the New LAN Cable in IFPD EOL ",
+    "justification": "To connect to the Internet",
+    "location": "CK1 IFPD EOL",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Terminate NEW LAN Cable in Cyclops ",
+    "justification": "To use LAN Cable and Connect to the Internet",
+    "location": "CK1 Cyclops",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Troubleshoot Printer in MC Store CK2.1",
+    "justification": "To print documents",
+    "location": "CK1 MIS TECH",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "Check printer and fuser for the weekly report",
+    "justification": "for the mis printer report",
+    "location": "CK1 MIS",
+    "category": "1",
+    "support_category": "9,2"
+  },
+  {
+    "description": "SETUP AND CONFIGURE 5 WIFI HEAT ALARM  ",
+    "justification": "SETUP 5 WIFI HEAT ALARM  ",
+    "location": "CK1 MIS TECH",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "CHECK THE RH TEMP NUMBER 6, 7, AND 9",
+    "justification": "NEED TO CONNECT TO AMT CONNECTION",
+    "location": "CK1 MC Store",
+    "category": "1",
+    "support_category": "1"
+  },
+  {
+    "description": "UPGRADE THE UBUNTU 12 TO 14\r\nCK355\r\nMIS-SA-5080-1378",
+    "justification": "UPGRADE THE UBUNTU 12 TO 14",
+    "location": "CK1 MIS TECH",
+    "category": "1",
+    "support_category": "1"
+  },
+  {
+    "description": "SETUP FOR THE DEV NEWLT HIRED",
+    "justification": "SETUP PC \r\n- ADD USER AND BACKUP FILES\r\n- SETUP EMAIL",
+    "location": "CK1 MIS TECH",
+    "category": "1",
+    "support_category": "1"
+  },
+  {
+    "description": "CONTINUES OF THE TROUBLESHOOTING OF THE MACHINE NOT CONNECTED IN THE INTERNET",
+    "justification": "USED FOR TEAMVIEWER",
+    "location": "CK2 IPD FOL",
+    "category": "1",
+    "support_category": "10"
+  },
+  {
+    "description": "Delete the Email Account of: \r\nName: Michaela Mendoza\r\nID: 241086\r\nDept: CL\r\nLast Day: June 23, 2026\r\nPosition: Operator",
+    "justification": "Delete the Email Account of Michaela Mendoza (michaela.mendoza@inari-amertron.com.ph).",
+    "location": "CK1 MIS TECH",
+    "category": "3",
+    "support_category": "9"
+  },
+  {
+    "description": "Assistance Required – CCTV Footage Retrieval (May 10, 2026 Incident)",
+    "justification": "To obtain CCTV footage for incident review and documentation.",
+    "location": "CK1 Security Office",
+    "category": "2",
+    "support_category": "15"
+  },
+  {
+    "description": "Request for the replacement of  1D barcode scanner\r\nLOCATION: OQA IFPD 192.1.2.234",
+    "justification": "Defective 1D barcode scanner",
+    "location": "CK1 QCQA",
+    "category": "1",
+    "support_category": "4"
+  },
+  {
+    "description": "Request for the replacement of  1D barcode scanner\r\nLOCATION: OQA IFPD 192.1.2.234",
+    "justification": "Defective 1D barcode scanner",
+    "location": "CK1 QCQA",
+    "category": "1",
+    "support_category": "4"
+  },
+  {
+    "description": "Requesting for the SETUP & DEPLOYMENT of Borrow Computer Set (Computer CPU (Mini), Monitor, Keyboard, Mouse)",
+    "justification": "Complete computer set at CK1 TO-Transistor Outline - SANAN will be assigned to Bengie Villamor (ITA26060039) ",
+    "location": "CK1 MIS",
+    "category": "1",
+    "support_category": "1,7,5,6"
+  },
+  {
+    "description": "Error printing.\r\nMIS-5080 0430-laptop\r\nPrinter tag-MIS CA 5080 0071",
+    "justification": "To use the printer for payroll documents.",
+    "location": "CK1 Finance Office",
+    "category": "1",
+    "support_category": "2"
+  },
+  {
+    "description": "Request Email for Newly Hired Test Engineer\r\nID: 266679 \r\nNAME: JEFFREY JOSH MARTINEZ \r\nDATE HIRED: JUNE 22, 2026\r\nLocation: Ck2 Warroom",
+    "justification": "Newly Hired Test Engineer\r\nLaptop ticket:ITA26060042",
+    "location": "CK1 War Room",
+    "category": "3",
+    "support_category": "9"
+  },
+  {
+    "description": "Restart all tks application",
+    "justification": "for the upcoming employees ",
+    "location": "CK1 MIS TECH",
+    "category": "1",
+    "support_category": "1"
+  },
+  {
+    "description": "PC Name CK 329\r\nPC IP 192.1.5.172\r\nASSET TAG MIS -5080-0030\r\n\r\n           hi MIS TEAM please help to check the computer mes transaction IPD-TEST HV station due to no internet connection\r\nthanks po.",
+    "justification": "to use the computer ",
+    "location": "CK2 IPD HV",
+    "category": "4",
+    "support_category": "10"
+  },
+  {
+    "description": " Machine viper MIS-CA-5080-0109   Description printer (document) delsan\r\n Machine mars  asset tag MIS-CA-5080-0110  Description printer (document) delsan\r\n Machine jupiter MIS-CA-5080-0111  Description printer (document) delsan\r\n\r\nHi MIS team please help to repair the printer here in DC station,due to fuser problem \r\nthanks po.",
+    "justification": "unreadable data on dc test summary",
+    "location": "CK2 IPD TEST",
+    "category": "2",
+    "support_category": "2"
+  },
+  {
+    "description": "CK535:JOANNA PEREZ\r\nIP: 192.1.9.164\r\n\r\nProvide access for the following shared folders:\r\n1. \\\\192.1.3.110\r\n2. \\\\192.1.0.18",
+    "justification": "For QC to access the shared folders for Test Buy-Off and Test verification purposes.",
+    "location": "CK1 IFPD EOL",
+    "category": "4",
+    "support_category": "17"
+  },
+  {
+    "description": "Input and update the newly requested CA Tag for Printer (Document)-Delsan in the IT Asset System.",
+    "justification": "To properly record the newly assigned CA Tag for Printer (Document)-Delsan in the IT Asset System, ensure accurate asset tracking, maintain accountability, and prevent asset loss or mismanagement.",
+    "location": "CK1 MIS",
+    "category": "1",
+    "support_category": "2"
+  },
+  {
+    "description": "Input and update the newly requested FA Tag for UPS & Network Switch in the IT Asset System.",
+    "justification": "To properly record the newly assigned FA Tag for UPS & Network Switch in the IT Asset System, ensure accurate asset tracking, maintain accountability, and prevent asset loss or mismanagement.",
+    "location": "CK1 MIS",
+    "category": "1",
+    "support_category": "14"
+  },
+  {
+    "description": "Tagging of CA tag for Printer (Document)-Delsan at CK2 Server Room\r\nMIS-CA-5080-0153\r\nMIS-CA-5080-0154\r\nMIS-CA-5080-0155\r\n",
+    "justification": " To ensure accurate asset identification and accountability  ",
+    "location": "CK2 Server Room",
+    "category": "1",
+    "support_category": "2"
+  },
+  {
+    "description": "Tagging of FA tag for UPS & Network Switch at CK2 Server Room\r\nUPS: MIS-5080-0622, MIS-5080-0623, MIS-5080-0624, MIS-5080-0625, MIS-5080-0626\r\nNetwork Switch: MIS-5080-0627, MIS-5080-0628, MIS-5080-0629, MIS-5080-0630\r\n",
+    "justification": "To ensure accurate asset identification and accountability ",
+    "location": "CK2 Server Room",
+    "category": "1",
+    "support_category": "17"
+  }
+]

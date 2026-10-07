@@ -1,0 +1,32 @@
+# Secrets — never commit
+.env
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Runtime data (ledger, conversations, uploads)
+data/
+uploads/
+
+# Backups & dumps
+backups/
+*.dump
+*.log
+server-test*.log
+
+# Local history / sessions
+.history/
+session-*.md
+tmp-edit-*.cjs
+
+# Certs
+certs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp

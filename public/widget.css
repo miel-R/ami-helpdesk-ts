@@ -1,0 +1,1815 @@
+/* Ami Widget - Modern Design System */
+:root {
+  /* Colors */
+  --ami-primary: #6b2fb5;
+  --ami-primary-hover: #57258f;
+  --ami-primary-light: rgba(107, 47, 181, 0.12);
+  --ami-primary-glow: rgba(107, 47, 181, 0.35);
+  --ami-surface: #ffffff;
+  --ami-surface-elevated: #faf9fd;
+  --ami-bg: #f6f5f9;
+  --ami-border: #e8e4ef;
+  --ami-border-strong: #ddd5ec;
+  --ami-text: #26232b;
+  --ami-text-secondary: #6b6578;
+  --ami-text-muted: #9b93a8;
+  --ami-user-msg: #6b2fb5;
+  --ami-user-msg-text: #ffffff;
+  --ami-assistant-msg: #ffffff;
+  --ami-assistant-msg-border: #e8e4ef;
+  --ami-success: #136b31;
+  --ami-success-bg: #e6f6ec;
+  --ami-success-border: #b7e2c6;
+  --ami-error: #8a1c11;
+  --ami-error-bg: #fdecea;
+  --ami-error-border: #f5c6c2;
+  --ami-warning: #854d0e;
+  --ami-warning-bg: #fff8e1;
+  --ami-warning-border: #ffe08a;
+  --ami-overlay: rgba(15, 10, 25, 0.72);
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(107, 47, 181, 0.12);
+  --shadow-lg: 0 12px 40px rgba(15, 10, 25, 0.18);
+  --shadow-glow: 0 0 0 3px var(--ami-primary-glow);
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fast: 120ms;
+  --normal: 200ms;
+  --slow: 320ms;
+
+  /* Z-index */
+  --z-widget: 9999;
+  --z-modal: 10000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+#ami-widget {
+  position: fixed;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  z-index: var(--z-widget);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-3);
+  line-height: 1.5;
+  --ami-accent: var(--ami-primary);
+}
+
+#ami-widget * {
+  box-sizing: border-box;
+}
+
+/* ============================================
+   CHAT BUTTON
+   ============================================ */
+#ami-chat-button {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: linear-gradient(135deg, var(--ami-primary) 0%, #8a4fd1 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--fast) var(--ease-out), box-shadow var(--fast) var(--ease-out);
+  flex: 0 0 60px;
+}
+
+#ami-chat-button:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: var(--shadow-lg);
+}
+
+#ami-chat-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+#ami-chat-button.active {
+  background: var(--ami-primary-hover);
+}
+
+#ami-chat-button svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.ami-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e5342a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 21px;
+  height: 21px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border: 2px solid var(--ami-surface);
+  animation: ami-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ami-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 52, 42, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(229, 52, 42, 0);
+  }
+}
+
+/* ============================================
+   CHAT WINDOW
+   ============================================ */
+#ami-chat-window {
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  height: 640px;
+  max-height: calc(100vh - 120px);
+  background: var(--ami-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--ami-border);
+  animation: ami-slide-up var(--normal) var(--ease-out);
+}
+
+@keyframes ami-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#ami-chat-window[style*="display: flex"] {
+  display: flex !important;
+}
+
+/* Draggable */
+#ami-chat-window.dragging {
+  transition: none !important;
+  cursor: grabbing;
+}
+
+#ami-header {
+  background: linear-gradient(135deg, var(--ami-primary) 0%, #57258f 55%, #3e1a6b 100%);
+  color: #fff;
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  position: relative;
+  user-select: none;
+}
+
+.ami-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.ami-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ami-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ami-avatar svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.ami-header-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ami-name {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+
+.ami-status {
+  font-size: 12px;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ami-status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: #22c55e;
+  flex: 0 0 auto;
+  animation: ami-blink 2s ease-in-out infinite;
+}
+
+@keyframes ami-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Header Action Controls */
+.ami-header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ami-header-right button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--fast) var(--ease-out);
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+}
+
+.ami-header-right button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.ami-header-right button:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.ami-header-right button svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* ============================================
+   MESSAGES AREA
+   ============================================ */
+#ami-messages {
+  flex: 1 1 auto;
+  /* REQUIRED, not decorative.
+   *
+   * A flex item's automatic minimum size is `auto`, which resolves to its
+   * content height. Without an explicit `min-height: 0` this box refuses to
+   * shrink below the full height of the conversation, so it never becomes a
+   * scroll container at all: scrollHeight equals clientHeight, scrollTop stays
+   * pinned at 0, and the browser fires no `scroll` event - which is exactly why
+   * "scroll to the top to load more" appeared to be dead no matter how the
+   * JavaScript was written. The overflow was being clipped by
+   * `#ami-chat-window { overflow: hidden }` instead of scrolled.
+   *
+   * With this, the transcript is a real scrollport of whatever height is left
+   * between the header and the input area. */
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Stop a scroll that reaches the end from chaining to the page behind the
+   * widget, which otherwise scrolls the host MIS form as the user reads back. */
+  overscroll-behavior: contain;
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  background: var(--ami-bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+#ami-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+#ami-messages::-webkit-scrollbar-thumb {
+  background: var(--ami-border-strong);
+  border-radius: 3px;
+}
+
+#ami-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ami-day-divider {
+  text-align: center;
+  font-size: 11px;
+  color: var(--ami-text-muted);
+  margin: var(--space-2) 0 var(--space-3);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.ami-msg-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+  max-width: 100%;
+  min-width: 0;
+  animation: ami-msg-in var(--normal) var(--ease-out);
+}
+
+@keyframes ami-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ami-msg-row.user {
+  flex-direction: row-reverse;
+}
+
+.ami-avatar-sm {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--ami-primary) 0%, #8a4fd1 100%);
+  color: #fff;
+  flex: 0 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.ami-avatar-sm svg {
+    width: 16px;
+    height: 16px;
+}
+
+.ami-avatar-sm img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-full);
+}
+
+.ami-msg-row.user .ami-avatar-sm {
+  background: linear-gradient(135deg, #7c3aed 0%, var(--ami-primary) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.ami-msg-body {
+  min-width: 0;
+  max-width: calc(100% - 38px);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ami-msg-row.user .ami-msg-body {
+  align-items: flex-end;
+}
+
+.ami-message {
+  width: fit-content;
+  max-width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  line-height: 1.55;
+}
+
+.ami-message.user {
+  background: var(--ami-user-msg);
+  color: var(--ami-user-msg-text);
+  margin-left: auto;
+  border-bottom-right-radius: 6px;
+}
+
+.ami-message.assistant {
+  background: var(--ami-assistant-msg);
+  color: var(--ami-text);
+  border: 1px solid var(--ami-assistant-msg-border);
+  margin-right: auto;
+  border-bottom-left-radius: 6px;
+}
+
+.ami-message a {
+  color: var(--ami-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ami-message a:hover {
+  text-decoration: underline;
+}
+
+.ami-message.user a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.ami-message strong {
+  font-weight: 700;
+}
+
+.ami-message code {
+  background: var(--ami-primary-light);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.ami-message.user code {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Notice / Error message variants */
+.ami-message.ami-ticket-notice {
+  background: var(--ami-success-bg);
+  border-color: var(--ami-success-border);
+  color: var(--ami-success);
+}
+
+.ami-message.ami-error {
+  background: var(--ami-error-bg);
+  border-color: var(--ami-error-border);
+  color: var(--ami-error);
+}
+
+.ami-message.ami-warning {
+  background: var(--ami-warning-bg);
+  border-color: var(--ami-warning-border);
+  color: var(--ami-warning);
+}
+
+.ami-time {
+  font-size: 10.5px;
+  color: var(--ami-text-muted);
+  margin-top: var(--space-1);
+  display: block;
+}
+
+.ami-msg-row.user .ami-time {
+  text-align: right;
+}
+
+/* ============================================
+   SESSION ENDED DIVIDER
+   ============================================ */
+.ami-session-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 var(--space-2);
+  color: var(--ami-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.ami-session-end::before,
+.ami-session-end::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--ami-border-strong);
+}
+
+.ami-session-end .ami-session-end-text {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.ami-session-end .ami-session-end-time {
+  flex: 0 0 auto;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.85;
+}
+
+/* ============================================
+   UPLOAD GRID & FILE PREVIEWS
+   ============================================ */
+.ami-upload-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.ami-thumb {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--ami-border);
+  background: var(--ami-surface);
+  max-width: 100%;
+  transition: transform var(--fast) var(--ease-out), box-shadow var(--fast) var(--ease-out);
+}
+
+.ami-thumb:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+.ami-thumb img {
+  display: block;
+  max-width: 240px;
+  max-height: 180px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.ami-thumb .ami-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.5));
+  opacity: 0;
+  transition: opacity var(--fast);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--space-2);
+}
+
+.ami-thumb:hover .ami-thumb-overlay {
+  opacity: 1;
+}
+
+.ami-thumb-expand {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ami-primary);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.ami-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  transition: background var(--fast);
+}
+
+.ami-file:hover {
+  background: var(--ami-primary-light);
+}
+
+.ami-file .ami-file-ico {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--ami-primary) 0%, #8a4fd1 100%);
+  color: #fff;
+  flex: 0 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ami-msg-row.user .ami-file {
+  color: #fff;
+}
+
+.ami-msg-row.user .ami-file .ami-file-ico {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.ami-msg-row.user .ami-file .ami-file-size {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ami-file .ami-file-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ami-file .ami-file-name {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.ami-file .ami-file-size {
+  font-size: 11px;
+  color: var(--ami-text-muted);
+}
+
+/* ============================================
+   TYPING INDICATOR
+   ============================================ */
+#ami-typing {
+  padding: 0 var(--space-3) var(--space-2);
+  background: var(--ami-bg);
+  display: none;
+}
+
+.ami-typing-bubble {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--ami-assistant-msg);
+  border: 1px solid var(--ami-assistant-msg-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.ami-typing-bubble span {
+  width: 8px;
+  height: 8px;
+  background: var(--ami-text-muted);
+  border-radius: var(--radius-full);
+  animation: ami-bounce 1.4s infinite ease-in-out;
+}
+
+.ami-typing-bubble span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.ami-typing-bubble span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes ami-bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+  }
+
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   QUICK REPLIES
+   ============================================ */
+.ami-quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-2);
+  background: var(--ami-bg);
+}
+
+.ami-quick-reply-btn {
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border);
+  color: var(--ami-primary);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-3);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all var(--fast) var(--ease-out);
+  font-family: inherit;
+  max-width: 100%;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.ami-quick-reply-btn:hover {
+  background: var(--ami-primary);
+  color: #fff;
+  border-color: var(--ami-primary);
+  transform: translateY(-1px);
+}
+
+.ami-quick-reply-btn:active {
+  transform: scale(0.97);
+}
+
+/* ============================================
+   INPUT AREA
+   ============================================ */
+#ami-input-area {
+  flex: 0 0 auto;
+  background: var(--ami-surface);
+  border-top: 1px solid var(--ami-border);
+  padding: var(--space-3);
+  /* Never let a tall attachment tray starve the message list. */
+  max-height: 50%;
+  overflow-y: auto;
+}
+
+/* File attachment tray — sits ABOVE the composer, never inside it.
+   JS adds `.on` to reveal it; without it the chips render but stay invisible. */
+#ami-pending {
+  display: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+#ami-pending.on {
+  display: flex;
+}
+
+/* Compact summary of what is staged. Previously an unstyled inline-block span
+   living inside .ami-input-row, which pushed the textarea down to ~0px once a
+   few filenames accumulated. It is now a block above the row and truncates. */
+.ami-file-label {
+  display: none;
+  font-size: 11.5px;
+  color: var(--ami-text-muted);
+  margin-bottom: var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.ami-file-label.on {
+  display: block;
+}
+
+.ami-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--ami-primary-light);
+  border: 1px solid var(--ami-border-strong);
+  color: var(--ami-text);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 12px;
+  max-width: 100%;
+}
+
+.ami-chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  color: inherit;
+}
+
+.ami-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ami-text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 2px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-full);
+  transition: color var(--fast);
+}
+
+.ami-chip button:hover {
+  color: var(--ami-error);
+}
+
+.ami-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+#ami-attach-btn,
+#ami-send {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+  transition: all var(--fast) var(--ease-out);
+}
+
+#ami-attach-btn {
+  background: var(--ami-surface-elevated);
+  color: var(--ami-text-secondary);
+  border: 1px solid var(--ami-border);
+}
+
+#ami-attach-btn:hover {
+  background: var(--ami-primary-light);
+  color: var(--ami-primary);
+  border-color: var(--ami-primary);
+}
+
+#ami-attach-btn.has-file {
+  background: var(--ami-primary);
+  color: #fff;
+  border-color: var(--ami-primary);
+}
+
+#ami-attach-btn:active {
+  transform: scale(0.95);
+}
+
+#ami-send {
+  background: var(--ami-primary);
+  color: #fff;
+}
+
+#ami-send:hover {
+  background: var(--ami-primary-hover);
+  transform: translateY(-1px);
+}
+
+#ami-send:disabled {
+  background: var(--ami-border-strong);
+  color: var(--ami-text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+#ami-attach-btn svg,
+#ami-send svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+#ami-input {
+  flex: 1 1 auto;
+  min-width: 90px;
+  width: 100%;
+  height: 42px;
+  max-height: 120px;
+  box-sizing: border-box;
+  border: 1px solid var(--ami-border);
+  border-radius: var(--radius-pill);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  line-height: 1.4;
+  overflow-y: auto;
+  transition: border-color var(--fast), box-shadow var(--fast), background var(--fast);
+  background: var(--ami-surface);
+  color: var(--ami-text);
+}
+
+#ami-input::placeholder {
+  color: var(--ami-text-muted);
+}
+
+#ami-input:focus {
+  border-color: var(--ami-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+#ami-input:disabled {
+  background: var(--ami-bg);
+  cursor: not-allowed;
+}
+
+#ami-hint {
+  font-size: 11px;
+  color: var(--ami-text-muted);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-1);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+#ami-hint b {
+  font-weight: 600;
+  color: var(--ami-primary);
+}
+
+/* ============================================
+   LIGHTBOX
+   ============================================ */
+#ami-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 10, 25, 0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  z-index: var(--z-modal);
+  animation: ami-fade-in var(--fast);
+}
+
+#ami-lightbox.open {
+  display: flex;
+}
+
+@keyframes ami-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+#ami-lightbox img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: block;
+}
+
+#ami-lightbox .ami-lb-caption {
+  color: #fff;
+  text-align: center;
+  margin-top: var(--space-3);
+  font-size: 13.5px;
+  opacity: 0.9;
+}
+
+/* ============================================
+   LOAD MORE BUTTON
+   ============================================ */
+.ami-load-more {
+  align-self: center;
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border);
+  color: var(--ami-primary);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-4);
+  font-size: 12.5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--fast);
+}
+
+.ami-load-more:hover {
+  background: var(--ami-primary-light);
+  border-color: var(--ami-primary);
+}
+
+/* In-flight state: the label already says what is happening, so the control is
+   dimmed rather than hidden. Keeping it visible is what makes a slow fetch read
+   as progress instead of a dead button. */
+.ami-load-more.loading,
+.ami-load-more:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+/* Sits above the transcript, not inside it, so prepending a page of older
+   messages cannot land above the control itself. */
+.ami-load-more-strip {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--ami-border);
+  background: var(--ami-surface);
+  flex: 0 0 auto;
+}
+
+.ami-load-more-strip:empty {
+  display: none;
+}
+
+/* ============================================
+   JUMP TO CURRENT MESSAGES
+   ============================================ */
+/* Shown only while the transcript is scrolled away from the newest turn, so it is
+   invisible during normal reading and appears only after the user scrolls up to
+   read older messages. Lives above the composer, outside the scrolling list, so
+   prepending a page cannot move it. */
+/* Zero-height anchor for the jump-to-latest control.
+   Deliberately NOT #ami-input-area: that box scrolls (a tall attachment tray must
+   not starve the message list), and `overflow` clips an absolutely positioned
+   child that sits outside the scrollport - which made the floating button vanish
+   completely. This sibling is not a scroll container, so nothing clips it, and at
+   zero height it costs no layout. */
+.ami-jump-anchor {
+  position: relative;
+  height: 0;
+  flex: 0 0 auto;
+}
+
+/* Floats directly over the composer, tracking whatever height it grows to. */
+.ami-jump-latest {
+  display: none;
+  position: absolute;
+  bottom: var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  background: var(--ami-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-4);
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  transition: opacity var(--fast);
+}
+
+.ami-jump-latest.show {
+  display: block;
+}
+
+.ami-jump-latest:hover {
+  background: var(--ami-primary-dark, var(--ami-primary));
+}
+
+.ami-jump-latest:focus-visible {
+  outline: 2px solid var(--ami-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  #ami-widget {
+    bottom: var(--space-3);
+    right: var(--space-3);
+    left: var(--space-3);
+  }
+
+  #ami-chat-window {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 80px);
+    max-height: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  #ami-messages {
+    padding: var(--space-3) var(--space-2) var(--space-2);
+  }
+
+  .ami-message {
+    max-width: 100%;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .ami-avatar-sm {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+  }
+
+  #ami-chat-button {
+    width: 56px;
+    height: 56px;
+  }
+
+  #ami-attach-btn,
+  #ami-send,
+  #ami-input {
+    height: 40px;
+  }
+
+  #ami-attach-btn,
+  #ami-send {
+    width: 40px;
+    flex: 0 0 40px;
+  }
+}
+/* ==========================================================================
+   Ticket Modal
+   Opened by the assistant itself once it cannot resolve the issue, so this is
+   a full-screen overlay rather than something that lives inside the chat panel.
+   ========================================================================== */
+
+.ami-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--ami-overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--normal) var(--ease-out), visibility var(--normal);
+  font-family: inherit;
+}
+
+.ami-modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ami-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: min(88vh, 760px);
+  background: var(--ami-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transform: translateY(12px) scale(0.98);
+  transition: transform var(--normal) var(--ease-out);
+}
+
+.ami-modal-overlay.open .ami-modal {
+  transform: translateY(0) scale(1);
+}
+
+.ami-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--ami-border);
+  background: var(--ami-surface-elevated);
+}
+
+.ami-modal-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  color: var(--ami-text);
+}
+
+.ami-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ami-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--fast), color var(--fast);
+}
+
+.ami-modal-close:hover {
+  background: var(--ami-primary-light);
+  color: var(--ami-primary);
+}
+
+.ami-modal-close:focus-visible {
+  outline: 2px solid var(--ami-primary);
+  outline-offset: 2px;
+}
+
+.ami-modal-body {
+  overflow-y: auto;
+  padding: var(--space-5);
+  -webkit-overflow-scrolling: touch;
+}
+
+.ami-modal-hint {
+  margin: 0 0 var(--space-4);
+  font-size: 14px;
+  color: var(--ami-text-secondary);
+}
+
+/* ---------------------------- Step 1: types ----------------------------- */
+
+.ami-type-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ami-type-card {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  grid-template-areas: "icon label" "icon desc";
+  gap: 2px var(--space-3);
+  align-items: center;
+  width: 100%;
+  padding: var(--space-4);
+  text-align: left;
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--fast), background var(--fast), box-shadow var(--fast);
+}
+
+.ami-type-card:hover {
+  border-color: var(--ami-primary);
+  background: var(--ami-primary-light);
+}
+
+.ami-type-card:focus-visible {
+  outline: 2px solid var(--ami-primary);
+  outline-offset: 2px;
+}
+
+.ami-type-icon {
+  grid-area: icon;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  background: var(--ami-surface-elevated);
+  border: 1px solid var(--ami-border);
+  border-radius: var(--radius-sm);
+}
+
+.ami-type-label {
+  grid-area: label;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ami-text);
+}
+
+.ami-type-desc {
+  grid-area: desc;
+  font-size: 13px;
+  color: var(--ami-text-secondary);
+}
+
+/* ---------------------------- Step 2: form ------------------------------ */
+
+.ami-form-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.ami-form-back {
+  padding: var(--space-1) var(--space-2);
+  font-size: 13px;
+  color: var(--ami-text-secondary);
+  background: transparent;
+  border: 1px solid var(--ami-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ami-form-back:hover {
+  color: var(--ami-primary);
+  border-color: var(--ami-primary);
+}
+
+.ami-form-back:focus-visible {
+  outline: 2px solid var(--ami-primary);
+  outline-offset: 2px;
+}
+
+.ami-form-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--ami-text);
+}
+
+.ami-ticket-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ami-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ami-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ami-form-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ami-text);
+}
+
+.ami-form-field input,
+.ami-form-field select,
+.ami-form-field textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: 14px;
+  color: var(--ami-text);
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border-strong);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--fast), box-shadow var(--fast);
+}
+
+.ami-form-field textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.ami-form-field select[multiple] {
+  min-height: 104px;
+  padding: var(--space-1);
+}
+
+.ami-form-field input:focus,
+.ami-form-field select:focus,
+.ami-form-field textarea:focus {
+  outline: none;
+  border-color: var(--ami-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Typeahead (location, item) */
+
+.ami-search-wrapper {
+  position: relative;
+}
+
+.ami-search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.ami-search-result {
+  padding: var(--space-2) var(--space-3);
+  font-size: 14px;
+  color: var(--ami-text);
+  cursor: pointer;
+}
+
+.ami-search-result:hover {
+  background: var(--ami-primary-light);
+}
+
+/* Fixed option set, e.g. the impact categories on a System Request */
+
+.ami-checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--space-2);
+}
+
+.ami-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: 14px;
+  color: var(--ami-text);
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ami-checkbox-item:hover {
+  border-color: var(--ami-primary);
+}
+
+.ami-checkbox-item input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--ami-primary);
+}
+
+.ami-field-hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ami-text-muted);
+}
+
+/* Catalog-backed tick boxes, optionally split into MIS's groups */
+
+.ami-checkgroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ami-checkgroup-status {
+  font-size: 12px;
+  color: var(--ami-text-muted);
+  min-height: 1em;
+}
+
+.ami-checkgroup-status:empty {
+  min-height: 0;
+}
+
+.ami-checkgroup-filter {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: 14px;
+  color: var(--ami-text);
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.ami-checkgroup-filter:focus {
+  outline: none;
+  border-color: var(--ami-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.ami-checkgroup-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ami-checkgroup-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ami-checkgroup-heading {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ami-text-muted);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--ami-border);
+}
+
+/* Greyed out because it belongs to a group that is not currently selected,
+ * matching the dimming scrf.form.php applies. Not hidden, so the shape of the
+ * full list stays visible while picking. */
+.ami-checkbox-item.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--ami-border);
+}
+
+@media (max-width: 480px) {
+  .ami-checkbox-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Repeatable item/quantity pairs, where the legacy form posts arrays */
+
+.ami-repeater {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ami-repeater-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.ami-repeater-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ami-repeater-cell label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ami-text-muted);
+}
+
+.ami-repeater-cell input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: 14px;
+  color: var(--ami-text);
+  background: var(--ami-surface);
+  border: 1px solid var(--ami-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.ami-repeater-cell input:focus {
+  outline: none;
+  border-color: var(--ami-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+/* The cell holding the typeahead needs to own the dropdown's positioning. */
+.ami-repeater-grow {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ami-repeater-qty {
+  flex: 0 0 92px;
+}
+
+.ami-repeater-remove {
+  flex: 0 0 auto;
+}
+
+.ami-repeater-remove .ami-btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .ami-repeater-row {
+    flex-wrap: wrap;
+  }
+
+  .ami-repeater-qty {
+    flex: 1 1 92px;
+  }
+}
+
+/* Attachments */
+
+.ami-form-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--ami-border);
+}
+
+.ami-attach-btn {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ami-primary);
+  background: var(--ami-primary-light);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ami-attach-label {
+  align-self: flex-start;
+  cursor: pointer;
+}
+
+.ami-attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ami-attachment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: 13px;
+  color: var(--ami-text-secondary);
+  background: var(--ami-surface-elevated);
+  border: 1px solid var(--ami-border);
+  border-radius: var(--radius-sm);
+}
+
+.ami-attach-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ami-attach-remove {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ami-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ami-attach-remove:hover {
+  color: var(--ami-error);
+  background: var(--ami-error-bg);
+}
+
+/* Actions */
+
+.ami-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--ami-border);
+}
+
+.ami-btn {
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--fast), opacity var(--fast);
+}
+
+.ami-btn-primary {
+  color: var(--ami-user-msg-text);
+  background: var(--ami-primary);
+}
+
+.ami-btn-primary:hover:not(:disabled) {
+  background: var(--ami-primary-hover);
+}
+
+.ami-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ami-btn-secondary {
+  color: var(--ami-text-secondary);
+  background: var(--ami-surface);
+  border-color: var(--ami-border-strong);
+}
+
+.ami-btn-secondary:hover {
+  color: var(--ami-primary);
+  border-color: var(--ami-primary);
+}
+
+.ami-btn:focus-visible {
+  outline: 2px solid var(--ami-primary);
+  outline-offset: 2px;
+}
+
+/* Toast */
+
+.ami-toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-6);
+  z-index: calc(var(--z-modal) + 1);
+  max-width: min(90vw, 420px);
+  padding: var(--space-3) var(--space-4);
+  font-size: 14px;
+  color: var(--ami-success);
+  background: var(--ami-success-bg);
+  border: 1px solid var(--ami-success-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition: opacity var(--normal) var(--ease-out), transform var(--normal) var(--ease-out);
+}
+
+.ami-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.ami-toast-error {
+  color: var(--ami-error);
+  background: var(--ami-error-bg);
+  border-color: var(--ami-error-border);
+}
+
+@media (max-width: 480px) {
+  .ami-modal-overlay {
+    padding: 0;
+  }
+
+  .ami-modal {
+    max-width: none;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .ami-form-actions .ami-btn {
+    flex: 1 1 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ami-modal-overlay,
+  .ami-modal,
+  .ami-toast {
+    transition: none;
+  }
+}

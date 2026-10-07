@@ -1,0 +1,39 @@
+{
+  "event": "ticket_created",
+  "department": "mis",
+  "ticket_type": "system_request",
+  "target_list": "mis_job_list",
+  "user": {
+    "user_id": 999999999,
+    "login": "test.user",
+    "full_name": "Test User",
+    "first_name": "Test",
+    "last_name": "User",
+    "name": "Test User",
+    "email": "test@example.com",
+    "department": "MIS",
+    "role": "user"
+  },
+  "ticket_data": {
+    "category": "Data Update",
+    "system": "Oracle ERP",
+    "location": "",
+    "description": "SAMPLE: add my account to the Oracle ERP procurement module",
+    "justification": "SAMPLE: need to raise POs for the incoming inspectors",
+    "impact": "",
+    "from_process": "SAMPLE: POs are raised manually in Excel",
+    "to_process": "SAMPLE: POs are raised directly in Oracle ERP",
+    "risk": "SAMPLE: manual entry causes delays and stock shortages",
+    "request_category": "",
+    "asset_tag": "",
+    "quantity": "",
+    "item": "",
+    "created_at": "2026-10-03 14:56:17",
+    "category_id": 16,
+    "system_id": 1,
+    "department": "Finance",
+    "_test": true
+  },
+  "attachment_count": 0,
+  "attachments": []
+}
