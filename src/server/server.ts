@@ -10,6 +10,7 @@ import { app } from './app';
 import { config } from './config/config.service';
 import { init as initDb, db } from './db/storage.service';
 import conversationManager from './services/session.service';
+import { loadCostRates } from './config/cost-rates.service';
 import { expireIfIdle } from './services/session-lifecycle.service';
 
 const MESSAGE_RETENTION_DAYS = parseInt(process.env.MESSAGE_RETENTION_DAYS ?? '', 10) || 180;
@@ -122,6 +123,11 @@ function installShutdownFlush(): void {
 
 async function main(): Promise<void> {
   await initDb();
+  // Loads any admin-saved token rates before the first request, so the Per Session
+  // Cost table does not briefly render at the shipped defaults on a cold start.
+  // A failure here must not block boot: the rates service falls back to the
+  // environment defaults, which is exactly what it would have used anyway.
+  await loadCostRates().catch(() => undefined);
   scheduleRetention();
   scheduleIdleExpiry();
   installShutdownFlush();

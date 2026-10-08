@@ -9,9 +9,9 @@ A modern, AI-powered helpdesk chatbot for Amertron Corporation's MIS department.
 - **Modal Ticket Creation** - Clean modal forms replace chat-based intake
 - **Three Ticket Types** - Tech Support, System Request, IT Asset
 - **Role-Based Access** - Admin commands, forged role protection
-- **Session Management** - Idle nudge at 4 minutes, conversation closes at 5
-- **Attachment Support** - File uploads with tickets
-- **Admin Dashboard** - Usage stats, conversation history, cost tracking
+- **Session Management** - Idle nudge at 4 minutes, conversation closes at 5. The close writes a real `[ended session]` row, so the boundary survives a reload.
+- **Attachment Support** - File uploads with tickets, and image analysis before the model is called
+- **Admin Dashboard** - Usage stats, conversation history, and per-session cost analysis (see [Per Session Cost](#per-session-cost))
 
 ## How Escalation Works
 
@@ -161,20 +161,34 @@ docker compose up -d
 │  │   └── IT Asset                                         │
 │  └── History with Pagination (50 per page)                │
 ├─────────────────────────────────────────────────────────────┤
+│  Admin Dashboard (src/dashboard → public/Dashboard)        │
+│  ├── Overview, Trends, Costs, Users, Sessions, Live, Logs  │
+│  ├── Per-session cost, split on [ended session] markers    │
+│  └── Admin-editable token rates (Live tab / Ctrl+Shift+R)  │
+├─────────────────────────────────────────────────────────────┤
 │  Backend (Express + TypeScript)                            │
 │  ├── /api/chat          - AI conversation                  │
 │  ├── /api/ticket        - Single-call ticket submission    │
 │  ├── /api/catalog/*     - Dropdown options (MIS)           │
 │  ├── /api/session       - Auth + history bootstrap         │
-│  ├── /api/admin/*       - Dashboard endpoints              │
+│  ├── /api/analytics/*   - Dashboard data                   │
+│  ├── /api/admin/*       - Admin CRUD + cost rates          │
 │  └── /api/health        - Health check                     │
 ├─────────────────────────────────────────────────────────────┤
 │  Data Layer                                                 │
 │  ├── PostgreSQL (primary) / JSON fallback                  │
+│  │   └── messages transcript, usage_messages ledger        │
 │  ├── MIS Catalogs (departments, locations, systems, etc.)  │
 │  └── File Storage (attachments)                            │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+Two tables do different jobs, and conflating them is the easiest mistake to
+make here. `messages` is the **transcript** — who said what, when, plus the
+`[ended session]` boundaries. `usage_messages` is the **ledger** — one row per AI
+call with tokens and the provider's charge. Both are keyed by conversation, not
+by session, which is why the dashboard has to split one and attribute the other
+by timestamp.
 
 ## Ticket Types & Fields
 
@@ -228,11 +242,76 @@ All require the `X-Session-ID` header; unauthenticated calls get a 401.
 - `GET /api/catalog/systems`
 - `GET /api/catalog/asset-items`
 
-### Admin
-- `GET /api/admin/stats` - System statistics
-- `GET /api/admin/users` - User list with token usage
-- `GET /api/admin/conversations` - All conversations
-- `GET /api/history/:sessionId` - Conversation history
+### Analytics
+
+All require the admin key (`?key=` or `X-Admin-Key`).
+
+| Endpoint | Notes |
+|----------|-------|
+| `GET /api/analytics/overview?days=` | KPIs with deltas vs the previous equal-length period |
+| `GET /api/analytics/timeseries?days=` | Zero-filled day buckets, so gaps are visible rather than absent |
+| `GET /api/analytics/breakdown?days=&username=` | Ranked `by_model`, `by_user`, `by_session`, `by_kind` |
+| `GET /api/analytics/sessions?limit=&username=` | Per-session cost. `limit` is `10`/`50`/`100`/`all` |
+| `GET /api/analytics/realtime` | Active sessions, rpm, memory, recent events |
+| `GET /api/analytics/users?days=` | Per-user rollups with quota fields |
+| `GET /api/admin/users/search?q=&limit=10` | Username substring search for the cost filter |
+| `GET /api/admin/cost-rates` | Current token rates and whether they are custom |
+| `POST /api/admin/cost-rates` | Set `{input_per_million, output_per_million}`. 400 on non-numeric or negative |
+| `DELETE /api/admin/cost-rates` | Drop the override, back to shipped defaults |
+| `GET /api/system/health` | System health card: PostgreSQL, chatbot, Node |
+
+### Per Session Cost
+
+The `sessions` endpoint splits each conversation on its `[ended session]` markers, so one
+conversation becomes several sessions. A session runs from the conversation start (or just
+after the previous marker) through to the next marker; a trailing run with no marker is
+`active`. Session ids are `conversationN` where N is 1-based **within that conversation**,
+so `rems.baks1` is that conversation's oldest session and `rems.baks5` its newest. Rows come
+back oldest first.
+
+Columns per session: session, user, mode, state, **Msgs In** (user turns), **Msgs Out**
+(assistant turns), **Files**, input/output tokens, and IT / OT / Total Cost.
+
+Both tables have an **Export** dropdown: CSV or JSON of the current view, plus a "CSV — all
+rows" option on the session table. That third option exists because the session table has a
+limit selector — exporting only what is on screen, under a filename that says nothing about
+it, is how someone reconciles a spreadsheet against the dashboard, gets different totals, and
+concludes the dashboard is wrong. "All rows" re-fetches with `limit=all`. The filename
+carries the user filter and a timestamp, and exports are read from the API payload rather
+than scraped from the DOM, so the file reconciles with the table it describes. Costs are
+exported at the same 6dp they are displayed.
+
+**IT / OT / Total Cost** price those tokens at the admin's configured rates (default
+$0.30 per 1M input, $2.50 per 1M output), to six decimals — a single session costs a
+fraction of a cent, so the short `$0.00` form would print every row as zero. Edit the rates
+from the dashboard's **Live** tab or with `Ctrl+Shift+R`. They are stored server-side in
+`data/cost-rates.json`, so two admins never read different numbers off the same table, and
+the `sessions` response echoes the rates it used.
+
+Usage rows are attributed to a session by timestamp, not by ratio. The ledger is keyed by
+*conversation*, so one conversation with six sessions is one row in `messages` per session
+and six rows in `usage_messages`; a usage row is charged to the last session that had
+already started when the call was made. Per-user sums reconcile exactly against
+`usage_messages`.
+
+**Files** counts the files the assistant was given, from two sources:
+
+1. **Recorded** (preferred) — the chat pipeline writes the file names onto the assistant
+   message's `meta` at the moment the model consumes them. This is exact.
+2. **Inferred** — anything recorded before that change was available is placed by
+   `uploaded_at` against the session windows. A file cannot be placed in a session that had
+   already ended, and images are analysed *before* the model is called, so a file uploaded
+   during a session was available to the assistant during it. Rows built this way are marked
+   `files_exact: false` and shown with a `~`.
+
+`conversations.uploads` is never counted directly: it accumulates every upload for the life
+of the conversation (capped at 20), so counting it would report a screenshot from session 1
+as "read" in session 5.
+
+> Timestamps from `pageMessages` arrive as JavaScript `Date` objects. `String(date)` renders
+> them with a **weekday name**, so sorting those strings compares "Thu" against "Wed" and puts
+> every Thursday session ahead of every Wednesday one. `tsOf()` in the analytics service
+> normalises to ISO before anything is compared or sorted.
 
 ### Health
 - `GET /api/health` - Service status
@@ -290,6 +369,12 @@ All require the `X-Session-ID` header; unauthenticated calls get a 401.
 | `RATE_LIMIT_PER_DAY` | No | `10` | Tickets per user/day |
 | `MAX_FILE_SIZE` | No | `10485760` | Max upload (bytes) |
 | `TIMEZONE` | No | `Asia/Manila` | Ticket timestamp TZ |
+| `COST_INPUT_PER_MILLION` | No | `0.30` | Default input token rate for the dashboard |
+| `COST_OUTPUT_PER_MILLION` | No | `2.50` | Default output token rate for the dashboard |
+
+The two `COST_*` variables only set the **defaults**. Anything saved through the dashboard
+(Live tab, or `POST /api/admin/cost-rates`) is written to `data/cost-rates.json` and wins
+until reset — the env vars do not overwrite a saved override.
 
 ## Project Structure
 
@@ -301,9 +386,10 @@ ami-helpdesk-ts/
 │   ├── ai.ts                # Model client (Gemini / OpenAI)
 │   ├── controllers/         # HTTP layer: translate request/response, no business logic
 │   │   ├── chat.controller.ts       # /api/session, /api/chat
+│   │   ├── analytics.controller.ts  # /api/analytics/*, cost rates, user search
 │   │   ├── history.controller.ts    # /api/history, /api/conversations
 │   │   ├── users.controller.ts      # admin user CRUD
-│   │   ├── dashboard.controller.ts  # /api/stats, /api/users, /api/logs
+│   │   ├── dashboard.controller.ts  # /api/stats, /api/users, /api/logs, /api/system/health
 │   │   ├── usage.controller.ts      # cost + token reports
 │   │   ├── health.controller.ts     # liveness and readiness
 │   │   ├── files.controller.ts      # uploaded file serving
@@ -317,7 +403,8 @@ ami-helpdesk-ts/
 │   │   ├── quota.service.ts         # rate limits and per-user access
 │   │   ├── rag.service.ts           # few-shot retrieval
 │   │   ├── file.service.ts          # upload storage
-│   │   └── session-lifecycle.service.ts   # idle expiry
+│   │   ├── session-lifecycle.service.ts   # idle expiry + the [ended session] marker
+│   │   └── analytics-*.service.ts   # overview / breakdown / realtime / tables
 │   ├── features/agent/      # Domain logic
 │   │   ├── ticket-intake.ts         # which ticket type, and steering
 │   │   ├── commands.ts              # slash commands
@@ -333,17 +420,33 @@ ami-helpdesk-ts/
 │   │   ├── storage.service.ts       # which backend is active
 │   │   └── helpers.ts
 │   ├── core/                # logger, flags, filesystem helpers
-│   ├── config/config.service.ts
-│   └── models/types.model.ts
+│   ├── config/
+│   │   ├── config.service.ts       # env-driven settings
+│   │   └── cost-rates.service.ts   # admin-editable token rates
+│   └── models/
+│       ├── types.model.ts
+│       └── analytics.model.ts      # analytics response shapes
 ├── src/types.ts             # Shared widget types
+├── src/dashboard/           # Admin dashboard TypeScript source
+│   ├── main.ts              # Entry: tab router, global filter, auth
+│   ├── api.ts  utils.ts  modal.ts  types.ts  rates.ts
+│   └── tabs/                # overview, trends, costs, users, sessions,
+│                            # realtime, inspect, user-admin, rates
 ├── public/widget/           # Browser-side ES modules
 │   ├── main.js              # Widget entry point
 │   ├── modal.js             # Ticket modal forms
 │   ├── api.js  state.js  ui.js  config.js  icons.js
+├── public/Dashboard/        # Served dashboard (index.html + compiled js)
 ├── db/schema.sql            # PostgreSQL schema
 ├── tools/                   # Regression suites (see Testing)
-└── Dockerfile  docker-compose.yml  tsconfig.json  package.json
+└── Dockerfile  docker-compose.yml  tsconfig.json  tsconfig.dashboard.json
 ```
+
+**Dashboard build.** `tsconfig.dashboard.json` compiles `src/dashboard/**/*.ts` into
+`public/Dashboard/js/`, so the dashboard has **two** sources of truth: edit the TypeScript
+in `src/dashboard/`, never the compiled files. `./public` is bind-mounted read-only into the
+container, so dashboard edits are live on refresh; only `dist/` changes need
+`docker compose up -d --build`.
 
 ### Adding a feature
 
@@ -375,6 +478,26 @@ carry on or a result to answer the user with. A non-null result ends the turn.
 That replaced one 526-line handler with nine hidden exit points, in which every
 stage sat in the same scope as every other one.
 
+`ctx.processedFiles` is how a turn reports what it handed the model.
+`stageUploads` fills it, and `decideAndStore` writes those names onto the
+assistant message's `meta`. That per-message record is the only thing the
+dashboard's Files column can trust, because the conversation-wide `uploads`
+array cannot say which turn consumed a file.
+
+### The admin dashboard
+
+Seven tabs — Overview, Trends, Costs, Users, Sessions, Live, Logs — sharing one
+global filter (window + user). Two things are worth knowing before editing it:
+
+- **Never write to `public/Dashboard/` by hand.** It is build output. The source
+  is `src/dashboard/`, compiled by `tsconfig.dashboard.json`. A hand-edit is
+  silently lost on the next build.
+- **One id per element, checked by a test.** `getElementById` returns the first
+  match, so a duplicated id makes a control silently inert: the Costs user filter
+  had two elements called `usageUser`, the top-bar input won, and typing in the
+  search box did nothing while looking like it worked. `analytics-regress.cjs`
+  now fails on duplicate ids for exactly this reason.
+
 ## Testing
 
 Every suite runs against a scratch data directory with no database, no AI
@@ -388,6 +511,20 @@ provider key and no webhook, so none can touch production or spend tokens.
 | `widget-regress.cjs` | the widget's rendering and its contract with the server |
 | `commands-regress.cjs` | slash commands, AI retry classification, greetings |
 | `identity-*.cjs` | role resolution and token signing |
+| `analytics-regress.cjs` | endpoint response shapes; per-session ordering and ordinal contiguity; cost arithmetic against the rates; rate validation and admin-only access; **duplicate element ids in the dashboard shell** |
+| `export-regress.cjs` | a produced CSV/JSON file — headers, precision, quoting, filename scope — not merely that a button renders |
+
+The analytics harness needs a live server, so `npm test` runs it through
+`tools/with-server.cjs`, which boots `dist/` on a spare port and shuts it down afterwards.
+The harnesses speak plain HTTP, but the deployed server terminates HTTPS with a self-signed
+certificate and has no HTTP listener — without this wrapper the suite failed with
+`ECONNREFUSED` while the endpoints under test were in fact fine.
+
+Run one suite on its own against an already-running server:
+
+```bash
+PORT=3101 ADMIN_KEY=admin node tools/analytics-regress.cjs
+```
 
 ## Attachment Storage
 

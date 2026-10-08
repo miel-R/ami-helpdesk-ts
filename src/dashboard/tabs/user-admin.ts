@@ -1,8 +1,8 @@
 // User management: create / edit / detail modal + delete.
 // Isolated module: user CRUD never shares code with the analytics tabs.
-import { api, flash } from '../api';
-import { bytes, esc, nfmt, usd, when } from '../utils';
-import { closeModal, openModal } from '../modal';
+import { api, flash } from '../api.js';
+import { bytes, esc, nfmt, usd, when } from '../utils.js';
+import { closeModal, openModal } from '../modal.js';
 
 export async function openUserEditor(username: string): Promise<void> {
   try {

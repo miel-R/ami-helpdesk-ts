@@ -1,22 +1,33 @@
 // Dashboard entry (part 1): imports, tab router, guarded refresh.
-import { api, clearKey, flash, getKey, setKey } from './api';
-import { must } from './utils';
-import { renderOverview, type OverviewFilter } from './tabs/overview';
-import { renderTrends } from './tabs/trends';
-import { renderCosts } from './tabs/costs';
-import { renderUsers } from './tabs/users';
-import { renderSessions } from './tabs/sessions';
-import { renderRealtime } from './tabs/realtime';
-import { openSession, renderLogs, wireLogFilters } from './tabs/inspect';
-import { openUserDetail, openUserEditor, wireUserForm } from './tabs/user-admin';
+import { api, clearKey, flash, getKey, setKey } from './api.js';
+import { esc, must } from './utils.js';
+import { renderOverview, type OverviewFilter } from './tabs/overview.js';
+import { renderTrends } from './tabs/trends.js';
+import { renderCosts } from './tabs/costs.js';
+import { renderUsers } from './tabs/users.js';
+import { renderSessions } from './tabs/sessions.js';
+import { renderRealtime } from './tabs/realtime.js';
+import { renderLogs, wireLogFilters, openSession } from './tabs/inspect.js';
+import { wireRateEditor } from './tabs/rates.js';
+import { openUserDetail, openUserEditor, wireUserForm } from './tabs/user-admin.js';
 
 export type TabId = 'overview' | 'trends' | 'cost' | 'users' | 'conv' | 'live' | 'logs';
 let activeTab: TabId = 'overview';
 
-export function currentFilter(): OverviewFilter {
-  const days = Number((document.getElementById('usageDays') as HTMLSelectElement | null)?.value || 30);
+export interface CostFilter extends OverviewFilter {
+  filterMode: 'all' | 'specific';
+  sessionLimit: number | 'all';
+}
+
+export function currentFilter(): OverviewFilter & { filterMode: 'all' | 'specific'; sessionLimit: number | 'all' } {
+  const days = Number((document.getElementById('usageDays') as HTMLSelectElement | null)?.value || 1);
   const user = (document.getElementById('usageUser') as HTMLInputElement | null)?.value.trim() || null;
-  return { days: Number.isFinite(days) ? days : 30, username: user || null };
+  return { 
+    days: Number.isFinite(days) ? days : 1, 
+    username: user || null,
+    filterMode,
+    sessionLimit
+  };
 }
 
 export async function safe(name: string, fn: () => Promise<void>): Promise<void> {
@@ -90,6 +101,116 @@ function wireAuth(): void {
   must('logoutBtn').addEventListener('click', () => signOut());
 }
 
+// Costs tab filter state and handlers
+let filterMode: 'all' | 'specific' = 'all';
+let sessionLimit: number | 'all' = 50;
+
+function costSearchInput(): HTMLInputElement | null {
+  return document.getElementById('costUserSearch') as HTMLInputElement | null;
+}
+
+/** Keeps the global user filter, the Costs search box and the mode select in sync. */
+function syncUserFilterUI(user: string | null, mode: 'all' | 'specific'): void {
+  const globalUser = document.getElementById('usageUser') as HTMLInputElement | null;
+  const search = costSearchInput();
+  const modeSelect = document.getElementById('usageFilterMode') as HTMLSelectElement | null;
+  const val = user || '';
+  if (globalUser) globalUser.value = val;
+  if (search) {
+    search.value = val;
+    search.style.display = mode === 'specific' ? '' : 'none';
+  }
+  if (modeSelect) modeSelect.value = mode;
+}
+
+/** Single entry point for applying a user filter from any UI affordance. */
+function setUserFilter(user: string | null): void {
+  const val = (user || '').trim();
+  filterMode = val ? 'specific' : 'all';
+  syncUserFilterUI(val || null, filterMode);
+  void refreshAll();
+}
+
+async function suggestUsers(term: string): Promise<void> {
+  const dl = document.getElementById('costUserOptions') as HTMLDataListElement | null;
+  if (!dl) return;
+  try {
+    const res = await api<{ users: { username: string }[] }>(
+      `/api/admin/users/search?q=${encodeURIComponent(term)}&limit=10`
+    );
+    dl.innerHTML = res.users.map(u => `<option value="${esc(u.username)}"></option>`).join('');
+  } catch {
+    dl.innerHTML = '';
+  }
+}
+
+function wireCostFilters(): void {
+  const modeSelect = document.getElementById('usageFilterMode') as HTMLSelectElement | null;
+  const search = costSearchInput();
+  const limitSelect = document.getElementById('sessionLimit') as HTMLSelectElement | null;
+
+  if (modeSelect) {
+    modeSelect.addEventListener('change', () => {
+      if (modeSelect.value === 'specific') {
+        filterMode = 'specific';
+        const existing = (document.getElementById('usageUser') as HTMLInputElement | null)?.value.trim() || '';
+        syncUserFilterUI(existing || null, 'specific');
+        search?.focus();
+      } else {
+        setUserFilter(null);
+        return;
+      }
+      void refreshAll();
+    });
+  }
+
+  if (search) {
+    let timer: number | undefined;
+    search.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void suggestUsers(search.value.trim()), 200);
+    });
+    search.addEventListener('keydown', e => {
+      if ((e as KeyboardEvent).key === 'Enter') {
+        e.preventDefault();
+        setUserFilter(search.value);
+      }
+    });
+  }
+
+  document.getElementById('costUserApply')?.addEventListener('click', () => {
+    setUserFilter(costSearchInput()?.value || null);
+  });
+
+  document.getElementById('costFilterClear')?.addEventListener('click', () => setUserFilter(null));
+
+  if (limitSelect) {
+    limitSelect.addEventListener('change', () => {
+      sessionLimit = limitSelect.value === 'all' ? 'all' : parseInt(limitSelect.value, 10);
+      void refreshAll();
+    });
+  }
+
+  // Typing in the global top-bar user field implies "Specific User".
+  const globalUser = document.getElementById('usageUser') as HTMLInputElement | null;
+  globalUser?.addEventListener('input', () => {
+    const v = globalUser.value.trim();
+    filterMode = v ? 'specific' : 'all';
+    syncUserFilterUI(v || null, filterMode);
+  });
+
+  // Single delegated handler for Filter buttons / user links in the Costs tables.
+  document.addEventListener('click', ev => {
+    const t = ev.target as HTMLElement | null;
+    if (!t || typeof t.closest !== 'function') return;
+    const fu = t.closest('[data-filteruser]') as HTMLElement | null;
+    if (fu?.dataset.filteruser) {
+      ev.preventDefault();
+      setUserFilter(fu.dataset.filteruser);
+    }
+  });
+}
+
 function wireChrome(): void {
   document.querySelectorAll('[data-tab]').forEach(b => {
     b.addEventListener('click', () => switchTab((b as HTMLElement).dataset.tab as TabId));
@@ -124,16 +245,13 @@ function wireChrome(): void {
     if (detail?.dataset.detail) { void openUserDetail(detail.dataset.detail); return; }
     const sess = t.closest('[data-session]') as HTMLElement | null;
     if (sess?.dataset.session) { void openSession(sess.dataset.session); return; }
-    const fu = t.closest('[data-filteruser]') as HTMLElement | null;
-    if (fu?.dataset.filteruser) {
-      ev.preventDefault();
-      (must('usageUser') as HTMLInputElement).value = fu.dataset.filteruser;
-      switchTab('cost');
-    }
   });
   document.addEventListener('ami:users-changed', () => {
     void safe('users', () => renderUsers(currentFilter().days));
   });
+  // Raised after the token rates change, so the Costs tab re-reads its rates
+  // rather than showing the previous ones until the next manual refresh.
+  document.addEventListener('ami:refresh', () => { void refreshAll(); });
   setInterval(() => {
     if (document.hidden) return;
     const ar = document.getElementById('autoRefresh') as HTMLInputElement | null;
@@ -149,7 +267,9 @@ function boot(): void {
   }
   wireAuth();
   wireChrome();
+  wireCostFilters();
   wireUserForm();
+  wireRateEditor();
   if (!getKey()) { showLogin(); return; }
   api('/api/admin/config')
     .then(() => { showApp(); return refreshAll(); })

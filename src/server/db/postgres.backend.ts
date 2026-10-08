@@ -266,9 +266,22 @@ async updateUser(username: string, patch: UserPatch = {}): Promise<UserRecord | 
 
 async summary(options: SummaryOptions = {}): Promise<UsageSummary> {
     const { days = 30, username = null } = options;
-    const params: unknown[] = [num(days, 30)];
-    const userFilter = username ? 'AND username = $2' : '';
-    if (username) params.push(String(username));
+    let params: unknown[];
+    let intervalExpr: string;
+    let userFilter: string;
+
+    if (days === 1) {
+      // "Today" means from midnight today to now
+      params = [];
+      intervalExpr = "now()::date"; // midnight today (cast date to timestamp = midnight)
+      userFilter = username ? 'AND username = $1' : '';
+      if (username) params.push(String(username));
+    } else {
+      params = [num(days, 30)];
+      intervalExpr = "now() - ($1 || ' days')::interval";
+      userFilter = username ? 'AND username = $2' : '';
+      if (username) params.push(String(username));
+    }
 
     const totals = await this.q(
       `SELECT COALESCE(SUM(input_tokens),0)  AS input,
@@ -276,7 +289,7 @@ async summary(options: SummaryOptions = {}): Promise<UsageSummary> {
               COALESCE(SUM(cost_usd),0)     AS cost,
               COUNT(*)                      AS calls
          FROM usage_messages
-        WHERE created_at >= now() - ($1 || ' days')::interval ${userFilter}`,
+        WHERE created_at >= ${intervalExpr} ${userFilter}`,
       params
     );
 
@@ -288,7 +301,7 @@ async summary(options: SummaryOptions = {}): Promise<UsageSummary> {
                 COALESCE(SUM(output_tokens),0) AS output,
                 COALESCE(SUM(cost_usd),0)     AS cost
            FROM usage_messages
-          WHERE created_at >= now() - ($1 || ' days')::interval ${userFilter}
+          WHERE created_at >= ${intervalExpr} ${userFilter}
           GROUP BY 1 ORDER BY 1`,
         params
       );
@@ -307,7 +320,7 @@ async summary(options: SummaryOptions = {}): Promise<UsageSummary> {
               COALESCE(SUM(cost_usd),0)     AS cost,
               MAX(created_at) AS last_at
          FROM usage_messages
-        WHERE created_at >= now() - ($1 || ' days')::interval ${userFilter}
+        WHERE created_at >= ${intervalExpr} ${userFilter}
         GROUP BY session_id ORDER BY MAX(created_at) DESC LIMIT 200`,
       params
     );

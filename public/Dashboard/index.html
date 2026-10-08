@@ -55,7 +55,7 @@
         <div class="card-body p-3">
           <div class="row g-2 align-items-center">
             <div class="col-auto"><span class="small fw-bold text-muted text-uppercase">Window:</span></div>
-            <div class="col-auto"><select id="usageDays" class="form-select form-select-sm"><option value="1">Today</option><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 1 year</option></select></div>
+            <div class="col-auto"><select id="usageDays" class="form-select form-select-sm"><option value="1" selected>Today</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 1 year</option></select></div>
             <div class="col-auto"><div class="input-group input-group-sm"><span class="input-group-text bg-white"><i class="bi bi-person text-muted"></i></span><input id="usageUser" class="form-control" placeholder="All users" spellcheck="false"></div></div>
             <div class="col-auto"><button id="usageApply" class="btn btn-sm btn-ami px-3" type="button">Apply</button></div>
           </div>
@@ -97,13 +97,104 @@
         <div id="trendsMeta" class="small text-muted mb-4"></div>
       </section>
       <section data-panel="cost" id="panel-cost" role="tabpanel" hidden>
+        <div class="row g-3 mb-4" id="statCards"></div>
+
+        <!-- Row 2: Cost by Model | Cost by Kind -->
         <div class="row g-3 mb-4">
-          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-cpu me-2 text-ami"></i>Cost by Model</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Model</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th></tr></thead><tbody id="costModelBody"></tbody></table></div></div></div></div>
-          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-pie-chart me-2 text-ami"></i>Model Mix</h6></div><div class="card-body"><div class="chart-box-sm"><canvas id="chModelMix"></canvas></div></div></div></div>
-          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-person-badge me-2 text-ami"></i>Cost by User</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>User</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th></tr></thead><tbody id="costUserBody"></tbody></table></div></div></div></div>
-          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-tags me-2 text-ami"></i>Cost by Kind</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Kind</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th></tr></thead><tbody id="costKindBody"></tbody></table></div></div></div></div>
+          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-cpu me-2 text-ami"></i>Cost by Model</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Model</th><th class="text-end">Calls</th><th class="text-end">Input Tokens</th><th class="text-end">Output Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th></tr></thead><tbody id="costModelBody"></tbody></table></div></div></div></div>
+          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-tags me-2 text-ami"></i>Cost by Kind</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Kind</th><th class="text-end">Calls</th><th class="text-end">Input Tokens</th><th class="text-end">Output Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th></tr></thead><tbody id="costKindBody"></tbody></table></div></div></div></div>
         </div>
-        <div class="card border-0 shadow-sm rounded-3 mb-4"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-chat-left-text me-2 text-ami"></i>Top Sessions by Cost</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Session</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th><th class="text-end">Last</th></tr></thead><tbody id="costSessionBody"></tbody></table></div></div></div>
+
+        <!-- Row 3: Cost by User (full width, drives the session filter below) -->
+        <div class="row g-3 mb-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+              <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <h6 class="fw-bold mb-0"><i class="bi bi-people me-2 text-ami"></i>Cost by User</h6>
+                  <div class="d-flex align-items-center gap-2">
+                    <span id="costFilterChip" class="badge text-bg-primary d-none align-items-center">
+                      <span id="costFilterChipText"></span>
+                      <button type="button" class="btn-close btn-close-white ms-1" id="costFilterClear" aria-label="Clear user filter"></button>
+                    </span>
+                    <div id="usersExportHost"></div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                  <span class="small fw-bold text-muted text-uppercase">Filter:</span>
+                  <select id="usageFilterMode" class="form-select form-select-sm" style="width:auto;">
+                    <option value="all">All Users</option>
+                    <option value="specific">Specific User</option>
+                  </select>
+                  <div class="input-group input-group-sm" style="max-width:340px;">
+                    <span class="input-group-text bg-white"><i class="bi bi-person text-muted"></i></span>
+                    <input id="costUserSearch" class="form-control" placeholder="Search user..." list="costUserOptions" autocomplete="off" spellcheck="false" style="display:none;">
+                    <datalist id="costUserOptions"></datalist>
+                    <button id="costUserApply" class="btn btn-ami" type="button">Apply</button>
+                  </div>
+                  <span class="small text-muted">Filters the session list below.</span>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>User</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th>
+                        <th class="text-end">Latency</th><th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="costUserBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: Per Session Cost (bottom, full width) -->
+        <div class="row g-3 mb-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+              <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                  <h6 class="fw-bold mb-0"><i class="bi bi-chat-left-text me-2 text-ami"></i>Per Session Cost</h6>
+                  <div class="small text-muted">Each session ends at its <code>[ended session]</code> marker.</div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div id="sessionExportHost"></div>
+                  <span id="costRateBadge" class="badge text-bg-light border">rate</span>
+                  <span id="costSessionCount" class="badge text-bg-light border">0 sessions</span>
+                  <label for="sessionLimit" class="small text-muted mb-0">Show</label>
+                  <select id="sessionLimit" class="form-select form-select-sm" style="width:auto;">
+                    <option value="10">10</option>
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Session</th><th>User</th><th>Mode</th><th>State</th>
+                        <th class="text-end">Msgs In</th><th class="text-end">Msgs Out</th>
+                        <th class="text-end">Files</th>
+                        <th class="text-end">Input Tokens</th><th class="text-end">Output Tokens</th>
+                        <th class="text-end">IT Cost</th><th class="text-end">OT Cost</th>
+                        <th class="text-end">Total Cost</th>
+                        <th>Start</th><th>End</th>
+                      </tr>
+                    </thead>
+                    <tbody id="costSessionBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="costsMeta" class="small text-muted mb-4"></div>
       </section>
       <section data-panel="users" id="panel-users" role="tabpanel" hidden>
@@ -130,9 +221,23 @@
         </div>
       </section>
       <section data-panel="live" id="panel-live" role="tabpanel" hidden>
-        <div class="card border-0 shadow-sm rounded-3 mb-4">
-          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center"><h6 class="fw-bold mb-0"><i class="bi bi-activity me-2 text-ami"></i>Live Pulse</h6><span id="liveMeta" class="small text-muted"></span></div>
-          <div class="card-body"><div id="livePulse" class="d-flex gap-2 flex-wrap mb-3"></div><div id="liveCounters" class="small"></div></div>
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+              <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center"><h6 class="fw-bold mb-0"><i class="bi bi-activity me-2 text-ami"></i>Live Pulse</h6><span id="liveMeta" class="small text-muted"></span></div>
+              <div class="card-body"><div id="livePulse" class="d-flex gap-2 flex-wrap mb-3"></div><div id="liveCounters" class="small"></div></div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <!-- Click to edit the rates the Costs tab prices tokens at. -->
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+              <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-sliders me-2 text-ami"></i>Token Rates</h6></div>
+              <div class="card-body">
+                <div id="liveRates" class="mb-2" role="button" tabindex="0" style="cursor:pointer;">Loading…</div>
+                <div class="small text-muted">Click to edit, or press Ctrl+Shift+R. Applies to Per Session Cost.</div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="card border-0 shadow-sm rounded-3 mb-4">
           <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-lightning me-2 text-ami"></i>Recent Events</h6></div>
@@ -143,6 +248,7 @@
         <div class="card border-0 shadow-sm rounded-3">
           <div class="card-header bg-white py-3"><div class="row g-2 align-items-center">
             <div class="col-auto"><span class="small fw-bold text-muted text-uppercase me-2">Severity:</span><div class="btn-group btn-group-sm" role="group"><button type="button" class="btn btn-outline-secondary active" data-lvl="all">All</button><button type="button" class="btn btn-outline-info" data-lvl="info">Info</button><button type="button" class="btn btn-outline-warning" data-lvl="warn">Warn</button><button type="button" class="btn btn-outline-danger" data-lvl="error">Error</button></div></div>
+            <div class="col-auto"><span class="small fw-bold text-muted text-uppercase me-2">Period:</span><select id="logsPeriod" class="form-select form-select-sm"><option value="all">All Time</option><option value="1h">Last Hour</option><option value="24h">Today</option><option value="7d">Last 7 Days</option><option value="30d">Last 30 Days</option></select></div>
             <div class="col text-end"><button id="logsRefresh" class="btn btn-sm btn-outline-secondary" type="button"><i class="bi bi-arrow-clockwise"></i> Reload</button></div>
           </div></div>
           <div class="card-body p-0"><div class="table-responsive" style="max-height:600px"><table class="table table-hover align-middle mb-0"><thead class="sticky-top"><tr><th style="width:170px">Timestamp</th><th style="width:100px">Level</th><th style="width:220px">Event</th><th>Details</th></tr></thead><tbody id="logBody"></tbody></table></div></div>
@@ -155,6 +261,51 @@
       <div class="modal-content border-0 shadow-lg rounded-4">
         <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold" id="appModalTitle">Details</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body p-4" id="appModalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Token rates. Reached from the Live tab (click the Rate card, or Ctrl+Shift+R).
+       Kept out of the tab strip because it changes what every cost figure on the
+       Costs tab means, and that should be a deliberate action rather than something
+       a stray navigation lands on. -->
+  <div class="modal fade" id="rateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <form id="rateForm">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">Token Rates</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <p class="small text-muted">
+              The Per Session Cost table prices every token at these rates instead of the
+              provider's billed cost. Both are shown side by side so a change here is visible.
+            </p>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label small fw-semibold" for="rateInput">Input — per 1M tokens</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input id="rateInput" class="form-control" type="number" min="0" step="0.01" required>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold" for="rateOutput">Output — per 1M tokens</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input id="rateOutput" class="form-control" type="number" min="0" step="0.01" required>
+                </div>
+              </div>
+            </div>
+            <div id="rateMsg" class="small mt-3"></div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-sm btn-link text-muted" id="rateReset">Reset to defaults</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-sm btn-ami px-3">Save</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

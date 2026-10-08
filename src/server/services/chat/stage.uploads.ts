@@ -78,6 +78,18 @@ export const stageUploads: ChatStage = async (ctx: ChatContext): Promise<ChatRes
       ctx.lastFileName = result.name;
       if (result.analysis) ctx.fileAnalysis = result.analysis;
 
+      // Published on the context so the assistant message can record WHICH file
+      // this turn consumed. Without it the only record is the conversation-wide
+      // uploads array, which cannot distinguish "uploaded during this turn" from
+      // "uploaded three sessions ago and still sitting there".
+      if (!ctx.processedFiles) ctx.processedFiles = [];
+      ctx.processedFiles.push({
+        name: result.name,
+        stored_name: String(result.stored_name ?? ''),
+        type: String(result.type ?? ''),
+        size: Number(result.size) || 0
+      });
+
       processedFiles.push({
         name: result.name,
         stored_name: result.stored_name,

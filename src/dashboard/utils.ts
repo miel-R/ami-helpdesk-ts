@@ -25,6 +25,22 @@ export function nfmt(n: unknown): string {
   return String(Math.round(v));
 }
 
+/**
+ * Dollars at full precision, for costs small enough that rounding them away
+ * would print every row as $0.00.
+ *
+ * The dashboard's other money columns use the short form, which is right for a
+ * daily or monthly total. A single session's cost at $0.30/1M input tokens is a
+ * fraction of a cent, so six decimals is the difference between a number and a
+ * row of zeros. Non-finite input collapses to $0 rather than printing $NaN.
+ */
+export function usd6(n: unknown): string {
+  const v = typeof n === 'number' ? n : parseFloat(String(n ?? ''));
+  if (!Number.isFinite(v)) return '$0.000000';
+  const sign = v < 0 ? '-' : '';
+  return `${sign}$${Math.abs(v).toFixed(6)}`;
+}
+
 export function usd(n: unknown): string {
   const v = Number(n) || 0;
   if (v === 0) return '$0.00';
@@ -78,4 +94,85 @@ export function deltaPill(pct: number | null, invert = false): string {
   const cls = good ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
   const arrow = up ? '▲' : '▼';
   return `<span class="badge ${cls}">${arrow} ${esc(Math.abs(pct).toFixed(1))}%</span>`;
+}
+
+/** Export an array of objects to CSV/JSON and trigger download. */
+export interface ExportOptions {
+  filename: string;
+  headers: string[];
+  rows: Record<string, unknown>[];
+  includeHeaders?: boolean;
+  format?: 'csv' | 'json';
+  dateFormat?: 'iso' | 'locale';
+  /** Optional column mapping to rename headers in export */
+  columnMap?: Record<string, string>;
+  /** Optional filter to transform cell values */
+  transform?: (key: string, value: unknown) => string;
+}
+
+export function exportTableToCSV(filename: string, headers: string[], rows: Record<string, unknown>[], options?: Partial<ExportOptions>): void {
+  const opts: Required<Omit<ExportOptions, 'transform' | 'columnMap'>> & Pick<ExportOptions, 'transform' | 'columnMap'> = {
+    includeHeaders: true,
+    format: 'csv',
+    dateFormat: 'iso',
+    filename: '',
+    headers: [],
+    rows: [],
+    ...options
+  };
+
+  if (opts.format === 'json') {
+    const data = opts.includeHeaders ? rows : rows.map(r => {
+      const obj: Record<string, unknown> = {};
+      for (const h of headers) {
+        const val = r[h];
+        const fn = opts.transform || ((_, v) => v);
+        obj[opts.columnMap?.[h] ?? h] = fn(h, val);
+      }
+      return obj;
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename.replace(/\.csv$/i, '.json');
+    link.click();
+    URL.revokeObjectURL(link.href);
+    return;
+  }
+
+  const csvRows: string[] = [];
+  const effectiveHeaders = opts.columnMap ? Object.keys(opts.columnMap).map(h => opts.columnMap![h]) : headers;
+  if (true) { // always include headers for now
+    csvRows.push(effectiveHeaders.join(','));
+  }
+  for (const row of rows) {
+    const vals = headers.map(h => {
+      const val = row[h];
+      if (val === null || val === undefined) return '';
+      let str = String(val);
+      // Optional transform
+      if (opts.transform) {
+        str = opts.transform(h, val);
+      }
+      // Format dates if dateFormat is specified
+      if (opts.dateFormat === 'iso' && val instanceof Date) {
+        str = val.toISOString();
+      } else if (opts.dateFormat === 'locale' && val instanceof Date) {
+        str = val.toLocaleString();
+      }
+      // Escape quotes and wrap in quotes if contains comma, quote, or newline
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    });
+    csvRows.push(vals.join(','));
+  }
+  const csvContent = csvRows.join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
 }

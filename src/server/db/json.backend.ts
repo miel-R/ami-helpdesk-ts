@@ -214,9 +214,17 @@ export class JsonBackend implements StorageBackend {
     return rows.slice(-Math.min(num(limit, 200), 1000)).reverse();
   }
 
-  async summary(options: SummaryOptions = {}): Promise<UsageSummary> {
+async summary(options: SummaryOptions = {}): Promise<UsageSummary> {
     const { days = 30, username = null } = options;
-    const cutoff = Date.now() - num(days, 30) * 86400000;
+    let cutoff: number;
+    if (days === 1) {
+      // "Today" means from midnight today to now
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      cutoff = today.getTime();
+    } else {
+      cutoff = Date.now() - num(days, 30) * 86400000;
+    }
     let rows = this.usage.entries.filter(r => new Date(r.created_at).getTime() >= cutoff);
     if (username) rows = rows.filter(r => r.username === String(username));
 

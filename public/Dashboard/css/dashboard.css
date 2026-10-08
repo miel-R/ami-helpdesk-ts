@@ -1,5 +1,11 @@
 :root { --ami-purple: #6f42c1; --ami-purple-hover: #59339d; }
 body { background-color: #f8fafc; min-height: 100vh; }
+/* Critical: `hidden` attribute loses to Bootstrap's .d-flex{display:flex!important}
+   because both are !important with equal specificity, and .d-flex is declared
+   later in bootstrap.min.css. Re-assert it with higher specificity so that a
+   "hidden" element (e.g. #login after sign-in) actually hides. */
+#login[hidden], #app[hidden], [data-panel][hidden], #loginErr[hidden],
+#errMsg[hidden], #okMsg[hidden], #lastUpd[hidden] { display: none !important; }
 .bg-ami { background: linear-gradient(135deg, #59339d 0%, #6f42c1 50%, #4c1d95 100%) !important; }
 .text-ami { color: var(--ami-purple) !important; }
 .btn-ami { background-color: var(--ami-purple); border-color: var(--ami-purple); color: #fff; }

@@ -1,7 +1,8 @@
 // Tab: Live — realtime pulse (active sessions, rpm, memory, event stream).
-import { api } from '../api';
-import { esc, must, nfmt, uptime, when } from '../utils';
-import type { AnalyticsRealtime } from '../types';
+import { api } from '../api.js';
+import { esc, must, nfmt, uptime, when } from '../utils.js';
+import type { AnalyticsRealtime } from '../types.js';
+import { renderRateCard } from './rates.js';
 
 function lvlBadge(lvl: string): string {
   if (lvl === 'error') return '<span class="badge bg-danger">error</span>';
@@ -16,6 +17,10 @@ export async function renderRealtime(): Promise<void> {
     `<span class="badge bg-primary fs-6">${nfmt(rt.requests_last_minute)} req/min</span> ` +
     `<span class="badge bg-secondary fs-6">up ${esc(uptime(rt.uptime_seconds))}</span> ` +
     `<span class="badge bg-secondary fs-6">RSS ${nfmt(rt.memory_mb.rss)} MB</span>`;
+  // Rates are a separate request and a separate failure. renderRealtime is called
+  // on a 15s timer, so letting a rate-read error reject here would blank the
+  // counters on every tick; the card degrades on its own instead.
+  void renderRateCard();
   const c = rt.counters;
   must('liveCounters').innerHTML = ['totalRequests', 'chatRequests', 'aiCalls', 'aiErrors', 'errors', 'ticketsCreated', 'ticketsFailed', 'uploads']
     .map(k => `<div class="d-flex justify-content-between border-bottom py-1">

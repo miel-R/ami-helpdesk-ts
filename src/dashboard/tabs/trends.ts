@@ -1,9 +1,9 @@
 // Tab: Trends — zero-filled timeseries charts (traffic, tokens, cost, latency).
-import { api } from '../api';
-import { must } from '../utils';
-import { lineChart, barChart } from '../charts';
-import type { AnalyticsTimeseries } from '../types';
-import type { OverviewFilter } from './overview';
+import { api } from '../api.js';
+import { must } from '../utils.js';
+import { lineChart, barChart } from '../charts.js';
+import type { AnalyticsTimeseries } from '../types.js';
+import type { OverviewFilter } from './overview.js';
 
 const PURPLE = '#6f42c1';
 const TEAL = '#0dcaf0';

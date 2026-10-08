@@ -46,6 +46,18 @@ export interface ChatContext {
   // Uploads.
   fileAnalysis: string | null;
   lastFileName: string;
+  /**
+   * Files that were staged for THIS turn, as `{name, stored_name}` pairs.
+   *
+   * This is what makes "files the assistant read" answerable. The uploads array on
+   * the conversation only says a file exists; it cannot say whether the model was
+   * ever handed it, because a file staged in an earlier turn stays in that array
+   * for the life of the conversation. stageUploads fills this, stage.reply attaches
+   * the names to the assistant message's meta, and the session analytics counts
+   * what it finds there. A file nobody read is therefore not billed as read.
+   */
+  processedFiles?: Array<{ name: string; stored_name: string;
+    type: string; size: number }>;
 
   /**
    * True once this turn's own user message has been pushed onto

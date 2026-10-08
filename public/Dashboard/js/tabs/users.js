@@ -1,6 +1,6 @@
 // Tab: Users — per-user rollup table with quota bars + manage actions.
-import { api, flash } from '../api';
-import { ago, esc, must, nfmt, usd } from '../utils';
+import { api, flash } from '../api.js';
+import { ago, esc, must, nfmt, usd } from '../utils.js';
 export function quotaBar(used, limit) {
     if (limit === null)
         return '<span class="badge bg-dark">unlimited</span>';

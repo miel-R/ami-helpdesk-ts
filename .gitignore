@@ -25,6 +25,13 @@ tmp-edit-*.cjs
 # Certs
 certs/
 
+# Dashboard CSV/JSON exports. The browser downloads them relative to the served
+# page, so they land in public/Dashboard/ when the dashboard is opened from the
+# deployed host. They are user data, not build output.
+public/Dashboard/ami-*.csv
+public/Dashboard/ami-*.json
+data/cost-rates.json
+
 # OS / editor
 .DS_Store
 Thumbs.db

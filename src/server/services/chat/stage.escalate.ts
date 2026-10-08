@@ -61,7 +61,27 @@ export const decideAndStore: ChatStage = async (ctx: ChatContext): Promise<ChatR
         ? "Sure - I'll bring up the form so you can log it."
         : "Sorry, I didn't catch that properly just now - my reply came back blank. Could you say that again?"));
 
-  session.messages.push({ role: 'assistant', content: usableReply, timestamp: new Date().toISOString() });
+  // Which files this turn actually handed to the model, recorded on the reply.
+  //
+  // This is the record the dashboard's Files column reads. It is per-message
+  // rather than per-conversation on purpose: `session.uploads` accumulates every
+  // file for the life of the conversation (bounded at twenty), so counting from it
+  // would report a screenshot uploaded in session #1 as "read" in session #5.
+  const filesForMeta = (ctx.processedFiles || []).map(f => ({
+    name: f.name,
+    stored_name: f.stored_name,
+    type: f.type || '',
+    size: Number(f.size) || 0
+  }));
+
+  session.messages.push({
+    role: 'assistant',
+    content: usableReply,
+    timestamp: new Date().toISOString(),
+    // Empty meta is left off entirely rather than written as `{}`, so the common
+    // no-upload turn produces exactly the row shape it always did.
+    ...(filesForMeta.length ? { meta: { files: filesForMeta } } : {})
+  });
 
   // The trim and the persistence cursor move together, in one place.
   //

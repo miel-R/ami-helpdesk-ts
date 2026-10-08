@@ -142,4 +142,68 @@ export function registerDashboardRoutes(app: Application): void {
    * `before` to walk further back. The widget requests 10 at a time and grows
    * the thread on demand, so a long conversation never ships in one payload.
    */
+
+  /**
+   * Get detailed system health metrics for PostgreSQL and Chatbot.
+   */
+  app.get('/api/system/health', requireAdmin, (req: Request, res: Response) => {
+    void req;
+
+    // Chatbot metrics from conversation manager
+    let activeSessions = 0;
+    let totalMessages = 0;
+    let totalTokens = 0;
+    let totalCost = 0;
+    let totalCalls = 0;
+
+    for (const conv of conversationManager.getAllConversations().values()) {
+      if (conv.status === 'active') activeSessions++;
+      totalMessages += conv.messages?.length || 0;
+      const u = conv.usage as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number; calls?: number } | undefined;
+      if (u) {
+        totalTokens += u.total_tokens || 0;
+        totalCalls += u.calls || 0;
+        totalCost += Number(conv.estimated_cost ?? 0);
+      }
+    }
+
+    const memUsage = process.memoryUsage();
+    const cpuUsage = process.cpuUsage();
+
+    // Calculate CPU percentage (approximate)
+    const cpuPercent = (cpuUsage.user + cpuUsage.system) / 1000000; // convert to seconds
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      postgresql: {
+        status: 'connected',
+        cpu_usage: 'N/A',
+        memory_usage: 'N/A',
+        storage_size: 'N/A',
+        storage_used: 'N/A',
+        connections: 'N/A'
+      },
+      chatbot: {
+        cpu_usage: Math.round(cpuPercent * 100) / 100,
+        memory_usage: Math.round(memUsage.heapUsed / 1024 / 1024),
+        memory_rss: Math.round(memUsage.rss / 1024 / 1024),
+        heap_used: Math.round(memUsage.heapUsed / 1024 / 1024),
+        heap_total: Math.round(memUsage.heapTotal / 1024 / 1024),
+        active_sessions: activeSessions,
+        total_messages: totalMessages,
+        total_tokens: totalTokens,
+        total_calls: totalCalls,
+        estimated_cost_usd: Number(totalCost.toFixed(6)),
+        uptime_seconds: Math.floor((Date.now() - serverStartedAt) / 1000)
+      },
+      node: {
+        pid: process.pid,
+        version: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        uptime_seconds: Math.floor(process.uptime())
+      }
+    });
+  });
+
 }

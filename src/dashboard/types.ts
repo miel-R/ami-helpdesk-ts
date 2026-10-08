@@ -33,9 +33,35 @@ export interface AnalyticsUserRow {
   avg_latency_ms: number; last_seen: string | null; last_active: string | null;
 }
 export interface AnalyticsUsers { timestamp: string; days: number; count: number; users: AnalyticsUserRow[]; }
-export interface AnalyticsSessionRow {
-  session_id: string; user: string; mode: string; status: string; messages: number;
-  ai_calls: number; input_tokens: number; output_tokens: number; total_tokens: number;
-  cost_usd: number; avg_latency_ms: number; created_at: string | null; last_activity: string | null;
+/** A file the assistant consumed during a session. */
+export interface SessionFile {
+  name: string; stored_name: string; type: string; size: number; uploaded_at: string | null;
 }
-export interface AnalyticsSessions { timestamp: string; count: number; sessions: AnalyticsSessionRow[]; }
+
+export interface AnalyticsSessionRow {
+  session_id: string; user: string; mode: string; status: string;
+  /** 1-based position within the parent conversation. */
+  session_no: number;
+  messages: number;
+  /** role='user', excluding the end marker. */
+  user_messages: number;
+  /** role='assistant', excluding the end marker. */
+  assistant_messages: number;
+  ai_calls: number; input_tokens: number; output_tokens: number; total_tokens: number;
+  /** input tokens priced at the configured input rate. */
+  input_cost_usd: number;
+  /** output tokens priced at the configured output rate. */
+  output_cost_usd: number;
+  /** input_cost_usd + output_cost_usd. */
+  cost_usd: number;
+  /** Actual provider charge, straight from the usage ledger. */
+  ledger_cost_usd: number;
+  files: SessionFile[]; files_count: number;
+  /** False when a file was placed by upload timestamp rather than recorded. */
+  files_exact: boolean;
+  avg_latency_ms: number; created_at: string | null; last_activity: string | null;
+}
+export interface AnalyticsSessions {
+  timestamp: string; count: number; sessions: AnalyticsSessionRow[];
+  rates: { input_per_million: number; output_per_million: number; source: 'custom' | 'default' };
+}
