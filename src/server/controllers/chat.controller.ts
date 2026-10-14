@@ -14,6 +14,17 @@ import { counters, logEvent } from '../core/logger';
 import { db } from '../db/storage.service';
 import { config } from '../config/config.service';
 import conversationManager from '../services/session.service';
+import { getTicketModals, getLinksOnlyMode } from '../config/ticket-modals.service';
+import { TICKET_TYPE_LABELS } from '../db/types.model';
+
+/** Ticket settings plus a display label, which the widget links read out. */
+async function labelledTicketModals(): Promise<Record<string, { enabled: boolean; external_url: string | null; label: string }>> {
+  const out: Record<string, { enabled: boolean; external_url: string | null; label: string }> = {};
+  for (const [type, v] of Object.entries(await getTicketModals())) {
+    out[type] = { enabled: v.enabled, external_url: v.external_url, label: TICKET_TYPE_LABELS[type] || type };
+  }
+  return out;
+}
 import { greetingFor } from '../features/agent/greeting';
 import {
   CHAT_STAGES, runChatPipeline, contextFromRequest, NO_IDENTITY_MESSAGE
@@ -96,6 +107,15 @@ export function registerChatRoutes(app: Application, upload: FileUpload): void {
       authenticated: true,
       identity_token_present: !!String(identity_token ?? '').trim(),
       session_idle_ms: config.conversation.sessionTimeout,
+      // Which ticket types the chatbot fills in. The widget needs this before it
+      // renders the type picker, because a type that is switched off must not
+      // present itself as fillable and then dead-end at submit.
+      //
+      // Every type is sent, enabled or not: the widget's job is to show a link
+      // for the disabled ones, and it cannot do that for a type it was never
+      // told about.
+      ticket_modals: await labelledTicketModals(),
+      links_only: await getLinksOnlyMode(),
       greeting,
       goodbye
     });

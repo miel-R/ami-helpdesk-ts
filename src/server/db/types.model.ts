@@ -47,6 +47,49 @@ export interface UserProfile {
   department?: string;
 }
 
+/**
+ * Whether the chatbot fills in a ticket type, and where to go if it does not.
+ *
+ * `external_url` is the raw string an admin typed. It is not normalised and not
+ * validated as a URL here on purpose - it is handed straight to the browser as a
+ * link target, and a "helpful" rewrite is how a correct URL turns into a broken
+ * one. Anything that is not http(s) is refused at the admin API boundary instead,
+ * where the mistake can be reported to the person who made it.
+ */
+export interface TicketModalConfig {
+  ticket_type: string;
+  enabled: boolean;
+  external_url: string | null;
+  updated_at?: string;
+}
+
+/**
+ * The three ticket types the chatbot knows about, in the order MIS lists them.
+ *
+ * `_links_only` is deliberately NOT in this list: it is the master switch stored
+ * as a row in the same table, and keeping it out of TICKET_TYPES is what stops it
+ * being rendered as a fourth ticket type or passed to the SQL that builds the
+ * type list.
+ */
+export const TICKET_TYPES = ['tech_support', 'system_request', 'it_asset'] as const;
+
+/** Row key for the master switch. Not a ticket type. */
+export const LINKS_ONLY_KEY = '_links_only';
+
+/**
+ * Human labels for the ticket types.
+ *
+ * Sent to the widget so a link reads "Open the System Request form" instead of
+ * exposing the internal key `system_request`. Duplicated from the widget's
+ * FORM_DEFINITIONS on purpose: the widget is hand-written browser ES modules and
+ * cannot import from the server build.
+ */
+export const TICKET_TYPE_LABELS: Record<string, string> = {
+  tech_support: 'Tech Support',
+  system_request: 'System Request',
+  it_asset: 'IT Asset'
+};
+
 /** One row of the token/cost ledger. */
 export interface UsageEntry {
   id: number;
@@ -214,8 +257,15 @@ export interface StorageHealth {
   messages?: number;
 }
 
-/** What a caller can report without knowing which backend is active. */
-export const REQUIRED_TABLES = ['users', 'conversations', 'messages'] as const;
+/**
+ * What a caller can report without knowing which backend is active.
+ *
+ * `ticket_modal_config` is here because the chat path reads it on every ticket
+ * handover. A missing table would otherwise surface as a failed query inside an
+ * unrelated feature, which reads like a widget bug rather than an un-migrated
+ * database.
+ */
+export const REQUIRED_TABLES = ['users', 'conversations', 'messages', 'ticket_modal_config'] as const;
 
 export interface StorageBackend {
   readonly kind: 'postgres' | 'json';
@@ -273,7 +323,26 @@ export interface StorageBackend {
   listConversations(options?: ListConversationsOptions): Promise<StoredConversationRow[]>;
   pageMessages(sessionId: string, options?: PageMessagesOptions): Promise<MessagePage>;
   recentMessages(sessionId: string, limit?: number): Promise<StoredMessage[]>;
-  deleteConversation(sessionId: string): Promise<void>;
+deleteConversation(sessionId: string): Promise<void>;
+
+  /**
+   * Ticket modal switches, one row per type.
+   *
+   * Returns a row for every known type even when the table has no row for it, so
+   * callers never have to decide whether a missing row means "enabled" or
+   * "missing". Unknown types are filtered out rather than passed through.
+   */
+  listTicketModalConfig(): Promise<TicketModalConfig[]>;
+  updateTicketModalConfig(type: string, enabled: boolean, externalUrl: string | null): Promise<TicketModalConfig>;
+
+  /**
+   * The master switch: true means no type opens a form, every type is a link.
+   *
+   * A separate read rather than a column on every row, because it is not a
+   * property of a ticket type - it is a property of the deployment.
+   */
+  getLinksOnlyMode(): Promise<boolean>;
+  setLinksOnlyMode(on: boolean): Promise<boolean>;
 
   pruneOldMessages(days?: number): Promise<number>;
   close(): Promise<void>;

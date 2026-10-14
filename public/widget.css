@@ -1305,6 +1305,52 @@
   outline-offset: 2px;
 }
 
+/* A type an admin switched off.
+ *
+ * Deliberately still clickable, and deliberately NOT greyed out: it is styled as
+ * a secondary action rather than a dead control, because clicking it is how the
+ * user reaches the real MIS form. Dimming it would read as "broken" instead of
+ * "handled elsewhere". */
+.ami-type-card.ami-type-external {
+  border-style: dashed;
+  background: var(--ami-surface, #fff);
+}
+
+.ami-type-card.ami-type-external:hover {
+  border-color: var(--ami-primary);
+  background: var(--ami-primary-light);
+}
+
+.ami-type-card.ami-type-external .ami-type-desc {
+  color: var(--ami-primary);
+  font-weight: 500;
+}
+
+/* The in-chat notice that stands in for a form the chatbot will not fill in.
+   Rendered through addMessage, so it is an ordinary .ami-message bubble with a
+   ticket-notice tint rather than a bespoke row shape. */
+.ami-message .ami-external-form-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-2, 8px);
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-md, 6px);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ami-external-form-link::after {
+  content: "\2197";       /* northeast arrow: "opens somewhere else" */
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.ami-external-form-link:hover {
+  text-decoration: underline;
+}
+
 .ami-type-icon {
   grid-area: icon;
   display: flex;

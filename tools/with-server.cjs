@@ -63,6 +63,12 @@ async function waitForServer(port, timeoutMs) {
   const child = spawn(process.execPath, [serverEntry], {
     // NODE_ENV=development keeps it on the HTTP listener; production mode wants
     // the TLS pair, which is not present outside the container.
+    //
+    // DATABASE_URL is forwarded when the caller set one. A suite that asserts on
+    // PERSISTENCE has to run against the real database: the JSON fallback accepts
+    // writes and reports them back without storing them, which is the documented
+    // behaviour and would make such a suite fail for the right reason at the wrong
+    // layer. Suites that only care about shapes are fine either way.
     env: { ...process.env, PORT: String(port), ADMIN_KEY: KEY, NODE_ENV: 'development' },
     stdio: ['ignore', 'pipe', 'pipe']
   });

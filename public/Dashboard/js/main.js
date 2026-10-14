@@ -8,6 +8,7 @@ import { renderUsers } from './tabs/users.js';
 import { renderSessions } from './tabs/sessions.js';
 import { renderRealtime } from './tabs/realtime.js';
 import { renderLogs, wireLogFilters, openSession } from './tabs/inspect.js';
+import { renderTicketForms, wireTicketForms } from './tabs/ticket-forms.js';
 import { wireRateEditor } from './tabs/rates.js';
 import { openUserDetail, openUserEditor, wireUserForm } from './tabs/user-admin.js';
 let activeTab = 'overview';
@@ -46,6 +47,8 @@ export async function refreshAll() {
         await safe('sessions', () => renderSessions(100));
     if (activeTab === 'live')
         await safe('live', () => renderRealtime());
+    if (activeTab === 'tickets')
+        await safe('ticket forms', () => renderTicketForms());
     if (activeTab === 'logs')
         await safe('logs', () => renderLogs());
     stamp.textContent = 'updated ' + new Date().toLocaleTimeString();
@@ -263,6 +266,7 @@ function boot() {
     wireCostFilters();
     wireUserForm();
     wireRateEditor();
+    wireTicketForms();
     if (!getKey()) {
         showLogin();
         return;

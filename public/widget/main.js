@@ -1000,29 +1000,23 @@ var Widget = {
             // `_sessionEnded` had been set true by the very first draw.
             self.addSessionEnd({ time: self.lastTime(d.messages), final: true });
           }
-          // The confirmation is now a real persisted assistant turn, written by
-          // the server when the ticket is filed, so replaying the page above
-          // already brings it back and it no longer needs re-adding here. This is
-          // only a fallback for conversations filed before that change, or where
-          // the ticket was numbered on a later page.
+          // No confirmation is synthesised here any more.
           //
-          // It checks the replayed turns first: adding the notice unconditionally
-          // would print it twice on every reload, once from history and once from
-          // here.
-          var lastNo = d.last_control_number || self._lastControlNumber || null;
-          if (lastNo) {
-            self._lastControlNumber = String(lastNo);
-            var alreadyReplayed = (d.messages || []).some(function (m) {
-              return m.role === 'assistant'
-                && String(m.content || '').indexOf('Ticket submitted') !== -1
-                && String(m.content || '').indexOf(String(lastNo)) !== -1;
-            });
-            if (!alreadyReplayed && !self._ticketNoticeShown) {
-              self._ticketNoticeShown = true;
-              self.addMessage('assistant', self.ticketNotice(lastNo),
-                { notice: true, quiet: true });
-            }
-          }
+          // There used to be a fallback that drew "Ticket submitted" from
+          // `last_control_number` whenever the replayed page did not already
+          // contain it. That number is STICKY for the whole conversation - it is
+          // the last ticket ever filed in that session - so the fallback kept
+          // resurrecting an old ticket's confirmation on every later history
+          // load. A user who asked for a ticket hours after filing one was told a
+          // ticket had been submitted when none had been, and because the notice
+          // was drawn client-side it vanished on the next refresh, which is what
+          // made it read as a glitch rather than a bug.
+          //
+          // The confirmation is a real persisted assistant turn written by
+          // POST /api/ticket (see ticket.controller.ts), so if it is not in the
+          // transcript then it was never written and drawing it would be inventing
+          // a record. Silence is recoverable; a false ticket is not.
+          self._lastControlNumber = d.last_control_number || self._lastControlNumber || null;
           self.loadedCount = d.messages.length;
           // The server's cursor is authoritative, but the same value can be read
           // straight off the page: the endpoint returns NEWEST FIRST, so the LAST
@@ -1981,11 +1975,72 @@ handleResponse: function (data, opts) {
       // The assistant decided the chat has gone as far as it can, so it hands
       // over to the ticket form itself. There is no header button for this.
       // Opened after the reply lands so the user reads why the form appeared.
+      //
+      // The switches come from the server on every turn rather than from the
+      // session bootstrap, so an admin who flips one does not have to wait for
+      // the user's next page load to see it applied.
+      if (data.ticket_modals) this.ticketModals = data.ticket_modals;
+      if (data.links_only !== undefined) this.linksOnly = !!data.links_only;
       if (data.open_ticket_modal && !this.ticketModalOpen && !suppressModal) {
         this.openTicketModal(data.ticket_prefill || null);
+      } else if (data.offer_ticket_links && !this.ticketModalOpen && !suppressModal
+                 && data.ticket_link_messages && data.ticket_link_messages.length) {
+        this.showTicketLinks(data.ticket_link_messages);
       }
     },
 
+    /**
+     * Render the MIS handovers the server just persisted.
+     *
+     * These strings come from the response and are the same text written to
+     * `messages`, so the live view and the replayed history are identical and a
+     * refresh does not change the transcript.
+     *
+     * They are drawn with plain addMessage rather than by building the DOM here.
+     * The earlier hand-built version reached for `this.messageList` and
+     * `this.scrollToBottom()`, neither of which exists on the widget, so the link
+     * was appended to undefined and silently vanished. addMessage already handles
+     * the avatar, bubble class and pinned-to-bottom behaviour, and renderContent
+     * turns the markdown `[text](url)` into an anchor with target=_blank and
+     * rel=noopener, only for http(s) - so an unsafe stored URL degrades to plain
+     * text instead of becoming a clickable javascript: link.
+     */
+    showTicketLinks: function (messages) {
+      for (var i = 0; i < messages.length; i++) {
+        this.addMessage('assistant', messages[i], { notice: true });
+      }
+    },
+
+    /**
+     * Whether an admin-entered link is safe to put in an href.
+     *
+     * The value is used verbatim - no rewriting, no trimming of the path - but the
+     * SCHEME is checked, because href is the one place where a stored string becomes
+     * executable. javascript: and data: both run in the page that renders them, so a
+     * config row is as much an injection point as a message body.
+     */
+    isSafeExternalUrl: function (url) {
+      var s = String(url || '').trim();
+      if (!s) return false;
+      try {
+        var parsed = new URL(s, window.location.href);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch (e) {
+        return false;
+      }
+    },
+
+    /**
+     * Chat links to the real MIS forms for any ticket type switched off.
+     *
+     * Only shown when something is actually switched off AND has a link, and only
+     * once per conversation turn that carries them. Without the "once" guard a
+     * plain "hello" would make the widget re-print the same three links on every
+     * reply, because the server sends the config on every turn.
+     *
+     * The URL is used exactly as stored. It came from an admin who typed it, and
+     * the only thing checked here is that it is a link - see isSafeExternalUrl.
+     */
     openTicketModal: function (prefill) {
       if (this.ticketModalOpen) return;
       if (!this.modal || !this.modal.open) return;
@@ -2004,6 +2059,10 @@ handleResponse: function (data, opts) {
         // than re-running base discovery for every catalog dropdown.
         apiUrl: function (p) { return self.apiUrl(p); },
         sessionId: this.sessionId,
+        // Which types are still fillable here. The modal marks the rest and
+        // hands the user a link instead of opening a form that cannot submit.
+        ticketModals: this.ticketModals || null,
+        linksOnly: !!this.linksOnly,
         // What the user asked about most recently, plus anything the server
         // carried over from earlier turns, so the form opens already filled
         // where the session knows the answer.
@@ -2024,7 +2083,28 @@ handleResponse: function (data, opts) {
             );
           }
         },
-        onCreated: function (result) { self.onTicketCreated(result); }
+        onCreated: function (result) { self.onTicketCreated(result); },
+        // A type an admin switched off, clicked while the modal was open (mixed mode,
+        // where some types still fill in here). The modal has closed and the chat
+        // owns the message list, so the handover is drawn here instead.
+        //
+        // Built as the same markdown the server persists, so it renders through
+        // the one path that turns a link into an anchor. Client-only: this branch
+        // has no server turn behind it to persist against, so a refresh drops it.
+        onExternal: function (type, url) {
+          var cfg = (self.ticketModals || {})[type] || {};
+          if (!self.isSafeExternalUrl(url)) {
+            self.addMessage('assistant',
+              'I\u2019m not able to open that form right now. Please use the MIS helpdesk directly.',
+              { notice: true });
+            return;
+          }
+          var label = cfg.label || type;
+          self.showTicketLinks([
+            "I don't file " + label + ' tickets here. Use the MIS form instead:\n' +
+            '[Open the ' + label + ' form](' + url + ')'
+          ]);
+        }
       });
     },
 

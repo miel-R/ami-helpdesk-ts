@@ -210,9 +210,9 @@ section('1. The route inventory has not drifted');
     // Declared once, in the contract both backends implement - not next to the
        // Postgres code that happens to read it, which is how it ended up in two
        // places the first time this was split up.
-       ok('required tables are declared once, in the shared contract',
-          /REQUIRED_TABLES\s*=\s*\['users', 'conversations', 'messages'\]/
-            .test(read('src/server/db/types.model.ts')));
+ok('required tables are declared once, in the shared contract',
+        /REQUIRED_TABLES\s*=\s*\['users', 'conversations', 'messages', 'ticket_modal_config'\]/
+          .test(read('src/server/db/types.model.ts')));
 
     section('2b. The boot gate cannot be satisfied by a marker table alone');
     const dbSrc = read('src/server/db/postgres.backend.ts');

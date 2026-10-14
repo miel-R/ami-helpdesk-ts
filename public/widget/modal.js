@@ -108,6 +108,24 @@ const AmiModal = (function() {
   let attachmentFiles = [];
   const catalogCache = {};
 
+  /**
+   * Which types the chatbot still fills in, as {type: {enabled, external_url}}.
+   *
+   * Null when the server sent nothing, which is treated as "everything enabled" so
+   * an older server or a failed bootstrap leaves the forms working rather than
+   * locking every user out of them.
+   */
+  let ticketModals = null;
+  let onExternalCb = null;
+  /** Master switch: when on, the modal is bypassed for every type. */
+  let linksOnlyMode = false;
+
+  function modalSetting(type) {
+    if (!ticketModals) return { enabled: true, external_url: null };
+    var cfg = ticketModals[type];
+    return cfg && typeof cfg === 'object' ? cfg : { enabled: true, external_url: null };
+  }
+
   // Everything the modal needs to talk to the server, handed over by the chat
   // widget in open(). The modal does not reach for globals: the chat widget owns
   // API-base discovery and the session id, and duplicating that here is how the
@@ -209,6 +227,24 @@ const AmiModal = (function() {
   }
 
   function selectType(type) {
+    // Links-only mode: no type opens a form, whatever its own switch says. Checked
+    // before the per-type switch so one place decides "the modal is not how you
+    // get a ticket today", rather than the switch and the mode disagreeing.
+    var cfg = modalSetting(type);
+    if (ctx.linksOnly || cfg.enabled === false) {
+      if (cfg.external_url) {
+        var cb = onExternalCb;
+        // Closed with a distinct reason so the chat does not also report this as
+        // "the user abandoned the form", which would have the model chase them.
+        close('external');
+        if (cb) cb(type, cfg.external_url);
+      } else {
+        showToast('The ' + FORM_DEFINITIONS[type].label + ' form is not available here. '
+          + 'Please use the MIS helpdesk directly.', 'error');
+      }
+      return;
+    }
+
     selectedType = type;
     fieldValues = {};
     // Cleared on every type change, not just when the new type forbids files:
@@ -867,8 +903,38 @@ const AmiModal = (function() {
     }, 5000);
   }
 
+/**
+   * Marks the type cards that are switched off.
+   *
+   * The card stays clickable rather than being greyed out and inert: a switched
+   * off type is still a thing the user may want, and clicking it is how they get
+   * to the MIS form. What changes is the affordance - the description is replaced
+   * with where the form actually is.
+   */
+  function applyTypeAvailability() {
+    if (!modalEl) return;
+    modalEl.querySelectorAll('.ami-type-card').forEach(function (card) {
+      var type = card.dataset.type;
+      var cfg = modalSetting(type);
+      var def = FORM_DEFINITIONS[type];
+      var desc = card.querySelector('.ami-type-desc');
+      if (!desc) return;
+      if (cfg.enabled === false || linksOnlyMode) {
+        card.classList.add('ami-type-external');
+        card.setAttribute('aria-label', def.label + ' - opens the MIS form in a new tab');
+        desc.textContent = cfg.external_url
+          ? 'Opens the MIS form in a new tab'
+          : 'Not available through the chatbot';
+      } else {
+        card.classList.remove('ami-type-external');
+        card.setAttribute('aria-label', def.label + ' - ' + def.description);
+        desc.textContent = def.description;
+      }
+    });
+  }
+
   /**
-   * @param {object}  [options]
+    * @param {object}  [options]
    * @param {function} [options.apiUrl]    path -> absolute URL, from the chat widget
    * @param {string}   [options.sessionId] session the server already knows about
    * @param {function} [options.onCreated] called with the ticket result once MIS confirms
@@ -891,6 +957,10 @@ const AmiModal = (function() {
     selectedType = null;
     fieldValues = {};
     attachmentFiles = [];
+    ticketModals = (opts.ticketModals && typeof opts.ticketModals === 'object') ? opts.ticketModals : null;
+    linksOnlyMode = !!opts.linksOnly;
+    onExternalCb = typeof opts.onExternal === 'function' ? opts.onExternal : null;
+    applyTypeAvailability();
     showStep(1);
     modalEl.classList.add('open');
     document.body.style.overflow = 'hidden';

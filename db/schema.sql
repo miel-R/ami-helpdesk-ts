@@ -115,6 +115,43 @@ CREATE TABLE IF NOT EXISTS usage_requests (
 );
 
 -- ---------------------------------------------------------------------------
+-- ticket_modal_config
+-- Which ticket types the chatbot fills in itself, and where the rest are sent.
+--
+-- A type can be switched off without a deploy. When it is, the widget does not
+-- open the form for it at all: the chat hands over a link to the real MIS form
+-- instead, because a chatbot that renders a stale copy of a form MIS is free to
+-- change is worse than one that admits it does not handle it.
+--
+-- external_url is NULL on purpose for an enabled type. "Enabled, no link" means
+-- the chatbot fills the form in; "Disabled, no link" means the type cannot be
+-- requested at all, and the widget says so rather than opening a dead form.
+-- Both halves are stored as given - no URL rewriting, no path munging.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS ticket_modal_config (
+  ticket_type  TEXT        PRIMARY KEY,
+  enabled      BOOLEAN     NOT NULL DEFAULT TRUE,
+  external_url TEXT        NULL,
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Seeded on every boot with ON CONFLICT DO NOTHING, so a row an admin has edited
+-- is never overwritten on restart. Defaults ship every type ENABLED, which is
+-- the behaviour this feature had before it existed.
+--
+-- The `_links_only` row is not a ticket type. It is the master switch: when on,
+-- no type opens a form at all and every type is handed to the user as a link. It
+-- lives in the same table so there is one place to look and one save to make,
+-- and it is filtered out of every type list so it cannot be mistaken for a
+-- fourth ticket type.
+INSERT INTO ticket_modal_config (ticket_type, enabled, external_url) VALUES
+  ('tech_support',   TRUE, NULL),
+  ('system_request', TRUE, NULL),
+  ('it_asset',       TRUE, NULL),
+  ('_links_only',    FALSE, NULL)
+ON CONFLICT (ticket_type) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
 -- schema_migrations
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS schema_migrations (

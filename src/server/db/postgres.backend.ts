@@ -11,8 +11,10 @@ import type {
   UserRecord, UserPatch, UserProfile, UsageEntry, UsageEntryInput,
   ConversationStateMeta, ConversationState, MessagePage,
   SummaryBucket, UsageSummary, ListConversationsOptions, PageMessagesOptions,
-  ListMessagesOptions, SummaryOptions, StoredMessage, StoredConversationRow
+ListMessagesOptions, SummaryOptions, StoredMessage, StoredConversationRow,
+  TicketModalConfig
 } from './types.model';
+import { TICKET_TYPES, LINKS_ONLY_KEY } from './types.model';
 import { REQUIRED_TABLES } from './types.model';
 import { num, today, round10, limitValue } from './helpers';
 
@@ -76,25 +78,39 @@ export class PgBackend implements StorageBackend {
     // there, so that is what gets checked. schema.sql is idempotent
     // (CREATE TABLE IF NOT EXISTS throughout), so re-running it is safe and
     // costs nothing.
-    const present = await this.missingTables(client);
-    if (!present.length) {
-      console.log('[db] schema already present, skipping DDL');
-      return;
+const present = await this.missingTables(client);
+    if (present.length) {
+      if (present.length < REQUIRED_TABLES.length) {
+        console.warn(`[db] schema incomplete (missing: ${present.join(', ')}); re-applying DDL`);
+      }
+      await client.query(sql);
+      await client.query('INSERT INTO schema_migrations (version) VALUES (1) ON CONFLICT DO NOTHING');
+      const stillMissing = await this.missingTables(client);
+      if (stillMissing.length) {
+        // Better to refuse to start than to serve a process that 500s on every
+        // request while reporting itself healthy.
+        throw new Error(
+          `schema still missing after DDL: ${stillMissing.join(', ')} - check that ${SCHEMA_FILE} is the file this build expects`
+        );
+      }
+console.log('[db] schema applied (version 1)');
+    } else {
+      console.log('[db] schema already present');
     }
-    if (present.length < REQUIRED_TABLES.length) {
-      console.warn(`[db] schema incomplete (missing: ${present.join(', ')}); re-applying DDL`);
-    }
-    await client.query(sql);
-    await client.query('INSERT INTO schema_migrations (version) VALUES (1) ON CONFLICT DO NOTHING');
-    const stillMissing = await this.missingTables(client);
-    if (stillMissing.length) {
-      // Better to refuse to start than to serve a process that 500s on every
-      // request while reporting itself healthy.
-      throw new Error(
-        `schema still missing after DDL: ${stillMissing.join(', ')} - check that ${SCHEMA_FILE} is the file this build expects`
-      );
-    }
-    console.log('[db] schema applied (version 1)');
+
+    // Rows are applied on EVERY boot, tables only when missing.
+    //
+    // Gating the whole of schema.sql on a missing table meant a row added to an
+    // existing table never reached an existing database: ticket_modal_config was
+    // already there, so the `_links_only` master switch added later was silently
+    // never seeded, and the feature read as permanently off with no error
+    // anywhere. ON CONFLICT DO NOTHING keeps this safe to repeat and keeps it from
+    // overwriting a setting an admin has changed.
+    await client.query(
+      `INSERT INTO ticket_modal_config (ticket_type, enabled, external_url)
+         VALUES ('_links_only', FALSE, NULL)
+       ON CONFLICT (ticket_type) DO NOTHING`
+    );
   }
 
   /** Of the tables this app depends on, the ones this database is missing. */
@@ -553,9 +569,77 @@ async summary(options: SummaryOptions = {}): Promise<UsageSummary> {
     return rows.reverse() as StoredMessage[];
   }
 
-  async deleteConversation(sessionId: string): Promise<void> {
+async deleteConversation(sessionId: string): Promise<void> {
     await this.q('DELETE FROM messages WHERE session_id = $1', [String(sessionId)]);
     await this.q('DELETE FROM conversations WHERE session_id = $1', [String(sessionId)]);
+  }
+
+  // -- ticket modal config --------------------------------------------------
+
+  /**
+   * Every known ticket type, with a row synthesised for any the table lacks.
+   *
+   * The LEFT JOIN from the type list rather than a plain SELECT is the point: a
+   * type with no row reads as ENABLED, which is how the chatbot behaved before
+   * this table existed. Returning an empty array instead would make a missing row
+   * mean "off", and every type would look disabled on a partially migrated DB.
+   */
+  async listTicketModalConfig(): Promise<TicketModalConfig[]> {
+    const { rows } = await this.q(
+      `SELECT t.ticket_type,
+              COALESCE(c.enabled, TRUE)  AS enabled,
+              c.external_url,
+              c.updated_at
+         FROM (SELECT unnest($1::text[]) AS ticket_type) t
+         LEFT JOIN ticket_modal_config c ON c.ticket_type = t.ticket_type
+        ORDER BY array_position($1::text[], t.ticket_type)`,
+      [[...TICKET_TYPES]]
+    );
+    return rows as TicketModalConfig[];
+  }
+
+  async updateTicketModalConfig(
+    type: string, enabled: boolean, externalUrl: string | null
+  ): Promise<TicketModalConfig> {
+    const { rows } = await this.q(
+      `INSERT INTO ticket_modal_config (ticket_type, enabled, external_url, updated_at)
+            VALUES ($1, $2, $3, now())
+       ON CONFLICT (ticket_type) DO UPDATE
+              SET enabled = EXCLUDED.enabled,
+                  external_url = EXCLUDED.external_url,
+                  updated_at = now()
+         RETURNING ticket_type, enabled, external_url, updated_at`,
+      [String(type), !!enabled, externalUrl === null ? null : String(externalUrl)]
+    );
+    return rows[0] as TicketModalConfig;
+  }
+
+  /**
+   * A missing row reads as OFF, not ON.
+   *
+   * Every per-type default is enabled, but this one is deliberately inverted: a
+   * database that predates the column, or a row that failed to seed, must not
+   * silently lock every user out of ticket creation. Failing open here means the
+   * chatbot still files tickets the way it always did.
+   */
+  async getLinksOnlyMode(): Promise<boolean> {
+    const { rows } = await this.q(
+      `SELECT enabled FROM ticket_modal_config WHERE ticket_type = $1`,
+      [LINKS_ONLY_KEY]
+    );
+    return rows.length ? rows[0].enabled === true : false;
+  }
+
+  async setLinksOnlyMode(on: boolean): Promise<boolean> {
+    const { rows } = await this.q(
+      `INSERT INTO ticket_modal_config (ticket_type, enabled, external_url, updated_at)
+            VALUES ($1, $2, NULL, now())
+       ON CONFLICT (ticket_type) DO UPDATE
+              SET enabled = EXCLUDED.enabled, updated_at = now()
+         RETURNING enabled`,
+      [LINKS_ONLY_KEY, !!on]
+    );
+    return rows.length ? rows[0].enabled === true : !!on;
   }
 
   // -- retention -----------------------------------------------------------

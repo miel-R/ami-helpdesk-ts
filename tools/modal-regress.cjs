@@ -446,16 +446,25 @@ const widgetMain = read('public/widget/main.js');
        && ctrlForNotice.indexOf('res.json({', saveAt) > saveAt);
     ok('a duplicate submit cannot stack two confirmations',
        /alreadySaid/.test(ctrlForNotice));
-    ok('the widget does not re-add a confirmation history already replayed',
-       /alreadyReplayed/.test(widgetMain));
-    ok('the widget still reads last_control_number as a fallback',
-       /d\.last_control_number/.test(widgetMain));
-    ok('and re-shows the confirmation from it', /_ticketNoticeShown/.test(widgetMain));
-    ok('the confirmation text is shared by both paths, not written twice',
-       widgetMain.split('Ticket submitted. Control number:').length - 1 === 1,
-       'found ' + (widgetMain.split('Ticket submitted. Control number:').length - 1) + ' copies');
-    ok('the restored confirmation does not yank the viewport',
-       /notice: true, quiet: true/.test(widgetMain));
+// loadHistory used to synthesise the confirmation from last_control_number when
+    // the replayed page lacked it. That number is the LAST ticket filed in the
+    // session, so the fallback resurrected an old confirmation on every later
+    // history load - a user who asked for a ticket hours after filing one was told
+    // a ticket had been submitted when none had been. It was drawn client-side, so
+    // it vanished on refresh and read as a glitch rather than a bug.
+    //
+    // The assertions below now pin the absence. The confirmation is a real
+    // persisted assistant turn (asserted above), so if it is not in the transcript
+    // it was never written and drawing it would be inventing a record.
+    const widgetCode = widgetMain.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
+    ok('history does not synthesise a confirmation', !/alreadyReplayed/.test(widgetCode));
+    ok('and does not redraw one from last_control_number',
+      !/_ticketNoticeShown/.test(widgetCode));
+    ok('the widget still remembers the number for the session',
+      /_lastControlNumber\s*=\s*d\.last_control_number/.test(widgetCode));
+    ok('the confirmation text is written in exactly one place',
+      widgetMain.split('Ticket submitted. Control number:').length - 1 === 1,
+      'found ' + (widgetMain.split('Ticket submitted. Control number:').length - 1) + ' copies');
 
     ok('the second page is the ten messages just before the cursor',
        second.messages[0].content === 'message 50' && second.messages[9].content === 'message 41',
@@ -567,10 +576,14 @@ const widgetMain = read('public/widget/main.js');
           !/openTicketModal\s*=\s*aiWantsEscalation\s*\|\|/.test(serverMain));
        ok('problem detection runs over the whole session',
           /hasDescribedProblem\(userUtterances\)/.test(serverMain));
-       ok('the prefill is built from the session and returned',
-          /ticket_prefill:\s*escalation\.open\s*\?\s*buildTicketPrefill\(userUtterances\)/.test(serverMain));
-       ok('no prefill leaks when the form stays closed',
-          /ticket_prefill:\s*escalation\.open\s*\?/.test(serverMain));
+ok('the prefill is built from the session and returned',
+        /ticket_prefill:\s*escalation\.open\s*(?:&&\s*\w+\s*)?\?\s*buildTicketPrefill\(userUtterances\)/.test(serverMain));
+      ok('no prefill leaks when the form stays closed',
+        /ticket_prefill:\s*escalation\.open\s*(?:&&\s*\w+\s*)?\?/.test(serverMain));
+      // The handover is also withheld when every ticket type is switched off, so
+      // the modal never opens onto nothing the user can actually submit.
+      ok('the handover is gated on some type being enabled',
+        /open_ticket_modal:\s*escalation\.open\s*&&\s*\w+/.test(serverMain));
        ok('the marker is still stripped before the reply is stored',
           /extractEscalation\(ctx\.aiReply/.test(serverMain));
     ok('the prompt tells the model to check the role first',

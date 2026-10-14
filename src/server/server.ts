@@ -11,6 +11,7 @@ import { config } from './config/config.service';
 import { init as initDb, db } from './db/storage.service';
 import conversationManager from './services/session.service';
 import { loadCostRates } from './config/cost-rates.service';
+import { warmTicketModals } from './config/ticket-modals.service';
 import { expireIfIdle } from './services/session-lifecycle.service';
 
 const MESSAGE_RETENTION_DAYS = parseInt(process.env.MESSAGE_RETENTION_DAYS ?? '', 10) || 180;
@@ -128,6 +129,9 @@ async function main(): Promise<void> {
   // A failure here must not block boot: the rates service falls back to the
   // environment defaults, which is exactly what it would have used anyway.
   await loadCostRates().catch(() => undefined);
+  // Ticket modal switches, so the first ticket handover of the day does not pay
+  // for a cache miss on a table that only has three rows.
+  await warmTicketModals().catch(() => undefined);
   scheduleRetention();
   scheduleIdleExpiry();
   installShutdownFlush();

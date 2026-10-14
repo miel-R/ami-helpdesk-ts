@@ -18,6 +18,7 @@
     "test": "npm run build && node tools/widget-regress.mjs && node tools/export-regress.cjs && node tools/with-server.cjs tools/analytics-regress.cjs && node tools/identity-regress.cjs && node tools/identity-signing-regress.cjs && node tools/commands-regress.cjs && node tools/commands-e2e.cjs && node tools/modal-regress.cjs && node tools/smoke-regress.cjs && node tools/durability-regress.cjs",
     "test:widget": "node tools/widget-regress.mjs",
     "test:analytics": "node tools/analytics-regress.cjs",
+  "test:ticket-modals": "node tools/with-server.cjs tools/ticket-modals-regress.cjs",
   "test:export": "node tools/export-regress.cjs",
     "test:identity": "node tools/identity-regress.cjs",
     "test:identity-signing": "node tools/identity-signing-regress.cjs",

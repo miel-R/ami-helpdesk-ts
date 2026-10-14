@@ -13,8 +13,10 @@ import type {
   StoredMessage, StoredConversationRow, ConversationState, ConversationStateMeta,
   ListConversationsOptions, PageMessagesOptions, MessagePage,
   UserRecord, UserPatch, UserProfile, UsageEntry, UsageEntryInput,
-  SummaryBucket, UsageSummary, ListMessagesOptions, SummaryOptions
+SummaryBucket, UsageSummary, ListMessagesOptions, SummaryOptions,
+  TicketModalConfig
 } from './types.model';
+import { TICKET_TYPES } from './types.model';
 import { num, today, round10, limitValue, readJsonSync, writeJsonAtomic } from './helpers';
 
 const USAGE_FILE = path.join(config.paths.dataDir, 'usage.json');
@@ -438,6 +440,51 @@ async pageMessages(sessionId: string, options: PageMessagesOptions = {}): Promis
     try { if (fs.existsSync(file)) fs.unlinkSync(file); } catch (e) {
       console.warn(`[db] could not delete conversation ${sessionId}: ${(e as Error).message}`);
     }
+  }
+
+// -- ticket modal config --------------------------------------------------
+
+  /**
+   * The JSON fallback has no store of its own for this and does not pretend to.
+   *
+   * It reports every type ENABLED with no link, which is exactly the behaviour
+   * that existed before the feature, so a database outage degrades the chatbot
+   * to "every ticket type works" rather than to "no ticket type works". A
+   * half-working fallback is the whole point of having one.
+   *
+   * Writes are accepted and discarded. They land in a log line rather than being
+   * silently dropped, because an admin who disables a type and watches it stay
+   * enabled deserves to be told why.
+   */
+  async listTicketModalConfig(): Promise<TicketModalConfig[]> {
+    return TICKET_TYPES.map(ticket_type => ({
+      ticket_type, enabled: true, external_url: null
+    }));
+  }
+
+  async updateTicketModalConfig(
+    type: string, enabled: boolean, externalUrl: string | null
+  ): Promise<TicketModalConfig> {
+    console.warn(
+      `[db] ticket modal config for ${type} NOT saved: the JSON fallback is active ` +
+      '(no DATABASE_URL). Restart Postgres to make it stick.'
+    );
+    return {
+      ticket_type: String(type), enabled: !!enabled,
+      external_url: externalUrl === null ? null : String(externalUrl)
+    };
+  }
+
+  /** Always off, for the same reason the types are always enabled. */
+  async getLinksOnlyMode(): Promise<boolean> {
+    return false;
+  }
+
+  async setLinksOnlyMode(_on: boolean): Promise<boolean> {
+    console.warn(
+      '[db] links-only mode NOT saved: the JSON fallback is active (no DATABASE_URL).'
+    );
+    return false;
   }
 
   async pruneOldMessages(): Promise<number> {

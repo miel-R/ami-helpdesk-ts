@@ -8,10 +8,11 @@ import { renderUsers } from './tabs/users.js';
 import { renderSessions } from './tabs/sessions.js';
 import { renderRealtime } from './tabs/realtime.js';
 import { renderLogs, wireLogFilters, openSession } from './tabs/inspect.js';
+import { renderTicketForms, wireTicketForms } from './tabs/ticket-forms.js';
 import { wireRateEditor } from './tabs/rates.js';
 import { openUserDetail, openUserEditor, wireUserForm } from './tabs/user-admin.js';
 
-export type TabId = 'overview' | 'trends' | 'cost' | 'users' | 'conv' | 'live' | 'logs';
+export type TabId = 'overview' | 'trends' | 'cost' | 'users' | 'conv' | 'live' | 'tickets' | 'logs';
 let activeTab: TabId = 'overview';
 
 export interface CostFilter extends OverviewFilter {
@@ -50,6 +51,7 @@ export async function refreshAll(): Promise<void> {
   if (activeTab === 'users') await safe('users', () => renderUsers(f.days));
   if (activeTab === 'conv') await safe('sessions', () => renderSessions(100));
   if (activeTab === 'live') await safe('live', () => renderRealtime());
+  if (activeTab === 'tickets') await safe('ticket forms', () => renderTicketForms());
   if (activeTab === 'logs') await safe('logs', () => renderLogs());
   stamp.textContent = 'updated ' + new Date().toLocaleTimeString();
 }
@@ -270,6 +272,7 @@ function boot(): void {
   wireCostFilters();
   wireUserForm();
   wireRateEditor();
+  wireTicketForms();
   if (!getKey()) { showLogin(); return; }
   api('/api/admin/config')
     .then(() => { showApp(); return refreshAll(); })
