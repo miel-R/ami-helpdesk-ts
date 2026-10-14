@@ -59,6 +59,14 @@ services:
       # service kept reporting the built-in defaults.
       - SESSION_NUDGE_MINUTES=${SESSION_NUDGE_MINUTES:-2}
       - SESSION_TIMEOUT_MINUTES=${SESSION_TIMEOUT_MINUTES:-5}
+      # Number of reverse proxies in front of this process. Express reads req.ip
+      # from the socket, so behind a proxy every request looks like it came from
+      # the proxy and rate limiting keys on ONE shared bucket for the whole
+      # company. Apache is expected in production, hence 1; use 0 when the
+      # process is reached directly. Passed through explicitly for the same
+      # reason as SESSION_* above - the container reads its environment from
+      # here, not from .env.
+      - TRUST_PROXY_HOPS=${TRUST_PROXY_HOPS:-1}
       - CORS_ORIGIN=${CORS_ORIGIN:-*}
       - TLS_CERT_FILE=${TLS_CERT_FILE}
       - TLS_KEY_FILE=${TLS_KEY_FILE}

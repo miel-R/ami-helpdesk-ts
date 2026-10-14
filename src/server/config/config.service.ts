@@ -122,13 +122,13 @@ export const config = {
   /**
    * When to nudge the user before session end, in ms.
    *
-   * Default 4 minutes. Must be less than sessionTimeout. Override with
+   * Default 2 minutes. Must be less than sessionTimeout. Override with
    * SESSION_NUDGE_MINUTES.
    */
   nudgeAfter: (() => {
     const mins = parseInt(process.env.SESSION_NUDGE_MINUTES || '', 10);
     if (Number.isFinite(mins) && mins > 0) return mins * 60 * 1000;
-    return 4 * 60 * 1000;
+    return 2 * 60 * 1000;
   })(),
     cleanupInterval: 30000
   },

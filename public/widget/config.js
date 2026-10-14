@@ -14,7 +14,7 @@ const AmiConfig = {
     // Server sends these on /api/session and /api/chat responses
     idleSessionMs: 5 * 60 * 1000,
     idlePollMs: 60 * 1000,
-    nudgeMs: 4 * 60 * 1000
+    nudgeMs: 2 * 60 * 1000
   },
 
   // Storage keys

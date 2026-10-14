@@ -150,7 +150,7 @@ interface Conversation {
 ```typescript
 // config.ts
 sessionTimeout: 5 minutes      // SESSION_TIMEOUT_MINUTES
-nudgeAfter: 4 minutes          // SESSION_NUDGE_MINUTES
+nudgeAfter: 2 minutes          // SESSION_NUDGE_MINUTES
 
 // utils.ts → expireIfIdle()
 if (idleMs >= sessionTimeout) {

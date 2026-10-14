@@ -219,9 +219,9 @@ console.log('\n[5b] the "still there?" nudge');
   // it must fire once, must not fire while the user is replying, and must be
   // re-armable afterwards.
   const n1 = base();
-  ok('nudge default is four minutes', n1.nudgeMs() === 240000, String(n1.nudgeMs()));
+  ok('nudge default is two minutes', n1.nudgeMs() === 120000, String(n1.nudgeMs()));
   n1.setNudgeMs('junk');
-  ok('setNudgeMs rejects junk', n1.nudgeMs() === 240000, String(n1.nudgeMs()));
+  ok('setNudgeMs rejects junk', n1.nudgeMs() === 120000, String(n1.nudgeMs()));
   n1.setNudgeMs(5000);
   ok('setNudgeMs stores a valid value', n1.nudgeMs() === 5000, String(n1.nudgeMs()));
 

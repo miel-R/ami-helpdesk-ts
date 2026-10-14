@@ -365,7 +365,7 @@ as "read" in session 5.
 | `ADMIN_KEY` | No | - | Admin dashboard key |
 | `IDENTITY_SECRET` | No | - | JWT secret for signed tokens |
 | `SESSION_TIMEOUT_MINUTES` | No | `5` | Session idle timeout |
-| `SESSION_NUDGE_MINUTES` | No | `4` | Nudge warning time |
+| `SESSION_NUDGE_MINUTES` | No | `2` | Nudge warning time |
 | `RATE_LIMIT_PER_DAY` | No | `10` | Tickets per user/day |
 | `MAX_FILE_SIZE` | No | `10485760` | Max upload (bytes) |
 | `TIMEZONE` | No | `Asia/Manila` | Ticket timestamp TZ |
