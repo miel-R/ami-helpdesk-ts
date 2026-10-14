@@ -333,6 +333,11 @@ as "read" in session 5.
 <script src="https://your-domain.com/widget.js"></script>
 ```
 
+> **Self-signed certificates (LAN deployments).** Browsers block both `widget.js` and
+> `widget.css` until the user chooses to proceed, so the chat launcher silently never
+> appears. To detect that and show setup instructions instead, see
+> [Self-Signed Certificate Fallback](docs/WIDGET_INTEGRATION.md#self-signed-certificate-fallback).
+
 ## Admin Commands
 
 | Command | Description | Admin Only |
@@ -680,6 +685,7 @@ To confirm it is working, submit one ticket per type and check that
 | "No identity" | Widget must send `login_user` from MIS PHP session |
 | "Not admin" | Add user to `ADMIN_USERS` or promote in MIS |
 | Files not uploading | Check `MAX_FILE_SIZE` and disk space |
+| Chat icon never appears on the MIS page | Self-signed cert not yet bypassed — `widget.js` **and** `widget.css` both fail to load. See [Self-Signed Certificate Fallback](docs/WIDGET_INTEGRATION.md#self-signed-certificate-fallback) |
 
 ## License
 
