@@ -100,7 +100,7 @@ export async function renderTicketForms(): Promise<void> {
       }
     }
     paint();
-    must('ticketFormsMeta').textContent = `Updated ${when(res.timestamp)}`;
+    must('settingsMeta').textContent = `Updated ${when(res.timestamp)}`;
     warn('');
   } catch (e) {
     flash('err', (e as Error).message);
