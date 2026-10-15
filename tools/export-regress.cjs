@@ -65,7 +65,12 @@ function loadExport(apiStub, flashStub) {
     .replace(/^import[^;]+;\s*$/gm, '')
     .replace(/export function/g, 'function')
     .replace(/export async function/g, 'async function')
-    + '\nmodule.exports = { mountExport, toRecords, fetchAllSessions };';
+    // export const was never needed here and did not appear until sessionColumns
+    // and round6 moved out of costs.ts. Left unstripped it is a hard SyntaxError,
+    // which surfaces as "HARNESS ERROR Unexpected token 'export'" and hides every
+    // assertion below it.
+    .replace(/export const/g, 'const')
+    + '\nmodule.exports = { mountExport, toRecords, fetchAllSessions, sessionColumns, round6 };';
   const mod = { exports: {} };
   new Function('module', 'exports', 'api', 'flash', 'exportTableToCSV', 'window', 'document',
     src)(mod, mod.exports, apiStub, flashStub, () => {}, {}, {
@@ -157,19 +162,68 @@ function loadExport(apiStub, flashStub) {
 
   console.log('\n[5] costs tab wires both tables and keeps precision');
   const costs = read('js/tabs/costs.js');
+  const exportSrc = read('js/tabs/export.js');
+  const sessions = read('js/tabs/sessions.js');
   ok('session export mounted into sessionExportHost', /mountExport\(must\('sessionExportHost'\)/.test(costs));
   ok('user export mounted into usersExportHost', /mountExport\(must\('usersExportHost'\)/.test(costs));
   ok('session export can fetch all rows', /fetchAll:\s*\(\)\s*=>\s*fetchAllSessions/.test(costs));
   ok('filename is stamped', /filename:\s*'ami-sessions'/.test(costs));
   // The scope goes in the filename; without it two exports look identical.
   ok('filename carries the user scope', /scopeNote:\s*f\.username\s*\|\|\s*'all-users'/.test(costs));
-  ok('rounded to 6dp for export', /Math\.round\(n \* 1e6\) \/ 1e6/.test(costs));
-  ok('14 export columns', (costs.match(/header: '(Session|Total Cost|End)'/g) || []).length >= 3);
+  // The rounding rule moved to export.ts so both tabs share one copy. Pin it there.
+  ok('rounded to 6dp for export', /Math\.round\(n \* 1e6\) \/ 1e6/.test(exportSrc));
+  ok('costs imports the shared rounding rule, not its own copy',
+    !/function round6/.test(costs) && /round6/.test(costs),
+    'costs.ts declares a second round6; the two copies can drift apart');
 
-  console.log('\n[6] mount exists in the shell for both tables');
+  console.log('\n[5b] the session columns are defined once and used by both tabs');
+  // This is the property that motivated lifting them out of costs.ts: a column
+  // added to one export used to be silently missing from the other.
+  const headerCount = (src) => (src.match(/header: '/g) || []).length;
+  ok('14 session columns are defined in export.js', headerCount(exportSrc) === 14, String(headerCount(exportSrc)));
+  ok('costs.js no longer defines session columns',
+    !/header: 'Total Cost'/.test(costs), 'session columns still live in costs.ts');
+  ok('both tabs import the shared sessionColumns',
+    /import \{[^}]*sessionColumns[^}]*\} from '\.\/export\.js'/.test(costs)
+    && /import \{[^}]*sessionColumns[^}]*\} from '\.\/export\.js'/.test(sessions));
+  // The decisive check: the exported headers are the same 14 the Costs table shows.
+  ok('the shared list covers the full per-session payload', (() => {
+    const want = ['Session', 'User', 'Mode', 'State', 'Msgs In', 'Msgs Out', 'Files',
+      'Input Tokens', 'Output Tokens', 'IT Cost', 'OT Cost', 'Total Cost', 'Start', 'End'];
+    const src = read('js/tabs/export.js').slice(read('js/tabs/export.js').indexOf('sessionColumns'));
+    const have = [...src.matchAll(/header: '([^']+)'/g)].map(m => m[1]);
+    return want.every(w => have.includes(w));
+  })(), 'a column is missing from sessionColumns');
+
+  console.log('\n[6] mount exists in the shell for all three tables');
   const shell = read('index.html');
   ok('shell has #sessionExportHost', shell.includes('id="sessionExportHost"'));
   ok('shell has #usersExportHost', shell.includes('id="usersExportHost"'));
+  ok('shell has #convExportHost for the Sessions tab', shell.includes('id="convExportHost"'));
+  ok('sessions tab mounts its export', /mountExport\(must\('convExportHost'\)/.test(sessions));
+
+  console.log('\n[7] the Sessions table lost its View column');
+  // The View button was the only way to open a conversation's messages. Removing
+  // it was deliberate, so assert it stays gone rather than quietly reappearing.
+  ok('no data-session button is rendered', !/data-session=/.test(sessions));
+  ok('no eye icon in the sessions table', !/bi-eye/.test(sessions));
+  ok('main.js no longer handles data-session clicks',
+    !/data-session/.test(read('js/main.js')));
+  ok('empty-state colspan matches the 9 real columns', (() => {
+    // Strip // comments first: the code documents that the old value was 11, and a
+    // naive search finds that sentence rather than the markup.
+    const code = sessions.replace(/^\s*\/\/.*$/gm, '');
+    return (code.match(/colspan="9"/g) || []).length === 3 && !/colspan="1[01]"/.test(code);
+  })(), 'placeholder colspan must track the header count or it hides a real column');
+  ok('sessions table header has 9 columns', (() => {
+    // The tbody id sits AFTER </thead>, so the header has to be found by searching
+    // backwards - looking forward lands on the next unrelated table in the page.
+    const at = shell.indexOf('id="convBody"');
+    const headStart = shell.lastIndexOf('<thead>', at);
+    const thead = shell.slice(headStart, shell.indexOf('</thead>', headStart));
+    // <th[\s>] rather than <th, which would also match <thead>.
+    return (thead.match(/<th[\s>]/g) || []).length === 9;
+  })(), 'header/colspan mismatch means an empty row spans a column that does not exist');
 
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

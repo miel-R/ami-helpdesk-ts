@@ -7,7 +7,7 @@ import type { Pool, PoolClient, QueryResult } from 'pg';
 
 const SCHEMA_FILE = path.join(__dirname, '..', '..', '..', 'db', 'schema.sql');
 import type {
-  StorageBackend, ConversationPersistInput, ConversationPersistResult, StorageHealth,
+  StorageBackend, ConversationPersistInput, ConversationPersistResult, StorageHealth, StorageMetrics,
   UserRecord, UserPatch, UserProfile, UsageEntry, UsageEntryInput,
   ConversationStateMeta, ConversationState, MessagePage,
   SummaryBucket, UsageSummary, ListConversationsOptions, PageMessagesOptions,
@@ -166,6 +166,47 @@ console.log('[db] schema applied (version 1)');
       return { ok: false, missing: [], error: (e as Error).message };
     } finally {
       client.release();
+    }
+  }
+
+  /**
+   * Size and load figures for the dashboard. Three catalog reads in one round
+   * trip, so the System Health panel costs exactly one query when it refreshes.
+   *
+   * `pg_total_relation_size` is used rather than `pg_relation_size` on purpose:
+   * it includes each table's indexes and TOAST data, which is where an app's real
+   * footprint usually lives. Reporting only heap size would understate it, often
+   * by half.
+   *
+   * Scoped to schemaname = 'public' because this instance is shared with other
+   * services (see the pool comment in init()). Without the filter, "PG Used" on
+   * the dashboard would silently include whatever else lives in the database,
+   * and an admin watching it grow would have no way to tell whose growth it was.
+   */
+  async metrics(): Promise<StorageMetrics | null> {
+    if (!this.pool) return null;
+    try {
+      const { rows } = await this.q(
+        `SELECT
+           (SELECT count(*)::int FROM pg_stat_activity
+             WHERE datname = current_database()) AS connections,
+           (SELECT pg_database_size(current_database())::bigint) AS total_bytes,
+           (SELECT coalesce(sum(pg_total_relation_size(relid)), 0)::bigint
+              FROM pg_stat_user_tables
+             WHERE schemaname = 'public') AS app_bytes`
+      );
+      const r = rows[0] as { connections?: number; total_bytes?: string; app_bytes?: string } | undefined;
+      if (!r) return null;
+      return {
+        connections: Number(r.connections ?? 0),
+        totalBytes: Number(r.total_bytes ?? 0),
+        appBytes: Number(r.app_bytes ?? 0)
+      };
+    } catch (e) {
+      // Degrade, never throw: a missing metrics card is a cosmetic problem, but
+      // a 500 here would take the whole System Health section down with it.
+      console.warn(`[db] storage metrics unavailable: ${(e as Error).message}`);
+      return null;
     }
   }
 

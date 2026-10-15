@@ -7,7 +7,7 @@ import { renderCosts } from './tabs/costs.js';
 import { renderUsers } from './tabs/users.js';
 import { renderSessions } from './tabs/sessions.js';
 import { renderRealtime } from './tabs/realtime.js';
-import { renderLogs, wireLogFilters, openSession } from './tabs/inspect.js';
+import { renderLogs, wireLogFilters } from './tabs/inspect.js';
 import { renderTicketForms, wireTicketForms } from './tabs/ticket-forms.js';
 import { wireRateEditor } from './tabs/rates.js';
 import { openUserDetail, openUserEditor, wireUserForm } from './tabs/user-admin.js';
@@ -317,8 +317,6 @@ function wireChrome(): void {
     if (edit?.dataset.edit) { void openUserEditor(edit.dataset.edit); return; }
     const detail = t.closest('[data-detail]') as HTMLElement | null;
     if (detail?.dataset.detail) { void openUserDetail(detail.dataset.detail); return; }
-    const sess = t.closest('[data-session]') as HTMLElement | null;
-    if (sess?.dataset.session) { void openSession(sess.dataset.session); return; }
   });
   document.addEventListener('ami:users-changed', () => {
     void safe('users', () => renderUsers(currentFilter().days));

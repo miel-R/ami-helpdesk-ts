@@ -7,7 +7,7 @@ import { renderCosts } from './tabs/costs.js';
 import { renderUsers } from './tabs/users.js';
 import { renderSessions } from './tabs/sessions.js';
 import { renderRealtime } from './tabs/realtime.js';
-import { renderLogs, wireLogFilters, openSession } from './tabs/inspect.js';
+import { renderLogs, wireLogFilters } from './tabs/inspect.js';
 import { renderTicketForms, wireTicketForms } from './tabs/ticket-forms.js';
 import { wireRateEditor } from './tabs/rates.js';
 import { openUserDetail, openUserEditor, wireUserForm } from './tabs/user-admin.js';
@@ -318,11 +318,6 @@ function wireChrome() {
         const detail = t.closest('[data-detail]');
         if (detail?.dataset.detail) {
             void openUserDetail(detail.dataset.detail);
-            return;
-        }
-        const sess = t.closest('[data-session]');
-        if (sess?.dataset.session) {
-            void openSession(sess.dataset.session);
             return;
         }
     });

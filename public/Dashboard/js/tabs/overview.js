@@ -1,6 +1,6 @@
 // Tab: Overview — 10 KPI cards with deltas + period totals + system health.
 import { api } from '../api.js';
-import { deltaPill, esc, must, nfmt, usd } from '../utils.js';
+import { bytes, deltaPill, esc, must, nfmt, usd } from '../utils.js';
 import { sparkline } from '../charts.js';
 function kpiCard(id, title, icon, k, invert = false, sparkId) {
     return `<div class="col-6 col-md-4 col-xl-2dot4">
@@ -59,9 +59,9 @@ export async function renderOverview(f) {
         const pg = sysHealth.postgresql;
         const cb = sysHealth.chatbot;
         const node = sysHealth.node;
-        function systemHealthCard(label, value, icon, color) {
+        function systemHealthCard(label, value, icon, color, title = '') {
             return `<div class="col-6 col-md-4 col-xl-3">
-        <div class="card metric-card border-0 shadow-sm rounded-3 h-100">
+        <div class="card metric-card border-0 shadow-sm rounded-3 h-100"${title ? ` title="${esc(title)}"` : ''}>
           <div class="card-body p-3">
             <div class="d-flex justify-content-between align-items-start mb-1">
               <span class="metric-title">${esc(label)}</span>
@@ -72,10 +72,20 @@ export async function renderOverview(f) {
         </div>
       </div>`;
         }
-        const pgHtml = systemHealthCard('PostgreSQL', pg.status, 'bi-database', 'text-primary')
-            + systemHealthCard('PG Connections', pg.connections, 'bi-hdd-network', 'text-info')
-            + systemHealthCard('PG Storage', pg.storage_size, 'bi-hdd', 'text-warning')
-            + systemHealthCard('PG Used', pg.storage_used, 'bi-hdd-fill', 'text-warning');
+        // These four cards read 'N/A' for their entire life before this change, so
+        // 'N/A' is kept as the explicit "this backend cannot answer that" answer
+        // rather than being hidden - but it should now be the exception (a JSON
+        // storage deployment, or Postgres briefly unreachable), not the default.
+        const mb = (v) => (v === null || !Number.isFinite(v) ? 'N/A' : bytes(v));
+        const pgStatusLabel = pg.status === 'connected' ? 'connected' : pg.status;
+        const pgStatusColor = pg.status === 'connected' ? 'text-primary' : 'text-danger';
+        // pg_error only exists when Postgres answered nothing, and the reason is the
+        // one thing an admin actually needs at that point.
+        const pgTitle = pg.error ? pg.error : pg.status === 'not-applicable' ? `storage backend: ${pg.backend}` : '';
+        const pgHtml = systemHealthCard('PostgreSQL', pgStatusLabel, 'bi-database', pgStatusColor, pgTitle)
+            + systemHealthCard('PG Connections', pg.connections === null ? 'N/A' : String(pg.connections), 'bi-hdd-network', 'text-info', 'open sessions against this database')
+            + systemHealthCard('PG Storage', mb(pg.storage_size), 'bi-hdd', 'text-warning', 'entire database on disk')
+            + systemHealthCard('PG Used', mb(pg.storage_used), 'bi-hdd-fill', 'text-warning', 'this app\'s tables, indexes and toast data');
         const cbHtml = systemHealthCard('Chatbot CPU', cb.cpu_usage + '%', 'bi-cpu', 'text-danger')
             + systemHealthCard('Chatbot Memory', cb.memory_usage + ' MB', 'bi-memory', 'text-success')
             + systemHealthCard('Chatbot RSS', cb.memory_rss + ' MB', 'bi-memory', 'text-info')

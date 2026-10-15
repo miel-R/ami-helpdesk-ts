@@ -13,6 +13,25 @@ export function quotaBar(used: number, limit: number | null): string {
     <small class="text-muted">${used}/${limit}</small>`;
 }
 
+/**
+ * Role as a badge rather than bare text. This column used to show Department,
+ * which was a free-text string someone typed and could be empty. Role is a fixed
+ * two-value enum, so it is worth showing at a glance which of the ten accounts
+ * can actually administer the dashboard - that used to mean reading a lowercase
+ * "admin" in a column of usernames.
+ *
+ * The cell's text content is still the plain role word, so the column keeps
+ * sorting correctly through the shared table sorter.
+ */
+function roleBadge(role: string): string {
+  const r = (role || '').trim().toLowerCase();
+  if (r === 'admin') return '<span class="badge bg-ami-subtle text-ami">admin</span>';
+  if (r === 'user') return '<span class="badge bg-secondary">user</span>';
+  // Never swallow a role the UI does not recognise: an unexpected value is more
+  // useful shown verbatim than collapsed into "user".
+  return esc(role || '—');
+}
+
 export async function renderUsers(days: number): Promise<void> {
   const host = must('userRows');
   host.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">Loading users…</td></tr>';
@@ -21,7 +40,7 @@ export async function renderUsers(days: number): Promise<void> {
     must('usersMeta').textContent = `${data.count} user(s) · last ${data.days}d ledger`;
     host.innerHTML = data.users.map(u => `<tr>
       <td><strong>${esc(u.display_name)}</strong><br><small class="mono text-muted">${esc(u.username)}</small></td>
-      <td>${esc(u.department || '—')}</td>
+      <td>${roleBadge(u.role)}</td>
       <td class="text-end">${nfmt(u.calls)}</td>
       <td class="text-end">${nfmt(u.total_tokens)}</td>
       <td class="text-end">${usd(u.cost_usd)}</td>

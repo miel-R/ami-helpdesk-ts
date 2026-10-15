@@ -280,6 +280,34 @@ export interface StorageHealth {
  */
 export const REQUIRED_TABLES = ['users', 'conversations', 'messages', 'ticket_modal_config'] as const;
 
+/**
+ * Size/load figures for the admin dashboard's System Health row.
+ *
+ * These used to be the string 'N/A', hardcoded, on the grounds that "a chat
+ * widget container cannot see its database's disk". That is wrong: the database
+ * answers these itself, in three cheap catalog queries, and an admin looking at a
+ * System Health panel whose PG cards all read N/A has no way to tell a working
+ * database from a half-provisioned one.
+ *
+ * The numbers are raw bytes and counts, NOT pre-formatted strings, so the client
+ * decides how to present them. That also means a JSON deployment can return null
+ * and the dashboard can say "not applicable" rather than inventing a number.
+ */
+export interface StorageMetrics {
+  /** Sessions currently open against this database. */
+  connections: number;
+  /** Whole database on disk, including WAL, catalogs and free space. */
+  totalBytes: number;
+  /**
+   * The part of the above held by this app's tables - data, indexes and TOAST.
+   * Always <= totalBytes; the difference is Postgres' own overhead plus free
+   * space. Reporting both is what makes the pair meaningful: a database that is
+   * 400 MB on disk but 380 MB of it is ours is healthy, and one that is 400 MB on
+   * disk with 20 MB of ours is worth investigating.
+   */
+  appBytes: number;
+}
+
 export interface StorageBackend {
   readonly kind: 'postgres' | 'json';
 
@@ -296,6 +324,19 @@ export interface StorageBackend {
    * catch that class of failure, so this one counts the rows it depends on.
    */
   health(): Promise<StorageHealth>;
+
+  /**
+   * Size and load figures, for the dashboard's System Health row.
+   *
+   * Optional on purpose. A backend that cannot answer these honestly - the JSON
+   * file store has no notion of connections or database size - omits the method,
+   * and the caller shows "N/A". Making it required would mean every backend had
+   * to fabricate a number, which is precisely the failure being fixed.
+   *
+   * Implementations should degrade rather than throw: a failure here is a missing
+   * card, never a 500 on the dashboard.
+   */
+  metrics?(): Promise<StorageMetrics | null>;
 
   ensureUser(profile: UserProfile): Promise<UserRecord | null>;
   getUser(username: string): Promise<UserRecord | null>;

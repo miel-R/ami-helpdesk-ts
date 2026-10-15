@@ -7,6 +7,7 @@ body { background-color: #f8fafc; min-height: 100vh; }
 #login[hidden], #app[hidden], [data-panel][hidden], #loginErr[hidden],
 #errMsg[hidden], #okMsg[hidden], #lastUpd[hidden] { display: none !important; }
 .bg-ami { background: linear-gradient(135deg, #59339d 0%, #6f42c1 50%, #4c1d95 100%) !important; }
+.bg-ami-subtle { background-color: #f3ecfb !important; }
 .text-ami { color: var(--ami-purple) !important; }
 .btn-ami { background-color: var(--ami-purple); border-color: var(--ami-purple); color: #fff; }
 .btn-ami:hover { background-color: var(--ami-purple-hover); border-color: var(--ami-purple-hover); color: #fff; }
@@ -71,6 +72,7 @@ body { background-color: #f8fafc; min-height: 100vh; }
 [data-bs-theme="dark"] .text-muted,
 [data-bs-theme="dark"] .text-secondary { color: #94a3b8 !important; }
 [data-bs-theme="dark"] .text-ami { color: #a78bfa !important; }
+[data-bs-theme="dark"] .bg-ami-subtle { background-color: #2e2445 !important; }
 [data-bs-theme="dark"] .alert-danger { background-color: #450a0a; border-color: #7f1d1d; color: #fecaca; }
 [data-bs-theme="dark"] .alert-success { background-color: #052e16; border-color: #166534; color: #bbf7d0; }
 [data-bs-theme="dark"] .alert-warning { background-color: #451a03; border-color: #854d0e; color: #fde68a; }

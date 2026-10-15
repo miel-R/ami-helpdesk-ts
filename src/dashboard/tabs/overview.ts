@@ -1,6 +1,6 @@
 // Tab: Overview — 10 KPI cards with deltas + period totals + system health.
 import { api } from '../api.js';
-import { deltaPill, esc, must, nfmt, usd } from '../utils.js';
+import { bytes, deltaPill, esc, must, nfmt, usd } from '../utils.js';
 import { sparkline } from '../charts.js';
 import type { AnalyticsOverview, Kpi } from '../types.js';
 
@@ -62,7 +62,7 @@ export async function renderOverview(f: OverviewFilter): Promise<void> {
   // System health - enhanced with PostgreSQL and Chatbot metrics
   try {
     const health = await api<{ status: string; uptime_seconds: number; tls: boolean; storage: string; memory_mb: { rss: number; heapUsed: number } }>('/api/health');
-    const sysHealth = await api<{ postgresql: { status: string; cpu_usage: string; memory_usage: string; storage_size: string; storage_used: string; connections: string }; chatbot: { cpu_usage: number; memory_usage: number; memory_rss: number; heap_used: number; heap_total: number; active_sessions: number; total_messages: number; total_tokens: number; total_calls: number; estimated_cost_usd: number; uptime_seconds: number }; node: { pid: number; version: string; platform: string; arch: string; uptime_seconds: number } }>('/api/system/health');
+    const sysHealth = await api<{ postgresql: { backend: string; status: string; storage_size: number | null; storage_used: number | null; connections: number | null; error?: string }; chatbot: { cpu_usage: number; memory_usage: number; memory_rss: number; heap_used: number; heap_total: number; active_sessions: number; total_messages: number; total_tokens: number; total_calls: number; estimated_cost_usd: number; uptime_seconds: number }; node: { pid: number; version: string; platform: string; arch: string; uptime_seconds: number } }>('/api/system/health');
 
     const healthHtml = `
       <span class="badge ${health.status === 'ok' ? 'bg-success' : 'bg-danger'}">${esc(health.status)}</span>
@@ -73,9 +73,9 @@ export async function renderOverview(f: OverviewFilter): Promise<void> {
     const cb = sysHealth.chatbot;
     const node = sysHealth.node;
 
-    function systemHealthCard(label: string, value: string, icon: string, color: string): string {
+    function systemHealthCard(label: string, value: string, icon: string, color: string, title = ''): string {
       return `<div class="col-6 col-md-4 col-xl-3">
-        <div class="card metric-card border-0 shadow-sm rounded-3 h-100">
+        <div class="card metric-card border-0 shadow-sm rounded-3 h-100"${title ? ` title="${esc(title)}"` : ''}>
           <div class="card-body p-3">
             <div class="d-flex justify-content-between align-items-start mb-1">
               <span class="metric-title">${esc(label)}</span>
@@ -87,10 +87,21 @@ export async function renderOverview(f: OverviewFilter): Promise<void> {
       </div>`;
     }
 
-    const pgHtml = systemHealthCard('PostgreSQL', pg.status, 'bi-database', 'text-primary')
-      + systemHealthCard('PG Connections', pg.connections, 'bi-hdd-network', 'text-info')
-      + systemHealthCard('PG Storage', pg.storage_size, 'bi-hdd', 'text-warning')
-      + systemHealthCard('PG Used', pg.storage_used, 'bi-hdd-fill', 'text-warning');
+    // These four cards read 'N/A' for their entire life before this change, so
+    // 'N/A' is kept as the explicit "this backend cannot answer that" answer
+    // rather than being hidden - but it should now be the exception (a JSON
+    // storage deployment, or Postgres briefly unreachable), not the default.
+    const mb = (v: number | null): string => (v === null || !Number.isFinite(v) ? 'N/A' : bytes(v));
+    const pgStatusLabel = pg.status === 'connected' ? 'connected' : pg.status;
+    const pgStatusColor = pg.status === 'connected' ? 'text-primary' : 'text-danger';
+    // pg_error only exists when Postgres answered nothing, and the reason is the
+    // one thing an admin actually needs at that point.
+    const pgTitle = pg.error ? pg.error : pg.status === 'not-applicable' ? `storage backend: ${pg.backend}` : '';
+
+    const pgHtml = systemHealthCard('PostgreSQL', pgStatusLabel, 'bi-database', pgStatusColor, pgTitle)
+      + systemHealthCard('PG Connections', pg.connections === null ? 'N/A' : String(pg.connections), 'bi-hdd-network', 'text-info', 'open sessions against this database')
+      + systemHealthCard('PG Storage', mb(pg.storage_size), 'bi-hdd', 'text-warning', 'entire database on disk')
+      + systemHealthCard('PG Used', mb(pg.storage_used), 'bi-hdd-fill', 'text-warning', 'this app\'s tables, indexes and toast data');
 
     const cbHtml = systemHealthCard('Chatbot CPU', cb.cpu_usage + '%', 'bi-cpu', 'text-danger')
       + systemHealthCard('Chatbot Memory', cb.memory_usage + ' MB', 'bi-memory', 'text-success')

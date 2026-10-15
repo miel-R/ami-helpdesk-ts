@@ -12,6 +12,45 @@
 // filename carries the user filter it was scoped to.
 import { api, flash } from '../api.js';
 import { exportTableToCSV } from '../utils.js';
+/**
+ * Costs are exported at the same 6dp the tables show, so a sum still ties out.
+ *
+ * Exported rather than kept private: the Costs tab rounds its own cost columns
+ * this way too, and two copies of a rounding rule is one too many - they agree
+ * today, and the export quietly stops tying out to the screen the day they do not.
+ */
+export function round6(n) {
+    return Number.isFinite(n) ? Math.round(n * 1e6) / 1e6 : 0;
+}
+/**
+ * The session export columns, shared by the Costs "Per Session Cost" table and
+ * the Sessions tab.
+ *
+ * Both tables render the same `/api/analytics/sessions` payload, so defining the
+ * columns twice meant a column added to one export was silently missing from the
+ * other, and the two files of "the same" session data could disagree. One
+ * definition is the only way to keep them honest.
+ *
+ * Values come from the API payload, never scraped back out of the DOM: the
+ * rendered rows are abbreviated (dates localised, costs rounded), so scraping
+ * would produce a file that does not reconcile with the numbers on screen.
+ */
+export const sessionColumns = [
+    { header: 'Session', value: (s) => s.session_id },
+    { header: 'User', value: (s) => s.user },
+    { header: 'Mode', value: (s) => s.mode },
+    { header: 'State', value: (s) => s.status },
+    { header: 'Msgs In', value: (s) => s.user_messages },
+    { header: 'Msgs Out', value: (s) => s.assistant_messages },
+    { header: 'Files', value: (s) => s.files_count },
+    { header: 'Input Tokens', value: (s) => s.input_tokens },
+    { header: 'Output Tokens', value: (s) => s.output_tokens },
+    { header: 'IT Cost', value: (s) => round6(s.input_cost_usd) },
+    { header: 'OT Cost', value: (s) => round6(s.output_cost_usd) },
+    { header: 'Total Cost', value: (s) => round6(s.cost_usd) },
+    { header: 'Start', value: (s) => s.created_at || '' },
+    { header: 'End', value: (s) => s.last_activity || '' },
+];
 const MENU_CSS = 'dropdown-menu dropdown-menu-end';
 function stamp() {
     const d = new Date();

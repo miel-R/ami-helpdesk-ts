@@ -1,12 +1,8 @@
 // Tab: Costs — ranked breakdowns (model / user / session / kind) + average tokens.
 import { api, flash } from '../api.js';
 import { ago, bytes, esc, must, nfmt, usd, usd6, when } from '../utils.js';
-import { fetchAllSessions, mountExport } from './export.js';
+import { fetchAllSessions, mountExport, round6, sessionColumns } from './export.js';
 let filterMode = 'all';
-/** Costs are exported at the same 6dp the table shows, so a sum still ties out. */
-function round6(n) {
-    return Number.isFinite(n) ? Math.round(n * 1e6) / 1e6 : 0;
-}
 function modelRows(list) {
     if (!list.length)
         return '<tr><td colspan="6" class="text-center text-muted py-3">No data in this window</td></tr>';
@@ -115,22 +111,7 @@ export async function renderCosts(f) {
         // Exported from the API payload, never scraped back out of the DOM. The
         // rendered row is abbreviated (dates localised, costs rounded), so scraping it
         // would produce a file that does not reconcile with the numbers on screen.
-        const sessionColumns = [
-            { header: 'Session', value: (s) => s.session_id },
-            { header: 'User', value: (s) => s.user },
-            { header: 'Mode', value: (s) => s.mode },
-            { header: 'State', value: (s) => s.status },
-            { header: 'Msgs In', value: (s) => s.user_messages },
-            { header: 'Msgs Out', value: (s) => s.assistant_messages },
-            { header: 'Files', value: (s) => s.files_count },
-            { header: 'Input Tokens', value: (s) => s.input_tokens },
-            { header: 'Output Tokens', value: (s) => s.output_tokens },
-            { header: 'IT Cost', value: (s) => round6(s.input_cost_usd) },
-            { header: 'OT Cost', value: (s) => round6(s.output_cost_usd) },
-            { header: 'Total Cost', value: (s) => round6(s.cost_usd) },
-            { header: 'Start', value: (s) => s.created_at || '' },
-            { header: 'End', value: (s) => s.last_activity || '' },
-        ];
+        // The column list lives in export.ts so the Sessions tab exports identically.
         const rateNote = `${sessions.rates.input_per_million}-${sessions.rates.output_per_million}per1M`;
         mountExport(must('sessionExportHost'), {
             label: 'Export',
@@ -156,32 +137,32 @@ export async function renderCosts(f) {
         chip.classList.toggle('d-inline-flex', !!f.username);
         if (f.username)
             must('costFilterChipText').textContent = f.username;
-        // Calculate average input/output tokens across all models
+        // Four cards, not two. The grid class here is col-xl-3 - three columns out of
+        // twelve, i.e. a 4-up row - and every other card row on this dashboard uses
+        // it. Only two cards were ever emitted, so on a desktop the row was half
+        // empty. Rather than stretching two cards to fill it, the totals the averages
+        // are computed from are shown alongside: an average with no total beside it
+        // cannot be read on its own ("1.2k per model" is cheap or expensive only
+        // relative to how many models and how much traffic).
         if (bd.by_model.length) {
             const totalInput = bd.by_model.reduce((sum, r) => sum + (r.input_tokens || 0), 0);
             const totalOutput = bd.by_model.reduce((sum, r) => sum + (r.output_tokens || 0), 0);
             const avgInput = bd.by_model.length > 0 ? Math.round(totalInput / bd.by_model.length) : 0;
             const avgOutput = bd.by_model.length > 0 ? Math.round(totalOutput / bd.by_model.length) : 0;
-            must('statCards').innerHTML = `
+            const stat = (label, value, color, footnote) => `
         <div class="col-6 col-md-4 col-xl-3">
           <div class="card metric-card border-0 shadow-sm rounded-3 h-100">
             <div class="card-body p-3 text-center">
-              <div class="small text-muted">Avg Input Tokens</div>
-              <div class="h4 fw-bold text-ami">${nfmt(avgInput)}</div>
-              <div class="small text-muted">per model</div>
+              <div class="small text-muted">${esc(label)}</div>
+              <div class="h4 fw-bold ${color}">${esc(value)}</div>
+              <div class="small text-muted">${esc(footnote)}</div>
             </div>
           </div>
-        </div>
-        <div class="col-6 col-md-4 col-xl-3">
-          <div class="card metric-card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-body p-3 text-center">
-              <div class="small text-muted">Avg Output Tokens</div>
-              <div class="h4 fw-bold text-success">${nfmt(avgOutput)}</div>
-              <div class="small text-muted">per model</div>
-            </div>
-          </div>
-        </div>
-      `;
+        </div>`;
+            must('statCards').innerHTML = stat('Avg Input Tokens', nfmt(avgInput), 'text-ami', `per model · ${bd.by_model.length} models`)
+                + stat('Avg Output Tokens', nfmt(avgOutput), 'text-success', `per model · ${bd.by_model.length} models`)
+                + stat('Total Input Tokens', nfmt(totalInput), 'text-primary', 'this window')
+                + stat('Total Output Tokens', nfmt(totalOutput), 'text-info', 'this window');
         }
         else {
             must('statCards').innerHTML = '<div class="col-12 text-center text-muted py-4">No model data in this window</div>';

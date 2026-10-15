@@ -87,7 +87,6 @@ export function wireUserForm() {
         const reqVal = document.getElementById('nuReq').value.trim();
         const body = {
             username: document.getElementById('nuName').value.trim(),
-            department: document.getElementById('nuDept').value.trim(),
             role: document.getElementById('nuRole').value,
             requests_per_day: reqVal === '' ? null : Number(reqVal),
             max_upload_bytes: upMb === '' ? null : Math.round(Number(upMb) * 1048576),

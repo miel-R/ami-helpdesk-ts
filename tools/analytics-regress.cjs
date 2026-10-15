@@ -19,6 +19,13 @@ async function get(path) {
 }
 
 (async () => {
+  // Declared up here rather than inside the dashboard-shell section, because the
+  // system-health section above also reads the compiled client to check the card
+  // is wired to the fields the server now returns.
+  const fs = require('fs');
+  const path = require('path');
+  const root = path.join(__dirname, '..', 'public', 'Dashboard');
+
   console.log('\n[1] /api/analytics/overview');
   let r = await get('/api/analytics/overview?days=30');
   ok('200', r.status === 200, 'status=' + r.status);
@@ -177,10 +184,46 @@ async function get(path) {
     ok('status enum (skipped)', true);
   }
 
+  console.log('\n[8b] /api/system/health reports real Postgres numbers');
+  // This endpoint used to hardcode every Postgres field to 'N/A' and claim
+  // status: 'connected' without ever asking the database. The dashboard rendered
+  // those three N/A cards as a broken feature, so the point of asserting the
+  // response is that a regression back to constants fails here rather than being
+  // read as "the database is simply unavailable".
+  r = await get('/api/system/health');
+  ok('200', r.status === 200, 'status=' + r.status);
+  const pg = (r.body || {}).postgresql || {};
+  ok('postgresql block present', !!r.body.postgresql);
+  ok('reports which backend answered', typeof pg.backend === 'string', 'backend=' + pg.backend);
+  // The scratch server runs on the JSON backend, so it cannot be postgres and
+  // must degrade honestly rather than inventing numbers.
+  ok('a non-postgres backend is labelled as such', pg.backend === 'json' || pg.backend === 'postgres',
+    'backend=' + pg.backend);
+  ok('status is a real string', typeof pg.status === 'string', 'status=' + pg.status);
+  ok('no field is the old hardcoded string', ![pg.storage_size, pg.storage_used, pg.connections].includes('N/A'),
+    'a field is back to a literal N/A');
+  for (const f of ['storage_size', 'storage_used', 'connections']) {
+    // number, or null only when the backend genuinely cannot answer.
+    ok(f + ' is a number or null',
+      pg[f] === null || (typeof pg[f] === 'number' && Number.isFinite(pg[f])),
+      f + '=' + JSON.stringify(pg[f]));
+  }
+  if (pg.backend === 'json') {
+    // The contract with JsonBackend is explicit: it has no metrics() method, so
+    // all three must be null and nothing may be fabricated.
+    ok('json backend reports null, not a made-up number',
+      pg.storage_size === null && pg.storage_used === null && pg.connections === null,
+      JSON.stringify({ s: pg.storage_size, u: pg.storage_used, c: pg.connections }));
+    ok('json backend is not called connected', pg.status !== 'connected', 'status=' + pg.status);
+  }
+  ok('chatbot block still present', !!r.body.chatbot);
+  ok('node block still present', !!r.body.node);
+  // The dashboard card is the only consumer; if it can render, the shape holds.
+  const overviewJs = fs.readFileSync(path.join(root, 'js/tabs/overview.js'), 'utf8');
+  ok('overview reads the numeric pg fields',
+    /pg\.storage_size/.test(overviewJs) && /pg\.connections/.test(overviewJs));
+
   console.log('\n[9] dashboard shell + modules exist');
-  const fs = require('fs');
-  const path = require('path');
-  const root = path.join(__dirname, '..', 'public', 'Dashboard');
   ok('index.html exists', fs.existsSync(path.join(root, 'index.html')));
   const shell = fs.existsSync(path.join(root, 'index.html')) ? fs.readFileSync(path.join(root, 'index.html'), 'utf8') : '';
   for (const id of ['kpiRow', 'chTraffic', 'costModelBody', 'userRows', 'convBody', 'livePulse', 'logBody']) {

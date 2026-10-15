@@ -12,6 +12,51 @@
 // filename carries the user filter it was scoped to.
 import { api, flash } from '../api.js';
 import { exportTableToCSV } from '../utils.js';
+import type { AnalyticsSessions } from '../types.js';
+
+/** A session row, as `/api/analytics/sessions` returns it. */
+type SessionRow = AnalyticsSessions['sessions'][number];
+
+/**
+ * Costs are exported at the same 6dp the tables show, so a sum still ties out.
+ *
+ * Exported rather than kept private: the Costs tab rounds its own cost columns
+ * this way too, and two copies of a rounding rule is one too many - they agree
+ * today, and the export quietly stops tying out to the screen the day they do not.
+ */
+export function round6(n: number): number {
+  return Number.isFinite(n) ? Math.round(n * 1e6) / 1e6 : 0;
+}
+
+/**
+ * The session export columns, shared by the Costs "Per Session Cost" table and
+ * the Sessions tab.
+ *
+ * Both tables render the same `/api/analytics/sessions` payload, so defining the
+ * columns twice meant a column added to one export was silently missing from the
+ * other, and the two files of "the same" session data could disagree. One
+ * definition is the only way to keep them honest.
+ *
+ * Values come from the API payload, never scraped back out of the DOM: the
+ * rendered rows are abbreviated (dates localised, costs rounded), so scraping
+ * would produce a file that does not reconcile with the numbers on screen.
+ */
+export const sessionColumns: ExportColumn[] = [
+  { header: 'Session', value: (s: SessionRow) => s.session_id },
+  { header: 'User', value: (s: SessionRow) => s.user },
+  { header: 'Mode', value: (s: SessionRow) => s.mode },
+  { header: 'State', value: (s: SessionRow) => s.status },
+  { header: 'Msgs In', value: (s: SessionRow) => s.user_messages },
+  { header: 'Msgs Out', value: (s: SessionRow) => s.assistant_messages },
+  { header: 'Files', value: (s: SessionRow) => s.files_count },
+  { header: 'Input Tokens', value: (s: SessionRow) => s.input_tokens },
+  { header: 'Output Tokens', value: (s: SessionRow) => s.output_tokens },
+  { header: 'IT Cost', value: (s: SessionRow) => round6(s.input_cost_usd) },
+  { header: 'OT Cost', value: (s: SessionRow) => round6(s.output_cost_usd) },
+  { header: 'Total Cost', value: (s: SessionRow) => round6(s.cost_usd) },
+  { header: 'Start', value: (s: SessionRow) => s.created_at || '' },
+  { header: 'End', value: (s: SessionRow) => s.last_activity || '' },
+];
 
 /** One exportable column: a header label and how to read its value off a row. */
 export interface ExportColumn {

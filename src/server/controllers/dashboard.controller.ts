@@ -146,7 +146,7 @@ export function registerDashboardRoutes(app: Application): void {
   /**
    * Get detailed system health metrics for PostgreSQL and Chatbot.
    */
-  app.get('/api/system/health', requireAdmin, (req: Request, res: Response) => {
+  app.get('/api/system/health', requireAdmin, async (req: Request, res: Response) => {
     void req;
 
     // Chatbot metrics from conversation manager
@@ -173,16 +173,48 @@ export function registerDashboardRoutes(app: Application): void {
     // Calculate CPU percentage (approximate)
     const cpuPercent = (cpuUsage.user + cpuUsage.system) / 1000000; // convert to seconds
 
+    // Real database figures, replacing the hardcoded 'N/A' this endpoint used to
+    // return for connections, storage_size and storage_used. Those three cards
+    // told an admin nothing at all, and "status: connected" was a constant -
+    // it stayed green through a database that had been unreachable for an hour.
+    //
+    // metrics() is itself the reachability proof: it only returns non-null after
+    // a successful catalog round trip. The full health() fallback runs only on
+    // failure, deliberately. This endpoint is hit by the dashboard's 15-second
+    // auto-refresh, and health() counts two entire tables - calling it on every
+    // tick to learn something metrics() already proved would be wasteful.
+    const backend = db();
+    const pg = {
+      backend: backend.kind,
+      status: backend.kind === 'postgres' ? 'unreachable' : 'not-applicable',
+      storage_size: null as number | null,
+      storage_used: null as number | null,
+      connections: null as number | null
+    } as {
+      backend: string;
+      status: string;
+      storage_size: number | null;
+      storage_used: number | null;
+      connections: number | null;
+      error?: string;
+    };
+
+    if (typeof backend.metrics === 'function') {
+      const m = await backend.metrics();
+      if (m) {
+        pg.status = 'connected';
+        pg.connections = m.connections;
+        pg.storage_size = m.totalBytes;
+        pg.storage_used = m.appBytes;
+      } else if (backend.kind === 'postgres') {
+        const h = await backend.health().catch(() => ({ ok: false, missing: [], error: 'health check failed' }));
+        pg.error = h.error || (h.missing.length ? `missing tables: ${h.missing.join(', ')}` : undefined);
+      }
+    }
+
     res.json({
       timestamp: new Date().toISOString(),
-      postgresql: {
-        status: 'connected',
-        cpu_usage: 'N/A',
-        memory_usage: 'N/A',
-        storage_size: 'N/A',
-        storage_used: 'N/A',
-        connections: 'N/A'
-      },
+      postgresql: pg,
       chatbot: {
         cpu_usage: Math.round(cpuPercent * 100) / 100,
         memory_usage: Math.round(memUsage.heapUsed / 1024 / 1024),
