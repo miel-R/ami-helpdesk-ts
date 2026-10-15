@@ -26,8 +26,24 @@ export function registerUsageRoutes(app: Application): void {
       // rather than only in chat.
       webhook_debug: isWebhookDebug(),
       webhook_target: isWebhookDebug() ? 'test' : 'production',
-      test_webhook_configured: !!config.n8n.testWebhookUrl
+      test_webhook_configured: !!config.n8n.testWebhookUrl,
+      helpdesk_url: process.env.AMI_CERT_BACK_URL || 'https://192.1.5.21/mis_helpdesk/index.php'
     });
+  }));
+
+  app.put('/api/admin/config', requireAdmin, wrap(async (req: Request, res: Response) => {
+    const { helpdesk_url } = req.body ?? {};
+    if (!helpdesk_url || typeof helpdesk_url !== 'string') {
+      return res.status(400).json({ error: 'helpdesk_url is required' });
+    }
+    try {
+      new URL(helpdesk_url); // validate
+    } catch {
+      return res.status(400).json({ error: 'Invalid URL' });
+    }
+    // Update runtime env (note: does not persist across restarts; update .env for that)
+    process.env.AMI_CERT_BACK_URL = helpdesk_url;
+    return res.json({ ok: true, helpdesk_url });
   }));
 
   /**

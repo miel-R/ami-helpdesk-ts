@@ -47,7 +47,7 @@ export async function refreshAll() {
         await safe('sessions', () => renderSessions(100));
     if (activeTab === 'live')
         await safe('live', () => renderRealtime());
-    if (activeTab === 'tickets')
+    if (activeTab === 'settings')
         await safe('ticket forms', () => renderTicketForms());
     if (activeTab === 'logs')
         await safe('logs', () => renderLogs());
@@ -255,6 +255,47 @@ function wireChrome() {
             void refreshAll();
     }, 15000);
 }
+function wireCertBackUrl() {
+    const input = document.getElementById('certBackUrl');
+    const btn = document.getElementById('certBackUrlSave');
+    const msg = document.getElementById('certBackUrlMsg');
+    if (!input || !btn || !msg)
+        return;
+    // Load current value from server config
+    api('/api/admin/config')
+        .then((cfg) => {
+        if (cfg.helpdesk_url)
+            input.value = cfg.helpdesk_url;
+    })
+        .catch(() => { });
+    btn.addEventListener('click', async () => {
+        const val = input.value.trim();
+        if (!val) {
+            msg.textContent = 'URL is required';
+            return;
+        }
+        try {
+            new URL(val); // validate
+        }
+        catch {
+            msg.textContent = 'Invalid URL';
+            return;
+        }
+        try {
+            await api('/api/admin/config', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ helpdesk_url: val })
+            });
+            msg.textContent = 'Saved. New cert flows will use this URL.';
+            msg.className = 'small text-success';
+        }
+        catch (e) {
+            msg.textContent = e.message;
+            msg.className = 'small text-danger';
+        }
+    });
+}
 function boot() {
     const fromUrl = new URLSearchParams(window.location.search).get('key');
     if (fromUrl) {
@@ -267,6 +308,7 @@ function boot() {
     wireUserForm();
     wireRateEditor();
     wireTicketForms();
+    wireCertBackUrl();
     if (!getKey()) {
         showLogin();
         return;
