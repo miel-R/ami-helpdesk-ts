@@ -171,6 +171,27 @@
   var PROBE = ORIGIN + '/api/health';
   var TIMEOUT_MS = 5000;
 
+  // Resolve the back target from ?back= (validated), then referrer, then null.
+  function getBackTarget() {
+    var params = new URLSearchParams(window.location.search);
+    var back = params.get('back');
+    if (back) {
+      try {
+        var u = new URL(back);
+        if (u.protocol === 'http:' || u.protocol === 'https:') return back;
+      } catch (e) { /* ignore invalid URL */ }
+    }
+    var ref = document.referrer;
+    if (ref) {
+      try {
+        var ru = new URL(ref);
+        if (ru.protocol === 'http:' || ru.protocol === 'https:') return ref;
+      } catch (e) { /* ignore */ }
+    }
+    return null;
+  }
+  var BACK_URL = getBackTarget();
+
   var elBadge = document.getElementById('probe');
   var elHead = document.getElementById('headline');
   var elResult = document.getElementById('result');
@@ -180,7 +201,7 @@
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      return { '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[c];
     });
   }
 
@@ -253,10 +274,13 @@
       }
 
       if (r.trusted) {
+        var backHtml = BACK_URL
+          ? '<p><a href="' + esc(BACK_URL) + '" class="btn btn-primary" style="text-decoration:none;">Back to the Helpdesk</a></p>'
+          : '<p><b>You can close this page now.</b> Go back to the Helpdesk tab and the chat button will be ' +
+            'in the bottom-right corner.</p>';
         render('ok', 'Done', 'It\u2019s done, thank you',
           '<p>This browser now trusts <code>' + esc(ORIGIN) + '</code>, so the chat widget will load.</p>' +
-          '<p><b>You can close this page now.</b> Go back to the Helpdesk and the chat button will be ' +
-          'in the bottom-right corner.</p>');
+          backHtml);
         return;
       }
 
@@ -269,15 +293,24 @@
 
   btnRetry.addEventListener('click', function () {
     btnRetry.disabled = true;
-    check().then(function () { btnRetry.disabled = false; });
+    var spin = document.createElement('span');
+    spin.className = 'spin';
+    spin.setAttribute('aria-hidden', 'true');
+    btnRetry.appendChild(spin);
+    check().then(function () {
+      btnRetry.disabled = false;
+      if (spin.parentNode) spin.parentNode.removeChild(spin);
+    });
   });
 
   btnBack.addEventListener('click', function () {
-    // Coming from the Helpdesk means there is somewhere to go back to. Opened
-    // cold there is not, so fall back to the tab-closing instruction instead of
-    // dumping the user on a blank history entry.
-    if (window.history.length > 1) { window.history.back(); }
-    else { window.close(); }
+    if (BACK_URL) {
+      window.location.assign(BACK_URL);
+    } else {
+      // No reliable target - fall back to a safe instruction instead of
+      // window.close(), which browsers block for tabs they didn't open.
+      window.alert('Certificate accepted. You can close this tab and return to your Helpdesk tab.');
+    }
   });
 
   check();

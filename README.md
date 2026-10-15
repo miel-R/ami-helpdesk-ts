@@ -113,7 +113,7 @@ docker compose logs --tail=100 ami-chatbot
 
 # 7. Access the application:
 #    - Chatbot widget: Available at your configured domain
-#    - Admin dashboard: http://localhost:3000/admin.html
+#    - Admin dashboard: http://localhost:3000/Dashboard/
 #    - Health check: http://localhost:3000/api/health
 
 # 8. To stop and remove containers (preserves volumes):

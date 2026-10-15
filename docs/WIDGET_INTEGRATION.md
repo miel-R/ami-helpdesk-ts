@@ -138,7 +138,7 @@ page that embeds the widget:
 #### The confirmation page
 
 `public/cert-trusted.html` ships with the widget host and is where the user lands after
-clicking "I have proceeded". It re-runs the same probe and then reports one of three
+clicking "Proceed". It re-runs the same probe and then reports one of three
 outcomes, because "something happened" is only useful if it is specific:
 
 | Probe result | Shown | Meaning |
