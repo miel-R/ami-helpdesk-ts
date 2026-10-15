@@ -86,7 +86,7 @@ export async function renderTicketForms() {
             }
         }
         paint();
-        must('ticketFormsMeta').textContent = `Updated ${when(res.timestamp)}`;
+        must('settingsMeta').textContent = `Updated ${when(res.timestamp)}`;
         warn('');
     }
     catch (e) {
