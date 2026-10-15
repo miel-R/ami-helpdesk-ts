@@ -77,6 +77,19 @@ export const TICKET_TYPES = ['tech_support', 'system_request', 'it_asset'] as co
 export const LINKS_ONLY_KEY = '_links_only';
 
 /**
+ * Row key for the address the certificate-trust page links back to.
+ *
+ * Stored here for the same reason `_links_only` is: an admin changes it from the
+ * dashboard while the chatbot is running, and an env var would mean a restart for
+ * every edit. Same table so there is one place to look and one save to make.
+ *
+ * The URL lives in `external_url`; `enabled` is carried TRUE purely because the
+ * column is NOT NULL, and is never read. A NULL `external_url` means "not
+ * overridden", which is what lets AMI_CERT_BACK_URL act as the deployment default.
+ */
+export const CERT_BACK_URL_KEY = '_cert_back_url';
+
+/**
  * Human labels for the ticket types.
  *
  * Sent to the widget so a link reads "Open the System Request form" instead of
@@ -343,6 +356,16 @@ deleteConversation(sessionId: string): Promise<void>;
    */
   getLinksOnlyMode(): Promise<boolean>;
   setLinksOnlyMode(on: boolean): Promise<boolean>;
+
+  /**
+   * The Helpdesk address the certificate-trust page links back to.
+   *
+   * null means no admin override, so the caller falls back to the env default.
+   * Never returns an empty string: an empty address would render a link that goes
+   * nowhere, which is worse than falling back.
+   */
+  getCertBackUrl(): Promise<string | null>;
+  setCertBackUrl(url: string): Promise<string>;
 
   pruneOldMessages(days?: number): Promise<number>;
   close(): Promise<void>;

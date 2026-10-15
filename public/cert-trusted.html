@@ -140,75 +140,16 @@
   </p>
 </main>
 
-<script>
-(function () {
-  'use strict';
+<!-- External, not inline, and that is load-bearing. Every page this app serves
+     carries helmet's default CSP, whose script-src is 'self' with no
+     'unsafe-inline'. An inline script is refused silently, so the page renders its
+     static markup looking normal while nothing in it works. 'self' does allow a
+     same-origin file, which is what this is. tools/cert-page-regress.cjs asserts
+     no inline <script> comes back.
 
-  // Hardcoded to match AmiChatConfig.baseUrl. Deliberately absolute: this file is
-  // also reachable under the MIS-mounted path, where a relative URL would resolve
-  // to a path the API never serves from there.
-  var ORIGIN = 'https://192.1.5.21:3000';
-  var CONFIG_URL = ORIGIN + '/api/public/cert-config';
-  // Only this fetch can hang, so only this needs a deadline. The page's verdict is
-  // already written into the markup; a stalled lookup must not blank it out or
-  // leave a half-drawn link behind.
-  var TIMEOUT_MS = 5000;
-
-  // Only ever http(s). Anything else (javascript:, data:) is refused rather than
-  // followed, so a crafted ?back= cannot turn the link into an injection.
-  function safeUrl(value) {
-    if (!value) return null;
-    try {
-      var u = new URL(String(value));
-      if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
-    } catch (e) { /* not a URL */ }
-    return null;
-  }
-
-  var ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) { return ENTITIES[c]; });
-  }
-
-  var slot = document.getElementById('backslot');
-
-  function showLink(url) {
-    if (!url) {
-      slot.textContent = 'Go back to your Helpdesk tab and the chat button will be ' +
-        'in the bottom-right corner.';
-      return;
-    }
-    var a = document.createElement('a');
-    a.className = 'btn';
-    a.href = url;
-    a.textContent = 'Back to the Helpdesk';
-    slot.appendChild(a);
-  }
-
-  // The Helpdesk address is a dashboard setting, so the live value is fetched
-  // rather than baked into this file. The ?back= param the help page passes and
-  // the referrer are fallbacks for when that endpoint cannot be reached.
-  function resolveBackUrl() {
-    var fallback = safeUrl(new URLSearchParams(window.location.search).get('back')) ||
-      safeUrl(document.referrer);
-    if (typeof window.fetch !== 'function') return Promise.resolve(fallback);
-
-    var ctrl = new AbortController();
-    var timer = window.setTimeout(function () { ctrl.abort(); }, TIMEOUT_MS);
-    return window.fetch(CONFIG_URL, { mode: 'cors', cache: 'no-store', signal: ctrl.signal })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (body) { return safeUrl(body && body.helpdesk_url) || fallback; })
-      .catch(function () { return fallback; })
-      .then(function (url) {
-        window.clearTimeout(timer);
-        return url;
-      });
-  }
-
-  // One fetch, one outcome. showLink is called exactly once either way, so the
-  // page cannot end up half-rendered no matter how the lookup resolves.
-  resolveBackUrl().then(showLink, showLink);
-})();
-</script>
+     The src is RELATIVE on purpose: this page is served both at the root and under
+     /mis_helpdesk/ami-helpdesk/, and a relative path resolves to the right file in
+     both mounts. An absolute path would break the MIS one. -->
+<script src="cert-trusted.js"></script>
 </body>
 </html>

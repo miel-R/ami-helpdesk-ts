@@ -487,6 +487,18 @@ async pageMessages(sessionId: string, options: PageMessagesOptions = {}): Promis
     return false;
   }
 
+  /** No override stored, so the caller falls back to the env default. */
+  async getCertBackUrl(): Promise<string | null> {
+    return null;
+  }
+
+  async setCertBackUrl(url: string): Promise<string> {
+    console.warn(
+      '[db] cert back URL NOT saved: the JSON fallback is active (no DATABASE_URL).'
+    );
+    return url;
+  }
+
   async pruneOldMessages(): Promise<number> {
     // No-op: the JSON fallback is a short-lived safety net, not the system of
     // record, so it deliberately keeps everything.

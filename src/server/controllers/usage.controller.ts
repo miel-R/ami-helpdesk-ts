@@ -3,6 +3,7 @@
 import type { Application, Request, Response } from 'express';
 import { db, kind as dbKind } from '../db/storage.service';
 import { config } from '../config/config.service';
+import { getCertBackUrl, saveCertBackUrl } from '../config/cert-config.service';
 import { isWebhookDebug } from '../core/flags';
 import conversationManager from '../services/session.service';
 import { requireAdmin, wrap, intQuery } from './admin.shared';
@@ -19,9 +20,7 @@ export function registerUsageRoutes(app: Application): void {
    */
   app.get('/api/public/cert-config', wrap(async (req: Request, res: Response) => {
     void req;
-    res.json({
-      helpdesk_url: process.env.AMI_CERT_BACK_URL || 'https://192.1.5.21/mis_helpdesk/index.php'
-    });
+    res.json({ helpdesk_url: await getCertBackUrl() });
   }));
 
   app.get('/api/admin/config', requireAdmin, wrap(async (req: Request, res: Response) => {
@@ -43,7 +42,11 @@ export function registerUsageRoutes(app: Application): void {
       webhook_debug: isWebhookDebug(),
       webhook_target: isWebhookDebug() ? 'test' : 'production',
       test_webhook_configured: !!config.n8n.testWebhookUrl,
-      helpdesk_url: process.env.AMI_CERT_BACK_URL || 'https://192.1.5.21/mis_helpdesk/index.php'
+      // Resolved through the service, so the dashboard shows the value the page
+      // will actually use: the admin override if there is one, otherwise the env
+      // default. Reading process.env here instead would show a stale "unset" the
+      // moment an admin saved something.
+      helpdesk_url: await getCertBackUrl()
     });
   }));
 
@@ -53,13 +56,14 @@ export function registerUsageRoutes(app: Application): void {
       return res.status(400).json({ error: 'helpdesk_url is required' });
     }
     try {
-      new URL(helpdesk_url); // validate
-    } catch {
-      return res.status(400).json({ error: 'Invalid URL' });
+      // Persisted to Postgres, not process.env. Writing the env var looked like it
+      // worked and then silently reverted on the next container restart, which is
+      // the same reasoning ticket-modals.service.ts records for its own settings.
+      const saved = await saveCertBackUrl(helpdesk_url);
+      return res.json({ ok: true, helpdesk_url: saved });
+    } catch (e) {
+      return res.status(400).json({ error: (e as Error).message });
     }
-    // Update runtime env (note: does not persist across restarts; update .env for that)
-    process.env.AMI_CERT_BACK_URL = helpdesk_url;
-    return res.json({ ok: true, helpdesk_url });
   }));
 
   /**

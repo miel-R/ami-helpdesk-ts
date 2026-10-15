@@ -14,7 +14,7 @@ import type {
 ListMessagesOptions, SummaryOptions, StoredMessage, StoredConversationRow,
   TicketModalConfig
 } from './types.model';
-import { TICKET_TYPES, LINKS_ONLY_KEY } from './types.model';
+import { TICKET_TYPES, LINKS_ONLY_KEY, CERT_BACK_URL_KEY } from './types.model';
 import { REQUIRED_TABLES } from './types.model';
 import { num, today, round10, limitValue } from './helpers';
 
@@ -110,6 +110,17 @@ console.log('[db] schema applied (version 1)');
       `INSERT INTO ticket_modal_config (ticket_type, enabled, external_url)
          VALUES ('_links_only', FALSE, NULL)
        ON CONFLICT (ticket_type) DO NOTHING`
+    );
+
+    // Same reasoning applies to the certificate-trust page's back address, added
+    // after the row above was written. Seeded with a NULL external_url, which
+    // means "no admin override" - so the env default keeps applying and a
+    // deployment that never touches the dashboard behaves exactly as before.
+    await client.query(
+      `INSERT INTO ticket_modal_config (ticket_type, enabled, external_url)
+         VALUES ($1, TRUE, NULL)
+       ON CONFLICT (ticket_type) DO NOTHING`,
+      [CERT_BACK_URL_KEY]
     );
   }
 
@@ -640,6 +651,27 @@ async deleteConversation(sessionId: string): Promise<void> {
       [LINKS_ONLY_KEY, !!on]
     );
     return rows.length ? rows[0].enabled === true : !!on;
+  }
+
+  async getCertBackUrl(): Promise<string | null> {
+    const { rows } = await this.q(
+      `SELECT external_url FROM ticket_modal_config WHERE ticket_type = $1`,
+      [CERT_BACK_URL_KEY]
+    );
+    const url = rows.length ? rows[0].external_url : null;
+    return typeof url === 'string' && url.trim() !== '' ? url : null;
+  }
+
+  async setCertBackUrl(url: string): Promise<string> {
+    const { rows } = await this.q(
+      `INSERT INTO ticket_modal_config (ticket_type, enabled, external_url, updated_at)
+            VALUES ($1, TRUE, $2, now())
+       ON CONFLICT (ticket_type) DO UPDATE
+              SET external_url = EXCLUDED.external_url, updated_at = now()
+         RETURNING external_url`,
+      [CERT_BACK_URL_KEY, url]
+    );
+    return rows.length ? rows[0].external_url : url;
   }
 
   // -- retention -----------------------------------------------------------

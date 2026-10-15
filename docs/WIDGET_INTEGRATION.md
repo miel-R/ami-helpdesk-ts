@@ -181,10 +181,24 @@ Dashboard → Settings takes effect immediately. The `?back=` parameter the MIS 
 passes and `document.referrer` are fallbacks, and if none of the three yields an
 `http(s)` address the page simply says to return to the Helpdesk tab.
 
+The saved value lives in Postgres (`ticket_modal_config`, under the
+`_cert_back_url` row) for the same reason the Ticket Forms switches do: it is changed
+by an admin from the dashboard while the chatbot is running, and an env var would mean
+a restart for every tweak. Resolution order is **database → `AMI_CERT_BACK_URL` →
+built-in default**, so an unset database row still honours the env var and a deleted
+row falls back cleanly.
+
 Rules that matter here:
 
-- **Inline everything.** Nothing in the block may depend on `widget.js` or
-  `widget.css`, because those are exactly what fails to load.
+- **Never use an inline `<script>`.** The server sets helmet's default CSP on every
+  response, and that header says `script-src 'self'` with no `'unsafe-inline'`, so an
+  inline script block is refused outright. Use `<script src="cert-trusted.js">` with a
+  **relative** `src`, which `script-src 'self'` allows and which resolves correctly
+  under both the root mount and `/mis_helpdesk/ami-helpdesk/`. See the callout below.
+- **No external dependency either.** The script must not import `widget.js` or
+  `widget.css`, because those are exactly what fails to load. A same-origin file of its
+  own is fine - by the time this page renders the certificate is already trusted, so a
+  same-origin asset always loads.
 - **Write the outcome in the markup.** The result is static text, not something a
   script swaps in. A page whose good news depends on script execution is a page that
   can show nothing at all.
@@ -195,13 +209,28 @@ Rules that matter here:
   called on both settle and reject so the region is always filled.
 - **Validate the back target.** `?back=` is attacker-controllable, so `safeUrl()` accepts
   `http:`/`https:` only and refuses everything else, turning a `javascript:` URL into a
-  no-op rather than an injection.
+  no-op rather than an injection. Build the link with `createElement` and `textContent`,
+  never `innerHTML`, so there is no string to escape in the first place.
+- **Guard the `AbortController` constructor.** `new AbortController()` throws
+  synchronously on a browser that lacks it, which kills the IIFE before the promise
+  exists - so `showLink()` never runs and the region stays empty. Check
+  `typeof window.AbortController === 'function'` and fall back before constructing one.
 
-> A past edit decoded the HTML entities inside `esc()`, turning `'&#39;'` into `'''`.
-> That is a **parse** error, so the browser discarded the entire script and the page sat
-> on "Checking…" forever showing buttons with no handlers - looking alive, doing nothing.
-> `tools/cert-page-regress.cjs` now runs `node --check` over the extracted script *and*
-> executes it in a `vm` sandbox with a stub DOM, so a dead script cannot pass review again.
+> **Why this page lost its link once already.** The symptom was a page that rendered fine
+> but whose "Back to the Helpdesk" link was simply absent - no visible error, no dead
+> button, just nothing where the link should be.
+>
+> The cause was CSP, not JavaScript. `helmet()` (`src/server/app.ts`) sends
+> `script-src 'self'` on every page, which refuses inline `<script>` blocks. The page had
+> exactly one script and it was inline, so it never ran, so `#backslot` stayed empty. It
+> had been that way since the page was first added - the earlier "Checking…" freeze had
+> the same cause and was misdiagnosed as a syntax error. A syntax error was present too,
+> and fixing it changed nothing, which is what finally pointed at the header.
+>
+> `tools/cert-page-regress.cjs` now fails the build if the HTML contains an inline
+> script block or an inline event handler, so this cannot silently come back. It also
+> runs `node --check` and executes the script in a `vm` sandbox with a stub DOM, so a
+> dead script cannot pass review either way.
 
 ## Role Resolution Priority
 

@@ -12,6 +12,7 @@ import { init as initDb, db } from './db/storage.service';
 import conversationManager from './services/session.service';
 import { loadCostRates } from './config/cost-rates.service';
 import { warmTicketModals } from './config/ticket-modals.service';
+import { warmCertConfig } from './config/cert-config.service';
 import { expireIfIdle } from './services/session-lifecycle.service';
 
 const MESSAGE_RETENTION_DAYS = parseInt(process.env.MESSAGE_RETENTION_DAYS ?? '', 10) || 180;
@@ -132,6 +133,9 @@ async function main(): Promise<void> {
   // Ticket modal switches, so the first ticket handover of the day does not pay
   // for a cache miss on a table that only has three rows.
   await warmTicketModals().catch(() => undefined);
+  // Same reason for the certificate-trust page's back address: the first user to
+  // finish setup after a restart should not pay a cache miss on the way out.
+  await warmCertConfig().catch(() => undefined);
   scheduleRetention();
   scheduleIdleExpiry();
   installShutdownFlush();

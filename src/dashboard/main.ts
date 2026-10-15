@@ -277,18 +277,33 @@ function wireCertBackUrl(): void {
   btn.addEventListener('click', async () => {
     const val = input.value.trim();
     if (!val) { msg.textContent = 'URL is required'; return; }
+    // Mirrors the server's own validation so the admin is told here rather than
+    // after a round-trip. `new URL` on its own is not enough: it happily accepts
+    // 'javascript:alert(1)', and this value is served straight into an href on
+    // the page that sends the user back to their Helpdesk.
+    let parsed: URL;
     try {
-      new URL(val); // validate
+      parsed = new URL(val);
     } catch {
-      msg.textContent = 'Invalid URL'; return;
+      msg.textContent = 'Enter a full address, including https://';
+      msg.className = 'small text-danger';
+      return;
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      msg.textContent = 'Must start with http:// or https://';
+      msg.className = 'small text-danger';
+      return;
     }
     try {
-      await api('/api/admin/config', {
+      const saved = await api<{ helpdesk_url: string }>('/api/admin/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ helpdesk_url: val })
       });
-      msg.textContent = 'Saved. New cert flows will use this URL.';
+      // Show what was stored, not what was typed: the server normalises, and an
+      // input that disagrees with the saved value reads as a failed save.
+      if (saved && saved.helpdesk_url) input.value = saved.helpdesk_url;
+      msg.textContent = 'Saved. This survives a restart.';
       msg.className = 'small text-success';
     } catch (e) {
       msg.textContent = (e as Error).message;
