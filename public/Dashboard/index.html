@@ -7,8 +7,8 @@
   <title>Ami Helpdesk &bull; Analytics Dashboard</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%236f42c1'/%3E%3Ctext%20x='32'%20y='44'%20font-size='34'%20font-weight='700'%20font-family='sans-serif'%20fill='white'%20text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="./bootstrap-5.3.8-dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <script src="./bootstrap-5.3.8-dist/js/chart.js"></script>
+  <link rel="stylesheet" href="./bootstrap-5.3.8-dist/css/bootstrap-icons.min.css">
+  <script src="./bootstrap-5.3.8-dist/js/chart.js" defer></script>
   <link rel="stylesheet" href="./css/dashboard.css">
 </head>
 <body>
@@ -42,7 +42,7 @@
             <label class="form-check-label text-white-50" for="autoRefresh">Auto-refresh</label>
           </div>
           <span id="lastUpd" class="badge bg-dark bg-opacity-25 text-white-50 font-monospace small d-none d-md-inline" hidden></span>
-          <button id="themeBtn" class="btn btn-sm btn-outline-light" type="button" title="Toggle theme"><i class="bi bi-moon-stars"></i></button>
+          <button id="themeBtn" class="btn btn-sm btn-outline-light" type="button" title="Switch to dark theme" aria-label="Switch to dark theme" aria-pressed="false"><i class="bi bi-moon-stars"></i></button>
           <button id="refreshBtn" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1" type="button"><i class="bi bi-arrow-clockwise"></i><span class="d-none d-sm-inline">Refresh</span></button>
           <button id="logoutBtn" class="btn btn-sm btn-light text-ami fw-semibold d-flex align-items-center gap-1" type="button"><i class="bi bi-box-arrow-right"></i><span class="d-none d-sm-inline">Sign out</span></button>
         </div>
@@ -61,17 +61,17 @@
           </div>
         </div>
       </div>
-      <ul class="nav nav-pills gap-2 mb-4 bg-white p-2 rounded-3 border shadow-sm flex-wrap" role="tablist">
-        <li class="nav-item"><button class="nav-link active d-flex align-items-center gap-2" data-tab="overview" type="button"><i class="bi bi-speedometer2"></i><span>Overview</span></button></li>
-        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" data-tab="trends" type="button"><i class="bi bi-graph-up-arrow"></i><span>Trends</span></button></li>
-        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" data-tab="cost" type="button"><i class="bi bi-cash-coin"></i><span>Costs</span></button></li>
-        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" data-tab="users" type="button"><i class="bi bi-people"></i><span>Users</span></button></li>
-        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" data-tab="conv" type="button"><i class="bi bi-chat-dots"></i><span>Sessions</span></button></li>
-        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" data-tab="live" type="button"><i class="bi bi-activity"></i><span>Live</span></button></li>
-        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" data-tab="settings" type="button"><i class="bi bi-gear"></i><span>Settings</span></button></li>
-        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" data-tab="logs" type="button"><i class="bi bi-terminal"></i><span>Logs</span></button></li>
+      <ul class="nav nav-pills gap-2 mb-4 bg-white p-2 rounded-3 border shadow-sm ami-tabstrip" role="tablist">
+        <li class="nav-item"><button class="nav-link active d-flex align-items-center gap-2" id="tab-overview" data-tab="overview" type="button" role="tab" aria-selected="true" aria-controls="panel-overview" tabindex="0"><i class="bi bi-speedometer2"></i><span>Overview</span></button></li>
+        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" id="tab-trends" data-tab="trends" type="button" role="tab" aria-selected="false" aria-controls="panel-trends" tabindex="-1"><i class="bi bi-graph-up-arrow"></i><span>Trends</span></button></li>
+        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" id="tab-cost" data-tab="cost" type="button" role="tab" aria-selected="false" aria-controls="panel-cost" tabindex="-1"><i class="bi bi-cash-coin"></i><span>Costs</span></button></li>
+        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" id="tab-users" data-tab="users" type="button" role="tab" aria-selected="false" aria-controls="panel-users" tabindex="-1"><i class="bi bi-people"></i><span>Users</span></button></li>
+        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" id="tab-conv" data-tab="conv" type="button" role="tab" aria-selected="false" aria-controls="panel-conv" tabindex="-1"><i class="bi bi-chat-dots"></i><span>Sessions</span></button></li>
+        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" id="tab-live" data-tab="live" type="button" role="tab" aria-selected="false" aria-controls="panel-live" tabindex="-1"><i class="bi bi-activity"></i><span>Live</span></button></li>
+        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" id="tab-settings" data-tab="settings" type="button" role="tab" aria-selected="false" aria-controls="panel-settings" tabindex="-1"><i class="bi bi-gear"></i><span>Settings</span></button></li>
+        <li class="nav-item"><button class="nav-link d-flex align-items-center gap-2" id="tab-logs" data-tab="logs" type="button" role="tab" aria-selected="false" aria-controls="panel-logs" tabindex="-1"><i class="bi bi-terminal"></i><span>Logs</span></button></li>
       </ul>
-      <section data-panel="overview" id="panel-overview" role="tabpanel">
+      <section data-panel="overview" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
         <div id="kpiRow" class="row g-3 mb-4"></div>
         <div class="row g-3 mb-4">
           <div class="col-12 col-lg-8">
@@ -88,7 +88,7 @@
           </div>
         </div>
       </section>
-      <section data-panel="trends" id="panel-trends" role="tabpanel" hidden>
+      <section data-panel="trends" id="panel-trends" role="tabpanel" aria-labelledby="tab-trends" hidden>
         <div class="row g-3 mb-4">
           <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Traffic (calls vs sessions)</h6></div><div class="card-body"><div class="chart-box"><canvas id="chTraffic"></canvas></div></div></div></div>
           <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tokens (in vs out)</h6></div><div class="card-body"><div class="chart-box"><canvas id="chTokens"></canvas></div></div></div></div>
@@ -97,13 +97,13 @@
         </div>
         <div id="trendsMeta" class="small text-muted mb-4"></div>
       </section>
-      <section data-panel="cost" id="panel-cost" role="tabpanel" hidden>
+      <section data-panel="cost" id="panel-cost" role="tabpanel" aria-labelledby="tab-cost" hidden>
         <div class="row g-3 mb-4" id="statCards"></div>
 
         <!-- Row 2: Cost by Model | Cost by Kind -->
         <div class="row g-3 mb-4">
-          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-cpu me-2 text-ami"></i>Cost by Model</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Model</th><th class="text-end">Calls</th><th class="text-end">Input Tokens</th><th class="text-end">Output Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th></tr></thead><tbody id="costModelBody"></tbody></table></div></div></div></div>
-          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-tags me-2 text-ami"></i>Cost by Kind</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Kind</th><th class="text-end">Calls</th><th class="text-end">Input Tokens</th><th class="text-end">Output Tokens</th><th class="text-end">Cost</th><th class="text-end">Latency</th></tr></thead><tbody id="costKindBody"></tbody></table></div></div></div></div>
+          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-cpu me-2 text-ami"></i>Cost by Model</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0 sortable" data-sortable><thead><tr><th data-sort-col="text">Model</th><th class="text-end" data-sort-col="num">Calls</th><th class="text-end" data-sort-col="num">Input Tokens</th><th class="text-end" data-sort-col="num">Output Tokens</th><th class="text-end" data-sort-col="num">Cost</th><th class="text-end" data-sort-col="num">Latency</th></tr></thead><tbody id="costModelBody"></tbody></table></div></div></div></div>
+          <div class="col-12 col-lg-6"><div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-tags me-2 text-ami"></i>Cost by Kind</h6></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0 sortable" data-sortable><thead><tr><th data-sort-col="text">Kind</th><th class="text-end" data-sort-col="num">Calls</th><th class="text-end" data-sort-col="num">Input Tokens</th><th class="text-end" data-sort-col="num">Output Tokens</th><th class="text-end" data-sort-col="num">Cost</th><th class="text-end" data-sort-col="num">Latency</th></tr></thead><tbody id="costKindBody"></tbody></table></div></div></div></div>
         </div>
 
         <!-- Row 3: Cost by User (full width, drives the session filter below) -->
@@ -138,11 +138,11 @@
               </div>
               <div class="card-body p-0">
                 <div class="table-responsive">
-                  <table class="table table-hover align-middle mb-0">
+                  <table class="table table-hover align-middle mb-0 sortable" data-sortable>
                     <thead>
                       <tr>
-                        <th>User</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th>
-                        <th class="text-end">Latency</th><th class="text-end">Actions</th>
+                        <th data-sort-col="text">User</th><th class="text-end" data-sort-col="num">Calls</th><th class="text-end" data-sort-col="num">Tokens</th><th class="text-end" data-sort-col="num">Cost</th>
+                        <th class="text-end" data-sort-col="num">Latency</th><th class="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody id="costUserBody"></tbody>
@@ -177,16 +177,16 @@
               </div>
               <div class="card-body p-0">
                 <div class="table-responsive">
-                  <table class="table table-hover align-middle mb-0">
+                  <table class="table table-hover align-middle mb-0 sortable" data-sortable>
                     <thead>
                       <tr>
-                        <th>Session</th><th>User</th><th>Mode</th><th>State</th>
-                        <th class="text-end">Msgs In</th><th class="text-end">Msgs Out</th>
-                        <th class="text-end">Files</th>
-                        <th class="text-end">Input Tokens</th><th class="text-end">Output Tokens</th>
-                        <th class="text-end">IT Cost</th><th class="text-end">OT Cost</th>
-                        <th class="text-end">Total Cost</th>
-                        <th>Start</th><th>End</th>
+                        <th data-sort-col="text">Session</th><th data-sort-col="text">User</th><th data-sort-col="text">Mode</th><th data-sort-col="text">State</th>
+                        <th class="text-end" data-sort-col="num">Msgs In</th><th class="text-end" data-sort-col="num">Msgs Out</th>
+                        <th class="text-end" data-sort-col="num">Files</th>
+                        <th class="text-end" data-sort-col="num">Input Tokens</th><th class="text-end" data-sort-col="num">Output Tokens</th>
+                        <th class="text-end" data-sort-col="num">IT Cost</th><th class="text-end" data-sort-col="num">OT Cost</th>
+                        <th class="text-end" data-sort-col="num">Total Cost</th>
+                        <th data-sort-col="date">Start</th><th data-sort-col="date">End</th>
                       </tr>
                     </thead>
                     <tbody id="costSessionBody"></tbody>
@@ -198,10 +198,10 @@
         </div>
         <div id="costsMeta" class="small text-muted mb-4"></div>
       </section>
-      <section data-panel="users" id="panel-users" role="tabpanel" hidden>
+      <section data-panel="users" id="panel-users" role="tabpanel" aria-labelledby="tab-users" hidden>
         <div class="card border-0 shadow-sm rounded-3 mb-4">
           <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center"><h6 class="fw-bold mb-0"><i class="bi bi-people me-2 text-ami"></i>Users &amp; Quotas</h6><span id="usersMeta" class="small text-muted"></span></div>
-          <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>User</th><th>Dept</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th><th>Quota</th><th class="text-end">Active</th><th class="text-end">Actions</th></tr></thead><tbody id="userRows"></tbody></table></div></div>
+          <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0 sortable" data-sortable><thead><tr><th data-sort-col="text">User</th><th data-sort-col="text">Dept</th><th class="text-end" data-sort-col="num">Calls</th><th class="text-end" data-sort-col="num">Tokens</th><th class="text-end" data-sort-col="num">Cost</th><th>Quota</th><th class="text-end" data-sort-col="num">Active</th><th class="text-end">Actions</th></tr></thead><tbody id="userRows"></tbody></table></div></div>
         </div>
         <div class="card border-0 shadow-sm rounded-3 mb-4">
           <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="bi bi-person-plus me-2 text-ami"></i>Add User</h6></div>
@@ -215,13 +215,13 @@
           </form></div>
         </div>
       </section>
-      <section data-panel="conv" id="panel-conv" role="tabpanel" hidden>
+      <section data-panel="conv" id="panel-conv" role="tabpanel" aria-labelledby="tab-conv" hidden>
         <div class="card border-0 shadow-sm rounded-3 mb-4">
           <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center"><h6 class="fw-bold mb-0"><i class="bi bi-chat-dots me-2 text-ami"></i>Sessions</h6><span id="sessionsMeta" class="small text-muted"></span></div>
-          <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Session</th><th>User</th><th>Mode</th><th>State</th><th class="text-end">Msgs</th><th class="text-end">Calls</th><th class="text-end">Tokens</th><th class="text-end">Cost</th><th class="text-end">Active</th><th class="text-end">View</th></tr></thead><tbody id="convBody"></tbody></table></div></div>
+          <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0 sortable" data-sortable><thead><tr><th data-sort-col="text">Session</th><th data-sort-col="text">User</th><th data-sort-col="text">Mode</th><th data-sort-col="text">State</th><th class="text-end" data-sort-col="num">Msgs</th><th class="text-end" data-sort-col="num">Calls</th><th class="text-end" data-sort-col="num">Tokens</th><th class="text-end" data-sort-col="num">Cost</th><th class="text-end" data-sort-col="num">Active</th><th class="text-end">View</th></tr></thead><tbody id="convBody"></tbody></table></div></div>
         </div>
       </section>
-      <section data-panel="live" id="panel-live" role="tabpanel" hidden>
+      <section data-panel="live" id="panel-live" role="tabpanel" aria-labelledby="tab-live" hidden>
         <div class="row g-3 mb-4">
           <div class="col-12 col-lg-8">
             <div class="card border-0 shadow-sm rounded-3 h-100">
@@ -245,7 +245,7 @@
           <div class="card-body"><div id="liveEvents" class="small"></div></div>
         </div>
       </section>
-      <section data-panel="settings" id="panel-settings" role="tabpanel" hidden>
+      <section data-panel="settings" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
         <div class="card border-0 shadow-sm rounded-3 mb-4">
           <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
@@ -305,8 +305,8 @@
             <div class="row g-3 align-items-end">
               <div class="col-12 col-md-8">
                 <label class="form-label small fw-semibold" for="certBackUrl">Helpdesk Return URL</label>
-                <input id="certBackUrl" class="form-control form-control-sm" type="url" placeholder="https://192.1.5.21/mis_helpdesk/index.php" autocomplete="off">
-                <div class="small text-muted mt-1">Must be an http/https URL. Used as the <code>?back=</code> parameter on the certificate confirmation page.</div>
+                <input id="certBackUrl" class="form-control form-control-sm" type="url" placeholder="https://helpdesk.example.com/index.php" autocomplete="off">
+                <div class="small text-muted mt-1">Must be an http/https URL. Must be the address users actually see for the MIS Helpdesk, including the <code>/mis_helpdesk/</code> path if your deployment uses it.</div>
               </div>
               <div class="col-12 col-md-4">
                 <button id="certBackUrlSave" class="btn btn-sm btn-ami w-100" type="button">Save</button>
@@ -316,7 +316,7 @@
           </div>
         </div>
       </section>
-      <section data-panel="logs" id="panel-logs" role="tabpanel" hidden>
+      <section data-panel="logs" id="panel-logs" role="tabpanel" aria-labelledby="tab-logs" hidden>
         <div class="card border-0 shadow-sm rounded-3">
           <div class="card-header bg-white py-3"><div class="row g-2 align-items-center">
             <div class="col-auto"><span class="small fw-bold text-muted text-uppercase me-2">Severity:</span><div class="btn-group btn-group-sm" role="group"><button type="button" class="btn btn-outline-secondary active" data-lvl="all">All</button><button type="button" class="btn btn-outline-info" data-lvl="info">Info</button><button type="button" class="btn btn-outline-warning" data-lvl="warn">Warn</button><button type="button" class="btn btn-outline-danger" data-lvl="error">Error</button></div></div>

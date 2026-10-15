@@ -1751,8 +1751,12 @@ console.log('\n[26] A refresh adopts the server clock instead of resetting it');
     const four = mkCtx();
     four.setIdleRemaining(60 * 1000);           // one minute of a five-minute period left
     const elapsed = Date.now() - four._lastActivity;
+    // The upper bound gets a millisecond of slack on purpose. setIdleRemaining
+    // sets _lastActivity to exactly now - 4 minutes, and the two Date.now()
+    // calls are separate statements, so a scheduler hiccup between them puts
+    // elapsed a few ms over 240000 and fails a correct implementation.
     ok('60s remaining back-dates activity by 4 minutes',
-        elapsed > (3.9 * 60 * 1000) && elapsed <= (4 * 60 * 1000),
+        elapsed > (3.9 * 60 * 1000) && elapsed <= (4 * 60 * 1000) + 100,
         'elapsed=' + elapsed);
     ok('so the existing checks see the session as four minutes idle',
         Date.now() - four._lastActivity >= four.idleMs() - 60 * 1000);

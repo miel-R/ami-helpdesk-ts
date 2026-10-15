@@ -11,6 +11,8 @@ import { renderLogs, wireLogFilters, openSession } from './tabs/inspect.js';
 import { renderTicketForms, wireTicketForms } from './tabs/ticket-forms.js';
 import { wireRateEditor } from './tabs/rates.js';
 import { openUserDetail, openUserEditor, wireUserForm } from './tabs/user-admin.js';
+import { wireSortableTables, resortTables } from './sortable.js';
+import { applyStoredTheme, toggleTheme } from './theme.js';
 let activeTab = 'overview';
 export function currentFilter() {
     const days = Number(document.getElementById('usageDays')?.value || 1);
@@ -51,17 +53,64 @@ export async function refreshAll() {
         await safe('ticket forms', () => renderTicketForms());
     if (activeTab === 'logs')
         await safe('logs', () => renderLogs());
+    // A re-render replaces tbody contents, so any header sort the admin chose would
+    // otherwise be undone by the next auto-refresh.
+    resortTables();
     stamp.textContent = 'updated ' + new Date().toLocaleTimeString();
 }
-export function switchTab(id) {
+/** Tab ids in the order they appear in the tab strip, for arrow-key movement. */
+const TAB_ORDER = ['overview', 'trends', 'cost', 'users', 'conv', 'live', 'settings', 'logs'];
+export function switchTab(id, focus = false) {
     activeTab = id;
     document.querySelectorAll('[data-tab]').forEach(b => {
-        b.classList.toggle('active', b.dataset.tab === id);
+        const btn = b;
+        const on = btn.dataset.tab === id;
+        btn.classList.toggle('active', on);
+        // role="tablist" promises this state; without it a screen reader announces
+        // every tab as equally selected.
+        btn.setAttribute('aria-selected', String(on));
+        // Roving tabindex: only the selected tab is in the tab order, so Tab moves
+        // out of the strip instead of walking through all eight.
+        btn.setAttribute('tabindex', on ? '0' : '-1');
     });
     document.querySelectorAll('[data-panel]').forEach(p => {
-        p.hidden = p.dataset.panel !== id;
+        const panel = p;
+        panel.hidden = panel.dataset.panel !== id;
+        if (!panel.hidden)
+            panel.setAttribute('tabindex', '0');
     });
+    if (focus) {
+        const btn = document.querySelector(`[data-tab="${id}"]`);
+        btn?.focus();
+    }
     void refreshAll();
+}
+/**
+ * Left/Right/Home/End within the tab strip. role="tablist" implies arrow-key
+ * navigation; without it the strip is a trap for keyboard users, because every
+ * button is a separate Tab stop and there is no way to move along the strip.
+ */
+function wireTabKeys() {
+    document.querySelectorAll('[data-tab]').forEach(b => {
+        b.addEventListener('keydown', e => {
+            const ev = e;
+            const here = b.dataset.tab;
+            const at = TAB_ORDER.indexOf(here);
+            let next = null;
+            if (ev.key === 'ArrowRight')
+                next = TAB_ORDER[(at + 1) % TAB_ORDER.length];
+            else if (ev.key === 'ArrowLeft')
+                next = TAB_ORDER[(at - 1 + TAB_ORDER.length) % TAB_ORDER.length];
+            else if (ev.key === 'Home')
+                next = TAB_ORDER[0];
+            else if (ev.key === 'End')
+                next = TAB_ORDER[TAB_ORDER.length - 1];
+            if (!next)
+                return;
+            ev.preventDefault();
+            switchTab(next, true);
+        });
+    });
 }
 function showLogin() {
     must('login').hidden = false;
@@ -195,10 +244,49 @@ function wireCostFilters() {
         }
     });
 }
+/**
+ * True when the user is typing somewhere. The auto-refresh tick re-renders the
+ * active tab, which replaces table bodies and re-populates form fields - so a
+ * half-typed URL in Settings or a user search in Costs would be wiped out from
+ * under the cursor every 15 seconds.
+ */
+function isEditing() {
+    const el = document.activeElement;
+    if (!el)
+        return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+}
+/** Document-level shortcuts, skipped while typing so they cannot eat keystrokes. */
+function wireShortcuts() {
+    document.addEventListener('keydown', e => {
+        const ev = e;
+        if (ev.ctrlKey || ev.metaKey || ev.altKey)
+            return;
+        const el = ev.target;
+        if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable))
+            return;
+        if (ev.key === 'r') {
+            ev.preventDefault();
+            void refreshAll();
+            return;
+        }
+        if (ev.key === '/') {
+            const search = document.getElementById('costUserSearch')
+                ?? document.getElementById('usageUser');
+            if (search) {
+                ev.preventDefault();
+                search.focus();
+                search.select();
+            }
+        }
+    });
+}
 function wireChrome() {
     document.querySelectorAll('[data-tab]').forEach(b => {
         b.addEventListener('click', () => switchTab(b.dataset.tab));
     });
+    wireTabKeys();
     must('refreshBtn').addEventListener('click', () => void refreshAll());
     must('usageApply').addEventListener('click', () => void refreshAll());
     document.getElementById('usageUser')?.addEventListener('keydown', e => {
@@ -207,10 +295,7 @@ function wireChrome() {
     });
     must('logsRefresh').addEventListener('click', () => void safe('logs', () => renderLogs()));
     wireLogFilters(() => void safe('logs', () => renderLogs()));
-    document.getElementById('themeBtn')?.addEventListener('click', () => {
-        const html = document.documentElement;
-        html.dataset.bsTheme = html.dataset.bsTheme === 'dark' ? 'light' : 'dark';
-    });
+    document.getElementById('themeBtn')?.addEventListener('click', toggleTheme);
     document.addEventListener('click', ev => {
         const t = ev.target;
         if (!t || typeof t.closest !== 'function')
@@ -249,6 +334,10 @@ function wireChrome() {
     document.addEventListener('ami:refresh', () => { void refreshAll(); });
     setInterval(() => {
         if (document.hidden)
+            return;
+        // Never re-render out from under someone mid-keystroke. Manual refresh and
+        // the r shortcut still work while typing - this guard is only for the timer.
+        if (isEditing())
             return;
         const ar = document.getElementById('autoRefresh');
         if (!must('app').hidden && ar?.checked)
@@ -317,6 +406,7 @@ function boot() {
         setKey(fromUrl);
         history.replaceState(null, '', window.location.pathname);
     }
+    applyStoredTheme();
     wireAuth();
     wireChrome();
     wireCostFilters();
@@ -324,6 +414,8 @@ function boot() {
     wireRateEditor();
     wireTicketForms();
     wireCertBackUrl();
+    wireSortableTables();
+    wireShortcuts();
     if (!getKey()) {
         showLogin();
         return;

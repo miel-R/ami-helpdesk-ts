@@ -248,8 +248,12 @@ async function get(path) {
   ok('empty-state colspan matches header count',
     !!spanMatch && Number(spanMatch[1]) === thCount,
     'span=' + (spanMatch && spanMatch[1]) + ' th=' + thCount);
+  // Matched on the header label and order only. Pinning the full <th> attribute
+  // list here made the assertion fail the moment a column gained an unrelated
+  // attribute (data-sort-col, for one) even though the column order it exists to
+  // protect was untouched.
   ok('Files column sits right after Msgs Out',
-    /Msgs Out<\/th>\s*<th class="text-end">Files<\/th>/.test(head), 'Files not after Msgs Out');
+    /Msgs Out<\/th>\s*<th[^>]*>Files<\/th>/.test(head), 'Files not after Msgs Out');
   ok('Ledger column removed', !head.includes('>Ledger</th>'), 'Ledger still present');
   // fileCell is a sibling helper, so it lives outside the sessionRows slice.
   ok('zero-file sessions show 0 not a dash',

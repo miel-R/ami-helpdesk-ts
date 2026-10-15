@@ -491,17 +491,29 @@ array cannot say which turn consumed a file.
 
 ### The admin dashboard
 
-Seven tabs — Overview, Trends, Costs, Users, Sessions, Live, Logs — sharing one
-global filter (window + user). Two things are worth knowing before editing it:
+Eight tabs — Overview, Trends, Costs, Users, Sessions, Live, Settings, Logs —
+sharing one global filter (window + user). Two things are worth knowing before
+editing it:
 
-- **Never write to `public/Dashboard/` by hand.** It is build output. The source
-  is `src/dashboard/`, compiled by `tsconfig.dashboard.json`. A hand-edit is
-  silently lost on the next build.
+- **Never hand-edit `public/Dashboard/js/`.** That directory is build output. The
+  source is `src/dashboard/`, compiled by `tsconfig.dashboard.json`, and a
+  hand-edit is silently lost on the next build. `public/Dashboard/index.html`
+  and `public/Dashboard/css/dashboard.css` are the exception: nothing generates
+  them, so they are maintained in place.
 - **One id per element, checked by a test.** `getElementById` returns the first
   match, so a duplicated id makes a control silently inert: the Costs user filter
   had two elements called `usageUser`, the top-bar input won, and typing in the
   search box did nothing while looking like it worked. `analytics-regress.cjs`
   now fails on duplicate ids for exactly this reason.
+- **The dashboard must work with no internet.** It is served from inside the
+  office LAN, so every asset it loads has to be vendored: Bootstrap, chart.js
+  and the bootstrap-icons font all live under `public/Dashboard/`. An icon
+  stylesheet pointing at a CDN is not a cosmetic problem here — it is
+  render-blocking in `<head>`, so the page stalls on a box that cannot reach
+  it. `dashboard-markup-regress.cjs` fails on any external `src`/`href`.
+  Note that vendoring bootstrap-icons is two files, not one: the CSS references
+  `fonts/bootstrap-icons.woff2` relative to itself, so the fonts have to sit in
+  `bootstrap-5.3.8-dist/css/fonts/` or the icons render as nothing at all.
 
 ## Testing
 
@@ -518,6 +530,9 @@ provider key and no webhook, so none can touch production or spend tokens.
 | `identity-*.cjs` | role resolution and token signing |
 | `analytics-regress.cjs` | endpoint response shapes; per-session ordering and ordinal contiguity; cost arithmetic against the rates; rate validation and admin-only access; **duplicate element ids in the dashboard shell** |
 | `export-regress.cjs` | a produced CSV/JSON file — headers, precision, quoting, filename scope — not merely that a button renders |
+| `cert-page-regress.cjs` | the certificate page shipping an inline `<script>` (which helmet's `script-src 'self'` silently refuses) or rendering its back link as HTML |
+| `dashboard-markup-regress.cjs` | the dashboard shell: an external asset creeping back in, a missing icon font, a duplicated id, a tab without its ARIA wiring, or a theme that darkens the body and nothing else |
+| `sortable-regress.cjs` | the table sorter's ordering: `1,234` read as the number 1, "item 10" before "item 9", and blank cells floating to the top the moment a column is sorted descending |
 
 The analytics harness needs a live server, so `npm test` runs it through
 `tools/with-server.cjs`, which boots `dist/` on a spare port and shuts it down afterwards.

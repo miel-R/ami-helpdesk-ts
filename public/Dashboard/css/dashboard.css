@@ -21,4 +21,62 @@ body { background-color: #f8fafc; min-height: 100vh; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: .85rem; }
 .nav-pills .nav-link { font-weight: 600; color: #475569; border-radius: 8px; padding: .5rem .9rem; font-size: .9rem; }
 .nav-pills .nav-link.active { background-color: var(--ami-purple); color: #fff; box-shadow: 0 4px 12px rgba(111,66,193,.25); }
-[data-bs-theme="dark"] body { background-color: #0f172a; }
+
+/* Eight tabs wrapped onto three rows on a phone. Scrolling the strip sideways
+   keeps them on one line; the fade tells you there is more to the right. */
+.ami-tabstrip { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.ami-tabstrip .nav-item { flex: 0 0 auto; }
+.ami-tabstrip .nav-link { white-space: nowrap; }
+@media (max-width: 575.98px) { .ami-tabstrip { border-radius: .5rem; } }
+
+/* Sortable tables. The arrow is always in the DOM so the header does not change
+   width when a column becomes active; it is only made visible on hover/active. */
+.table.sortable thead th { cursor: pointer; user-select: none; white-space: nowrap; }
+.table.sortable thead th::after {
+  content: '\2195'; opacity: .28; margin-left: .4rem; font-size: .9em;
+}
+.table.sortable thead th.sort-asc::after { content: '\2191'; opacity: 1; color: var(--ami-purple); }
+.table.sortable thead th.sort-desc::after { content: '\2193'; opacity: 1; color: var(--ami-purple); }
+.table.sortable thead th.sort-active { color: var(--ami-purple); }
+.table.sortable thead th:focus-visible { outline: 3px solid var(--ami-purple); outline-offset: -3px; }
+
+[hidden] { display: none !important; }
+
+/* Dark theme. Bootstrap's own dark theme covers most components, but this page
+   hardcodes light utilities - bg-white on every card header, the tab strip and
+   the input groups, and text-bg-light on the badges - and those utilities are
+   !important, so they win over [data-bs-theme="dark"]. Without the overrides
+   below, toggling the theme produced white cards on a near-black page. */
+[data-bs-theme="dark"] body { background-color: #0f172a; color: #e2e8f0; }
+[data-bs-theme="dark"] .bg-white,
+[data-bs-theme="dark"] .card-header.bg-white,
+[data-bs-theme="dark"] .input-group-text.bg-white { background-color: #1e293b !important; color: #e2e8f0; }
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .ami-tabstrip,
+[data-bs-theme="dark"] .modal-content { background-color: #1e293b; border-color: #334155 !important; }
+[data-bs-theme="dark"] .border,
+[data-bs-theme="dark"] .border-top,
+[data-bs-theme="dark"] .table { border-color: #334155 !important; }
+[data-bs-theme="dark"] .table { --bs-table-color: #e2e8f0; --bs-table-bg: transparent; --bs-table-hover-bg: #263449; --bs-table-hover-color: #f1f5f9; }
+[data-bs-theme="dark"] .table thead th { background-color: #172033; color: #94a3b8; }
+[data-bs-theme="dark"] .text-bg-light,
+[data-bs-theme="dark"] .badge.text-bg-light { background-color: #334155 !important; color: #e2e8f0 !important; }
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .input-group-text { background-color: #0f172a; color: #e2e8f0; border-color: #334155; }
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus { background-color: #0f172a; color: #e2e8f0; }
+[data-bs-theme="dark"] .form-control::placeholder { color: #64748b; }
+[data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+[data-bs-theme="dark"] .text-muted,
+[data-bs-theme="dark"] .text-secondary { color: #94a3b8 !important; }
+[data-bs-theme="dark"] .text-ami { color: #a78bfa !important; }
+[data-bs-theme="dark"] .alert-danger { background-color: #450a0a; border-color: #7f1d1d; color: #fecaca; }
+[data-bs-theme="dark"] .alert-success { background-color: #052e16; border-color: #166534; color: #bbf7d0; }
+[data-bs-theme="dark"] .alert-warning { background-color: #451a03; border-color: #854d0e; color: #fde68a; }
+[data-bs-theme="dark"] .modal-content { color: #e2e8f0; }
+[data-bs-theme="dark"] .page-link,
+[data-bs-theme="dark"] .dropdown-menu { background-color: #1e293b; color: #e2e8f0; }
+[data-bs-theme="dark"] .metric-card { border-color: #334155; }
+[data-bs-theme="dark"] .metric-title { color: #94a3b8; }
+[data-bs-theme="dark"] code { color: #c4b5fd; }
