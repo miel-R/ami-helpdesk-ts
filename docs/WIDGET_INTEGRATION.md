@@ -127,9 +127,18 @@ page that embeds the widget:
     // When the user says they have dismissed the warning, send them to the
     // confirmation page rather than reloading. Reloading only re-runs the probe
     // that just failed, so it cannot tell them whether their click registered.
+    //
+    // The ?back= parameter is only a fallback. The confirmation page reads the
+    // live address from GET /api/public/cert-config, so an admin changing it in
+    // Dashboard -> Settings does not also have to edit this page - and this PHP
+    // file never has to know about it. Note that PHP and the chatbot server are
+    // separate processes with separate environments: getenv() here would NOT see
+    // a value the dashboard saved, which is exactly why the page asks the server
+    // instead.
     // document.getElementById('amiCertReload')
     //     .addEventListener('click', function () {
-    //         window.location.href = ORIGIN + '/cert-trusted.html';
+    //         window.location.href = ORIGIN + '/cert-trusted.html?back=' +
+    //             encodeURIComponent(HELPDESK_URL);
     //     });
 })();
 </script>
@@ -138,33 +147,61 @@ page that embeds the widget:
 #### The confirmation page
 
 `public/cert-trusted.html` ships with the widget host and is where the user lands after
-clicking "Proceed". It re-runs the same probe and then reports one of three
-outcomes, because "something happened" is only useful if it is specific:
+clicking **Proceed**. It says the same thing every time:
 
-| Probe result | Shown | Meaning |
-| --- | --- | --- |
-| any response, `status !== 404` | **Done** - "It's done, thank you. You can close this page now." | Certificate accepted; go back to the MIS page and the launcher will be there |
-| any response, `status === 404` | **Almost** | TLS is fine, but `/api/health` is not being served. The launcher still may not appear, so this is not reported as success |
-| rejection or 5s timeout | **Not yet** | The warning has not actually been dismissed yet; repeat the steps |
+> **All set** - *This browser is checked.* You are done. You can close this tab.
+
+**It does not probe anything, and that is deliberate.** By the time this document
+renders, the certificate is already accepted: a browser cannot load an HTTPS page over a
+certificate it rejects without first showing the warning the user just dismissed. An
+earlier version re-ran the `/api/health` probe and reported pass/fail, which meant a
+setup that was already finished spent its first seconds claiming to be "Checking...".
+Since the outcome can only ever be "done", the finished state is written into the markup
+and nothing has to verify it.
+
+The consequence worth stating plainly: if this page *does* load, the widget will load
+too. There is no longer a branch where the page reports failure.
 
 It is a single self-contained file with no build step, no CDN and no dependency on
 `widget.js`/`widget.css` - the same constraint as the block above, because it is loaded
 at the exact moment those assets may still be refused. It lives in `public/`, so it is
 pinned to the widget origin and served by the same `express.static` mount as the widget.
 
+**There are no buttons.** The one action available - returning to the Helpdesk - is an
+ordinary `<a href>`, not a `<button>` with a click handler. A button would be a worse
+link: it breaks with JavaScript disabled, hides the destination from the status bar, and
+loses right-click → open in new tab. The earlier version used
+`window.history.back()` with a `window.close()` fallback, and both failed in practice -
+the page is opened in a new tab, so there is no history entry behind it, and browsers
+refuse `window.close()` on a tab they did not open.
+
+The Helpdesk address is **a dashboard setting**, fetched from
+`GET /api/public/cert-config` rather than baked into the page, so changing it in
+Dashboard → Settings takes effect immediately. The `?back=` parameter the MIS page
+passes and `document.referrer` are fallbacks, and if none of the three yields an
+`http(s)` address the page simply says to return to the Helpdesk tab.
+
 Rules that matter here:
 
 - **Inline everything.** Nothing in the block may depend on `widget.js` or
   `widget.css`, because those are exactly what fails to load.
-- **Treat a 503 as trusted.** `/api/health` answers 503 when storage is degraded, which
-  is a reachable server, not a certificate problem.
-- **Always time out.** A hung request is indistinguishable from a blocked one to the
-  user, and both mean no chat.
+- **Write the outcome in the markup.** The result is static text, not something a
+  script swaps in. A page whose good news depends on script execution is a page that
+  can show nothing at all.
 - **Place the markup after the `<!DOCTYPE html>`.** A DOCTYPE that follows any content is
   ignored by the HTML parser and puts the whole page into quirks mode.
-- **Pin the probe origin absolutely.** The widget host is also reachable under
-  `/mis_helpdesk/ami-helpdesk/`, where a relative `/api/health` resolves to a path the API
-  never serves. That 404 is harmless to TLS but reads as a false alarm.
+- **Time out the one request that remains.** The settings lookup is the only async work
+  left, and a stalled fetch must not leave a half-drawn link behind. `showLink()` is
+  called on both settle and reject so the region is always filled.
+- **Validate the back target.** `?back=` is attacker-controllable, so `safeUrl()` accepts
+  `http:`/`https:` only and refuses everything else, turning a `javascript:` URL into a
+  no-op rather than an injection.
+
+> A past edit decoded the HTML entities inside `esc()`, turning `'&#39;'` into `'''`.
+> That is a **parse** error, so the browser discarded the entire script and the page sat
+> on "Checking…" forever showing buttons with no handlers - looking alive, doing nothing.
+> `tools/cert-page-regress.cjs` now runs `node --check` over the extracted script *and*
+> executes it in a `vm` sandbox with a stub DOM, so a dead script cannot pass review again.
 
 ## Role Resolution Priority
 

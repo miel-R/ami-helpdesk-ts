@@ -8,6 +8,22 @@ import conversationManager from '../services/session.service';
 import { requireAdmin, wrap, intQuery } from './admin.shared';
 
 export function registerUsageRoutes(app: Application): void {
+  /**
+   * The Helpdesk address shown on public/cert-trusted.html, unauthenticated.
+   *
+   * That page has to learn where to send the user once the certificate warning
+   * has been dismissed, and it is deliberately a static file with no server-side
+   * templating - so it asks here instead. Only the URL is exposed; the writable
+   * /api/admin/config route below stays behind requireAdmin. Anyone who can load
+   * this page is already on the LAN and knows the address regardless.
+   */
+  app.get('/api/public/cert-config', wrap(async (req: Request, res: Response) => {
+    void req;
+    res.json({
+      helpdesk_url: process.env.AMI_CERT_BACK_URL || 'https://192.1.5.21/mis_helpdesk/index.php'
+    });
+  }));
+
   app.get('/api/admin/config', requireAdmin, wrap(async (req: Request, res: Response) => {
     void req;
     res.json({

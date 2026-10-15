@@ -15,10 +15,6 @@
     --primary-2: #8a4fd1;
     --ok: #1a7f4b;
     --ok-bg: #e8f6ee;
-    --warn: #8a5a00;
-    --warn-bg: #fdf3dd;
-    --bad: #b3261e;
-    --bad-bg: #fdeceb;
     --ink: #1c1b22;
     --ink-soft: #5b5766;
     --line: #e3e0ea;
@@ -28,8 +24,6 @@
   @media (prefers-color-scheme: dark) {
     :root {
       --ok: #6ee7a8; --ok-bg: #10301f;
-      --warn: #f5c563; --warn-bg: #33270c;
-      --bad: #ff9d97; --bad-bg: #3a1512;
       --ink: #f2f0f7; --ink-soft: #a8a3b6;
       --line: #33303d; --bg: #16151b; --card: #201e27;
     }
@@ -67,8 +61,9 @@
   .badge {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
-    color: var(--ink-soft);
-    border: 1px solid var(--line); border-radius: 999px;
+    color: var(--ok);
+    background: var(--ok-bg);
+    border: 1px solid var(--ok); border-radius: 999px;
     padding: 4px 10px;
   }
   h1 { font-size: 24px; line-height: 1.25; margin: 16px 0 10px; }
@@ -82,50 +77,29 @@
   .status {
     display: flex; gap: 14px; align-items: flex-start;
     border-radius: 12px; padding: 16px; margin: 18px 0;
-    border: 1px solid transparent;
+    border: 1px solid var(--ok);
+    background: var(--ok-bg); color: var(--ok);
   }
-  .status[hidden] { display: none; }
   .status .mark {
     flex: 0 0 34px; height: 34px; border-radius: 999px;
     display: flex; align-items: center; justify-content: center;
     font-size: 20px; font-weight: 700; line-height: 1;
   }
-  .status h2 { font-size: 16px; margin: 4px 0 6px; }
-  .status p { margin: 0; font-size: 14.5px; }
-  .status-ok    { background: var(--ok-bg);   border-color: var(--ok);   color: var(--ok); }
-  .status-warn  { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
-  .status-bad   { background: var(--bad-bg);  border-color: var(--bad);  color: var(--bad); }
-  .status-ok h2, .status-warn h2, .status-bad h2 { color: inherit; }
-  .status-ok p, .status-warn p, .status-bad p { color: var(--ink-soft); }
-  ol { margin: 0; padding-left: 22px; color: var(--ink-soft); }
-  ol li { margin-bottom: 8px; }
-  ol li:last-child { margin-bottom: 0; }
+  .status h2 { font-size: 16px; margin: 4px 0 6px; color: inherit; }
+  .status p { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
   a { color: var(--primary); }
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
   .btn {
-    appearance: none; border: 1px solid transparent; cursor: pointer;
+    display: inline-block;
+    border: 1px solid transparent; cursor: pointer;
     font: inherit; font-weight: 600; text-decoration: none;
-    padding: 11px 18px; border-radius: 10px; display: inline-flex;
-    align-items: center; gap: 8px;
-  }
-  .btn-primary {
+    padding: 11px 18px; border-radius: 10px;
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
-    color: #fff; border: 0;
+    color: #fff;
   }
-  .btn-ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
   .btn:focus-visible { outline: 3px solid var(--primary-2); outline-offset: 2px; }
-  .btn[disabled] { opacity: .55; cursor: default; }
   .foot {
     margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line);
     font-size: 13px; color: var(--ink-soft);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .spin {
-      width: 18px; height: 18px; border-radius: 999px;
-      border: 2.5px solid var(--line); border-top-color: var(--primary);
-      animation: sp .7s linear infinite;
-    }
-    @keyframes sp { to { transform: rotate(360deg); } }
   }
 </style>
 </head>
@@ -140,16 +114,24 @@
     Ami chat
   </div>
 
-  <span class="badge" id="probe">Checking&hellip;</span>
-  <h1 id="headline">Checking this browser</h1>
+  <!-- Written as the settled state in the markup, not swapped in by script.
+       The certificate is accepted by definition once this page renders: a browser
+       cannot load an HTTPS document over a certificate it rejects without first
+       showing the warning. So there is nothing left to verify, and a page that
+       says "Checking..." for a setup that is already finished is just noise. -->
+  <span class="badge" id="probe">All set</span>
+  <h1 id="headline">This browser is checked</h1>
 
-  <!-- The result region is polite-live so a screen reader announces the outcome
-       when the probe resolves, instead of silently swapping content. -->
-  <div id="result" role="status" aria-live="polite"></div>
-
-  <div class="actions" id="actions" hidden>
-    <button class="btn btn-primary" id="back" type="button">Back to the Helpdesk</button>
-    <button class="btn btn-ghost" id="retry" type="button">Check again</button>
+  <div class="status" role="status" aria-live="polite" id="result">
+    <div class="mark" aria-hidden="true">&#10003;</div>
+    <div>
+      <h2>You are done</h2>
+      <p>
+        This browser now trusts the Ami chat server, so the chat widget will load on the
+        Helpdesk. You can close this tab.
+      </p>
+      <p id="backslot"></p>
+    </div>
   </div>
 
   <p class="foot">
@@ -162,158 +144,70 @@
 (function () {
   'use strict';
 
-  // Hardcoded to match AmiChatConfig.baseUrl and the help page's cert probe.
-  // Deliberately absolute: this file is also reachable under the MIS-mounted
-  // path, and a relative '/api/health' would resolve to a path the API never
-  // serves from there. A 404 still proves TLS worked, but it would read as a
-  // false alarm, so the origin is pinned instead.
+  // Hardcoded to match AmiChatConfig.baseUrl. Deliberately absolute: this file is
+  // also reachable under the MIS-mounted path, where a relative URL would resolve
+  // to a path the API never serves from there.
   var ORIGIN = 'https://192.1.5.21:3000';
-  var PROBE = ORIGIN + '/api/health';
+  var CONFIG_URL = ORIGIN + '/api/public/cert-config';
+  // Only this fetch can hang, so only this needs a deadline. The page's verdict is
+  // already written into the markup; a stalled lookup must not blank it out or
+  // leave a half-drawn link behind.
   var TIMEOUT_MS = 5000;
 
-  // Resolve the back target from ?back= (validated), then referrer, then null.
-  function getBackTarget() {
-    var params = new URLSearchParams(window.location.search);
-    var back = params.get('back');
-    if (back) {
-      try {
-        var u = new URL(back);
-        if (u.protocol === 'http:' || u.protocol === 'https:') return back;
-      } catch (e) { /* ignore invalid URL */ }
-    }
-    var ref = document.referrer;
-    if (ref) {
-      try {
-        var ru = new URL(ref);
-        if (ru.protocol === 'http:' || ru.protocol === 'https:') return ref;
-      } catch (e) { /* ignore */ }
-    }
+  // Only ever http(s). Anything else (javascript:, data:) is refused rather than
+  // followed, so a crafted ?back= cannot turn the link into an injection.
+  function safeUrl(value) {
+    if (!value) return null;
+    try {
+      var u = new URL(String(value));
+      if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+    } catch (e) { /* not a URL */ }
     return null;
   }
-  var BACK_URL = getBackTarget();
 
-  var elBadge = document.getElementById('probe');
-  var elHead = document.getElementById('headline');
-  var elResult = document.getElementById('result');
-  var elActions = document.getElementById('actions');
-  var btnBack = document.getElementById('back');
-  var btnRetry = document.getElementById('retry');
-
+  var ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[c];
-    });
+    return String(s).replace(/[&<>"']/g, function (c) { return ENTITIES[c]; });
   }
 
-  function render(kind, badge, headline, bodyHtml) {
-    elBadge.textContent = badge;
-    elHead.textContent = headline;
-    elResult.innerHTML = '<div class="status status-' + kind + '">' +
-      '<div class="mark" aria-hidden="true">' +
-      (kind === 'ok' ? '&#10003;' : kind === 'bad' ? '!' : '?') +
-      '</div><div><h2>' + esc(headline) + '</h2>' + bodyHtml + '</div></div>';
-    elActions.hidden = false;
-    // Move focus so keyboard and screen-reader users land on the outcome
-    // rather than being left on a button that may no longer be the right one.
-    btnBack.focus();
+  var slot = document.getElementById('backslot');
+
+  function showLink(url) {
+    if (!url) {
+      slot.textContent = 'Go back to your Helpdesk tab and the chat button will be ' +
+        'in the bottom-right corner.';
+      return;
+    }
+    var a = document.createElement('a');
+    a.className = 'btn';
+    a.href = url;
+    a.textContent = 'Back to the Helpdesk';
+    slot.appendChild(a);
   }
 
-  var STEPS =
-    '<ol>' +
-    '<li>Open <code>' + esc(ORIGIN) + '</code> in this same browser.</li>' +
-    '<li>Expect a &ldquo;your connection is not private&rdquo; / &ldquo;not secure&rdquo; warning.</li>' +
-    '<li>Choose <b>Advanced</b>, then <b>Proceed to 192.1.5.21 (unsafe)</b>. ' +
-      'In Firefox or Safari the same option is called <b>Visit Website</b> or <b>Show Details &rarr; visit this website</b>.</li>' +
-    '<li>Come back and press <b>Check again</b>.</li>' +
-    '</ol>';
+  // The Helpdesk address is a dashboard setting, so the live value is fetched
+  // rather than baked into this file. The ?back= param the help page passes and
+  // the referrer are fallbacks for when that endpoint cannot be reached.
+  function resolveBackUrl() {
+    var fallback = safeUrl(new URLSearchParams(window.location.search).get('back')) ||
+      safeUrl(document.referrer);
+    if (typeof window.fetch !== 'function') return Promise.resolve(fallback);
 
-  function isTrusted() {
-    if (typeof window.AbortController !== 'function') {
-      return Promise.resolve(false);
-    }
-    if (typeof window.fetch !== 'function') {
-      return Promise.resolve(false);
-    }
     var ctrl = new AbortController();
     var timer = window.setTimeout(function () { ctrl.abort(); }, TIMEOUT_MS);
-    return window.fetch(PROBE, {
-      mode: 'cors',
-      cache: 'no-store',
-      signal: ctrl.signal
-    }).then(function (res) {
-      window.clearTimeout(timer);
-      // Any resolved response means the TLS handshake completed and the
-      // request reached the server - including a 503 raised while storage is
-      // degraded, and including a 404 from a misconfigured deployment. Only a
-      // rejection or a timeout means the certificate is still in the way.
-      return { trusted: true, status: res.status };
-    }, function () {
-      window.clearTimeout(timer);
-      return { trusted: false, status: 0 };
-    });
+    return window.fetch(CONFIG_URL, { mode: 'cors', cache: 'no-store', signal: ctrl.signal })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (body) { return safeUrl(body && body.helpdesk_url) || fallback; })
+      .catch(function () { return fallback; })
+      .then(function (url) {
+        window.clearTimeout(timer);
+        return url;
+      });
   }
 
-  function check() {
-    elBadge.textContent = 'Checking\u2026';
-    elHead.textContent = 'Checking this browser';
-    elResult.innerHTML = '';
-    elActions.hidden = true;
-
-    return isTrusted().then(function (r) {
-      if (r.trusted && r.status === 404) {
-        // TLS is fine but the API is not where it should be. Saying "all done"
-        // here would send the user back to a Helpdesk whose widget cannot
-        // load, so this is called out separately.
-        render('warn', 'Almost',
-          'Certificate accepted, but the health check was not found',
-          '<p>The browser now trusts <code>' + esc(ORIGIN) + '</code>, so the certificate step is done. ' +
-          'However <code>/api/health</code> answered <b>404</b>, which usually means the server is running ' +
-          'with a different <code>API_BASE</code> or is missing the dashboard build. Tell IT before reloading ' +
-          'the Helpdesk - the chat button may still not appear.</p>');
-        return;
-      }
-
-      if (r.trusted) {
-        var backHtml = BACK_URL
-          ? '<p><a href="' + esc(BACK_URL) + '" class="btn btn-primary" style="text-decoration:none;">Back to the Helpdesk</a></p>'
-          : '<p><b>You can close this page now.</b> Go back to the Helpdesk tab and the chat button will be ' +
-            'in the bottom-right corner.</p>';
-        render('ok', 'Done', 'It\u2019s done, thank you',
-          '<p>This browser now trusts <code>' + esc(ORIGIN) + '</code>, so the chat widget will load.</p>' +
-          backHtml);
-        return;
-      }
-
-      render('bad', 'Not yet', 'This browser still does not trust the server',
-        '<p>Nothing has gone wrong - the certificate warning just has not been dismissed yet. ' +
-        'It has to be done once per computer, in the browser you use for the Helpdesk.</p>' +
-        STEPS);
-    });
-  }
-
-  btnRetry.addEventListener('click', function () {
-    btnRetry.disabled = true;
-    var spin = document.createElement('span');
-    spin.className = 'spin';
-    spin.setAttribute('aria-hidden', 'true');
-    btnRetry.appendChild(spin);
-    check().then(function () {
-      btnRetry.disabled = false;
-      if (spin.parentNode) spin.parentNode.removeChild(spin);
-    });
-  });
-
-  btnBack.addEventListener('click', function () {
-    if (BACK_URL) {
-      window.location.assign(BACK_URL);
-    } else {
-      // No reliable target - fall back to a safe instruction instead of
-      // window.close(), which browsers block for tabs they didn't open.
-      window.alert('Certificate accepted. You can close this tab and return to your Helpdesk tab.');
-    }
-  });
-
-  check();
+  // One fetch, one outcome. showLink is called exactly once either way, so the
+  // page cannot end up half-rendered no matter how the lookup resolves.
+  resolveBackUrl().then(showLink, showLink);
 })();
 </script>
 </body>
