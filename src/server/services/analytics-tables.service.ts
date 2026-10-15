@@ -6,6 +6,7 @@ import type {
   AnalyticsSessions, AnalyticsUsers, SessionFile
 } from '../models/analytics.model';
 import { avg, num, roundCost } from './analytics-helpers';
+import { lookupRoles } from './mis-directory.service';
 
 export interface UserSearchResult {
   username: string;
@@ -51,6 +52,17 @@ export async function buildUsers(days: number): Promise<AnalyticsUsers> {
     const ts = tsOf(m.created_at);
     if (ts && (!lastByUser.has(u) || ts > lastByUser.get(u)!)) lastByUser.set(u, ts);
   }
+  // The users table's `role` column only ever holds 'admin' or 'user', because
+  // the chatbot collapses MIS's three roles into two on purpose (see
+  // identity.service.ts) and ensureUser() never writes the column at all. So
+  // reading it back made every approver look like a plain user. Ask MIS directly
+  // for the real helpdesk role; the chatbot role stays on the row as the fallback
+  // for anyone MIS cannot answer for.
+  const misRoles = await lookupRoles([
+    ...users.map(u => u.username),
+    ...byUser.keys(),
+  ]);
+
   const rows: AnalyticsUsers['users'] = [];
   for (const u of users) {
     const b = byUser.get(u.username);
@@ -61,6 +73,10 @@ export async function buildUsers(days: number): Promise<AnalyticsUsers> {
       display_name: u.display_name || u.username,
       department: u.department || '',
       role: u.role || 'user',
+      // MIS's own role string ("Admin"/"Approver"/"User"), or '' when MIS could
+      // not answer for this person. Empty is NOT "user" - it means "unknown",
+      // and the client must not render it as though everyone were a user.
+      mis_role: misRoles.get(u.username) || '',
       enabled: u.enabled !== false,
       calls: num(b?.calls),
       input_tokens: num(b?.input),
@@ -83,6 +99,7 @@ export async function buildUsers(days: number): Promise<AnalyticsUsers> {
       display_name: name,
       department: '',
       role: 'user',
+      mis_role: misRoles.get(name) || '',
       enabled: true,
       calls: num(b.calls),
       input_tokens: num(b.input),

@@ -12,8 +12,9 @@ export async function openUserEditor(username) {
             return;
         }
         openModal(`Edit ${username}`, `<form id="editUserForm" class="vstack gap-3">
-      <div><label class="form-label small fw-semibold">Role</label>
-        <select id="euRole" class="form-select"><option value="user">user</option><option value="admin">admin</option></select></div>
+      <div><label class="form-label small fw-semibold" for="euRole">Chatbot role</label>
+        <input id="euRole" class="form-control" readonly>
+        <div class="form-text">Set from the MIS helpdesk role (or the ADMIN_USERS allowlist), not from this page. It is the fallback used when MIS cannot be reached.</div></div>
       <div><label class="form-label small fw-semibold">Requests / day (blank = inherit)</label>
         <input id="euReq" type="number" min="0" class="form-control" placeholder="inherit"></div>
       <div><label class="form-label small fw-semibold">Max upload MB (blank = inherit)</label>
@@ -33,8 +34,10 @@ export async function openUserEditor(username) {
             ev.preventDefault();
             const req = document.getElementById('euReq').value.trim();
             const upMb = document.getElementById('euUp').value.trim();
+            // role is deliberately absent: it is resolved from MIS per request, and a
+            // dashboard edit that wrote it would be overwritten by the next sign-in
+            // anyway. Sending it would only look like it worked.
             const body = {
-                role: document.getElementById('euRole').value,
                 enabled: document.getElementById('euEnabled').value === '1',
                 requests_per_day: req === '' ? null : Number(req),
                 max_upload_bytes: upMb === '' ? null : Math.round(Number(upMb) * 1048576),
@@ -85,9 +88,11 @@ export function wireUserForm() {
         ev.preventDefault();
         const upMb = document.getElementById('nuUp').value.trim();
         const reqVal = document.getElementById('nuReq').value.trim();
+        // No role is sent. The chatbot role comes from the MIS helpdesk (or the
+        // ADMIN_USERS allowlist); a role chosen here would be overwritten by the
+        // next sign-in, so offering one would only look like it worked.
         const body = {
             username: document.getElementById('nuName').value.trim(),
-            role: document.getElementById('nuRole').value,
             requests_per_day: reqVal === '' ? null : Number(reqVal),
             max_upload_bytes: upMb === '' ? null : Math.round(Number(upMb) * 1048576),
         };

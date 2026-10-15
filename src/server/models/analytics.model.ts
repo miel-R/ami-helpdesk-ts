@@ -123,6 +123,8 @@ export interface AnalyticsUserRow {
   display_name: string;
   department: string;
   role: string;
+  /** MIS's own role ("Admin"/"Approver"/"User"); '' when MIS could not answer. */
+  mis_role: string;
   enabled: boolean;
   calls: number;
   input_tokens: number;

@@ -10,8 +10,9 @@ export async function openUserEditor(username: string): Promise<void> {
     const u = (data.users || []).find(x => String(x.username) === username);
     if (!u) { flash('err', `User "${username}" not found`); return; }
     openModal(`Edit ${username}`, `<form id="editUserForm" class="vstack gap-3">
-      <div><label class="form-label small fw-semibold">Role</label>
-        <select id="euRole" class="form-select"><option value="user">user</option><option value="admin">admin</option></select></div>
+      <div><label class="form-label small fw-semibold" for="euRole">Chatbot role</label>
+        <input id="euRole" class="form-control" readonly>
+        <div class="form-text">Set from the MIS helpdesk role (or the ADMIN_USERS allowlist), not from this page. It is the fallback used when MIS cannot be reached.</div></div>
       <div><label class="form-label small fw-semibold">Requests / day (blank = inherit)</label>
         <input id="euReq" type="number" min="0" class="form-control" placeholder="inherit"></div>
       <div><label class="form-label small fw-semibold">Max upload MB (blank = inherit)</label>
@@ -23,7 +24,7 @@ export async function openUserEditor(username: string): Promise<void> {
       <div class="d-flex gap-2"><button class="btn btn-ami" type="submit">Save</button>
         <button class="btn btn-outline-secondary" type="button" id="euCancel">Cancel</button></div>
     </form>`);
-    (document.getElementById('euRole') as HTMLSelectElement).value = String(u.role || 'user');
+    (document.getElementById('euRole') as HTMLInputElement).value = String(u.role || 'user');
     (document.getElementById('euEnabled') as HTMLSelectElement).value = u.enabled === false ? '0' : '1';
     (document.getElementById('euNote') as HTMLTextAreaElement).value = String(u.note || '');
     document.getElementById('euCancel')?.addEventListener('click', closeModal);
@@ -31,8 +32,10 @@ export async function openUserEditor(username: string): Promise<void> {
       ev.preventDefault();
       const req = (document.getElementById('euReq') as HTMLInputElement).value.trim();
       const upMb = (document.getElementById('euUp') as HTMLInputElement).value.trim();
+      // role is deliberately absent: it is resolved from MIS per request, and a
+      // dashboard edit that wrote it would be overwritten by the next sign-in
+      // anyway. Sending it would only look like it worked.
       const body = {
-        role: (document.getElementById('euRole') as HTMLSelectElement).value,
         enabled: (document.getElementById('euEnabled') as HTMLSelectElement).value === '1',
         requests_per_day: req === '' ? null : Number(req),
         max_upload_bytes: upMb === '' ? null : Math.round(Number(upMb) * 1048576),
@@ -76,9 +79,11 @@ export function wireUserForm(): void {
     ev.preventDefault();
     const upMb = (document.getElementById('nuUp') as HTMLInputElement).value.trim();
     const reqVal = (document.getElementById('nuReq') as HTMLInputElement).value.trim();
+    // No role is sent. The chatbot role comes from the MIS helpdesk (or the
+    // ADMIN_USERS allowlist); a role chosen here would be overwritten by the
+    // next sign-in, so offering one would only look like it worked.
     const body = {
       username: (document.getElementById('nuName') as HTMLInputElement).value.trim(),
-      role: (document.getElementById('nuRole') as HTMLSelectElement).value,
       requests_per_day: reqVal === '' ? null : Number(reqVal),
       max_upload_bytes: upMb === '' ? null : Math.round(Number(upMb) * 1048576),
     };

@@ -57,6 +57,44 @@ async function get(path) {
   r = await get('/api/analytics/users?days=30');
   ok('users 200', r.status === 200, 'status=' + r.status);
   ok('users array', Array.isArray(r.body.users));
+
+  // Every row carries MIS's own role alongside the chatbot's. The chatbot
+  // deliberately collapses MIS's three roles (Admin/Approver/User) down to
+  // admin/user, which is correct for permissions but meant the dashboard showed
+  // "user" for everybody - ensureUser() never writes the role column, so it
+  // sat on its 'user' default. mis_role is the uncollapsed string.
+  //
+  // Create a user so there is a row to inspect. Without this the assertions
+  // below would pass vacuously on an empty database, which is exactly how a
+  // broken payload would slip through.
+  if (r.body.users.length === 0) {
+    const seeded = await fetch(`${BASE}/api/admin/users`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-admin-key': KEY },
+      body: JSON.stringify({ username: 'regress.role.check', display_name: 'Role Check' })
+    });
+    ok('seeded a user to inspect', seeded.status === 200 || seeded.status === 409,
+      'status=' + seeded.status);
+    r = await get('/api/analytics/users?days=30');
+  }
+  const row = (r.body.users || []).find(u => u.username === 'regress.role.check') || r.body.users[0];
+  ok('has a user row to check', !!row, 'users=' + JSON.stringify(r.body.users));
+  if (row) {
+    ok('row carries mis_role', Object.prototype.hasOwnProperty.call(row, 'mis_role'),
+      Object.keys(row).join(','));
+    ok('mis_role is a string (empty when MIS cannot answer)', typeof row.mis_role === 'string',
+      'got ' + typeof row.mis_role);
+    ok('row still carries the chatbot role', typeof row.role === 'string',
+      'got ' + typeof row.role);
+    ok('the chatbot role is still admin-or-user',
+      row.role === 'admin' || row.role === 'user', 'role=' + row.role);
+    // This harness runs with no MIS database configured, so the lookup must
+    // degrade rather than fabricate: '' means "MIS could not tell us", and must
+    // never be dressed up as a real role.
+    ok('with no MIS configured mis_role is empty, not guessed',
+      process.env.MIS_DB_HOST ? true : row.mis_role === '',
+      'mis_role=' + JSON.stringify(row.mis_role));
+  }
   r = await get('/api/analytics/sessions?limit=5');
   ok('sessions 200', r.status === 200, 'status=' + r.status);
   ok('sessions array', Array.isArray(r.body.sessions));

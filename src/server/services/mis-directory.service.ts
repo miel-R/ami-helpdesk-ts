@@ -122,6 +122,86 @@ export async function lookupRole(login: string): Promise<MisRoleRecord | null> {
   }
 }
 
+/**
+ * Batch variant of lookupRole(), for the analytics dashboard's Users tab.
+ *
+ * The dashboard needs every user's helpdesk role at once, not one chat turn's
+ * worth at a time. Issuing lookupRole() per row would mean N queries per refresh,
+ * and the dashboard re-renders on a 15s timer, so that is a real load rather than
+ * a theoretical one.
+ *
+ * Returns MIS's OWN raw role string ("Admin" / "Approver" / "User") keyed by
+ * login, because the dashboard reports the helpdesk role, not the chatbot's
+ * admin/user collapse of it - see analytics-tables.service.ts.
+ *
+ * Fails soft to a partial map: logins MIS did not answer for are simply absent,
+ * and the caller falls back to the chatbot's stored role for those. An empty map
+ * means "MIS could not tell us", which is different from "everyone is a user" and
+ * must not be rendered as though every row had the same role.
+ */
+export async function lookupRoles(logins: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (!enabled() || !logins.length) return out;
+
+  const wanted = Array.from(new Set(logins.map(l => String(l || '').trim()).filter(Boolean)));
+  if (!wanted.length) return out;
+
+  // Reuse the same 60s cache lookupRole() fills, so a dashboard refresh that
+  // changes nothing costs zero MIS queries.
+  const misses: string[] = [];
+  const now = Date.now();
+  for (const login of wanted) {
+    const hit = cache.get(login);
+    if (hit && hit.expires > now) {
+      if (hit.raw) out.set(login, hit.raw);
+    } else {
+      misses.push(login);
+    }
+  }
+  if (!misses.length) return out;
+
+  const p = await getPool();
+  if (!p) return out;
+
+  // Chunked because an unbounded IN (...) list is one very long statement, and
+  // the Users tab can hold every login that has ever chatted.
+  const CHUNK = 200;
+  for (let i = 0; i < misses.length; i += CHUNK) {
+    const slice = misses.slice(i, i + CHUNK);
+    const placeholders = slice.map(() => '?').join(', ');
+    try {
+      const [rows] = await p.query(
+        `SELECT user_name, user_role FROM scrf_user WHERE user_name IN (${placeholders})`,
+        slice
+      );
+      const list = (rows as Array<{ user_name?: string; user_role?: string }>) || [];
+      const found = new Set<string>();
+      for (const row of list) {
+        const login = String(row.user_name ?? '').trim();
+        if (!login) continue;
+        found.add(login);
+        const raw = String(row.user_role ?? '');
+        out.set(login, raw);
+        // Cache under the same entry shape lookupRole() writes, so the two
+        // functions never disagree about one person's role.
+        cache.set(login, { role: normalizeRole(raw), raw, expires: Date.now() + CACHE_TTL_MS });
+      }
+      // Remember the misses too, so a person who simply is not in MIS is not
+      // re-queried on every refresh for the next 60 seconds.
+      for (const login of slice) {
+        if (found.has(login)) continue;
+        cache.set(login, { role: null, raw: null, expires: Date.now() + CACHE_TTL_MS });
+      }
+    } catch (e) {
+      const err = e as { code?: string; message: string };
+      console.warn(`[mis] batch role lookup failed (${slice.length} logins): ${err.code || err.message}`);
+      return out; // partial results beat none; callers fall back per-login
+    }
+  }
+
+  return out;
+}
+
 /** Drop a cached entry, e.g. after a role change is known. */
 export function invalidate(login: string): void {
   cache.delete(String(login || '').trim());

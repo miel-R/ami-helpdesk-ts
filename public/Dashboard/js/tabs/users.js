@@ -13,24 +13,43 @@ export function quotaBar(used, limit) {
     <small class="text-muted">${used}/${limit}</small>`;
 }
 /**
- * Role as a badge rather than bare text. This column used to show Department,
- * which was a free-text string someone typed and could be empty. Role is a fixed
- * two-value enum, so it is worth showing at a glance which of the ten accounts
- * can actually administer the dashboard - that used to mean reading a lowercase
- * "admin" in a column of usernames.
+ * The MIS helpdesk role as a badge.
  *
- * The cell's text content is still the plain role word, so the column keeps
- * sorting correctly through the shared table sorter.
+ * This is MIS's own role, read live from `scrf_user.user_role` — not the
+ * chatbot's role. The distinction matters: the chatbot collapses MIS's three
+ * roles into two on purpose (Approver gets nothing extra, because approving a
+ * ticket is a different permission from operating the dashboard), so the
+ * chatbot role is the same value for two of the three, and a column of them all
+ * reading "user" was accurate but useless. The chatbot role still decides
+ * permissions; it just no longer pretends to describe the helpdesk.
  */
 function roleBadge(role) {
     const r = (role || '').trim().toLowerCase();
     if (r === 'admin')
-        return '<span class="badge bg-ami-subtle text-ami">admin</span>';
+        return '<span class="badge bg-ami-subtle text-ami">Admin</span>';
+    if (r === 'approver')
+        return '<span class="badge bg-info text-dark">Approver</span>';
     if (r === 'user')
-        return '<span class="badge bg-secondary">user</span>';
+        return '<span class="badge bg-secondary">User</span>';
     // Never swallow a role the UI does not recognise: an unexpected value is more
-    // useful shown verbatim than collapsed into "user".
+    // useful shown verbatim than collapsed into "User".
     return esc(role || '—');
+}
+/**
+ * One cell for the Role column: the badge, plus a tooltip saying where it came
+ * from. MIS not answering is not the same as someone being a User, so the two
+ * cases are labelled differently instead of both rendering as "User".
+ *
+ * The cell's text content is still the plain role word, so the column keeps
+ * sorting correctly through the shared table sorter.
+ */
+function roleCell(u) {
+    const fromMis = !!(u.mis_role || '').trim();
+    const badge = roleBadge(fromMis ? u.mis_role : u.role);
+    const title = fromMis
+        ? 'Helpdesk role, read from MIS. Permissions follow the chatbot role.'
+        : 'MIS did not report a role for this account, so this is the chatbot role (used when MIS is unreachable).';
+    return `<td title="${esc(title)}">${badge}</td>`;
 }
 export async function renderUsers(days) {
     const host = must('userRows');
@@ -40,7 +59,7 @@ export async function renderUsers(days) {
         must('usersMeta').textContent = `${data.count} user(s) · last ${data.days}d ledger`;
         host.innerHTML = data.users.map(u => `<tr>
       <td><strong>${esc(u.display_name)}</strong><br><small class="mono text-muted">${esc(u.username)}</small></td>
-      <td>${roleBadge(u.role)}</td>
+      ${roleCell(u)}
       <td class="text-end">${nfmt(u.calls)}</td>
       <td class="text-end">${nfmt(u.total_tokens)}</td>
       <td class="text-end">${usd(u.cost_usd)}</td>

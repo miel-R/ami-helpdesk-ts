@@ -27,7 +27,10 @@ export interface AnalyticsRealtime {
   counters: Record<string, number>; recent_events: Array<{ ts: string; level: string; event: string; detail: Record<string, unknown> }>;
 }
 export interface AnalyticsUserRow {
-  username: string; display_name: string; department: string; role: string; enabled: boolean;
+  username: string; display_name: string; department: string; role: string;
+  /** MIS's own role ("Admin"/"Approver"/"User"); '' when MIS could not answer. */
+  mis_role: string;
+  enabled: boolean;
   calls: number; input_tokens: number; output_tokens: number; total_tokens: number; cost_usd: number;
   sessions: number; requests_today: number; requests_limit: number | null; requests_remaining: number | null;
   avg_latency_ms: number; last_seen: string | null; last_active: string | null;
